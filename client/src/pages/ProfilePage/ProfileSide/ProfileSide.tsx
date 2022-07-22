@@ -93,7 +93,7 @@ const ProfileSide = ({ user }: ProfileSideProps) => {
           <S.StyledDivider />
           <S.ItemBox>
             {userLikes.slice(0, 3).map((item, index) => {
-              const link = `track/${item.userId}/${item.permalink}`
+              const link = `/track/${item.userId}/${item.permalink}`
               return (
                 <S.Item key={index}>
                   <div className="imgBox">

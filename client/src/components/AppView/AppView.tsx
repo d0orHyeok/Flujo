@@ -1,6 +1,6 @@
 import React, { useLayoutEffect, useState } from 'react'
 import * as S from './AppView.style'
-import { BiAlbum, BiLibrary } from 'react-icons/bi'
+import { BiAlbum } from 'react-icons/bi'
 import { MdOutlineAddchart } from 'react-icons/md'
 import {
   AiOutlineHome,
@@ -24,7 +24,6 @@ const menuItems = [
   { name: 'Home', path: '/home', icon: <AiOutlineHome /> },
   { name: 'Trend', path: '/trend', icon: <MdOutlineAddchart /> },
   { name: 'New Release ', path: '/newrelease', icon: <BiAlbum /> },
-  { name: 'Library', path: '/library', icon: <BiLibrary /> },
   { name: 'Upload', path: '/upload', icon: <RiUploadCloud2Line /> },
 ]
 

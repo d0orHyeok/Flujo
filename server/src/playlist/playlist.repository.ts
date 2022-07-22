@@ -157,13 +157,6 @@ export class PlaylistRepository extends Repository<Playlist> {
   async findPlaylistsByTag(tag: string, pagingDto: PagingDto) {
     const { skip, take } = pagingDto;
 
-    const p = await this.getDetailPlaylistQuery()
-      .addSelect('playlist.tagsLower')
-      .where('playlist.name = :name', { name: 'test' })
-      .take(1)
-      .getMany();
-    console.log(p);
-
     try {
       const query = this.getDetailPlaylistQuery()
         .addSelect('playlist.tagsLower')
