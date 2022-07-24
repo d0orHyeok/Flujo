@@ -130,10 +130,6 @@ export class MusicService {
     return !newBuffer ? file : { ...file, buffer: newBuffer };
   }
 
-  async updateMusicCount(id: number) {
-    return this.musicRepository.updateMusicCount(id);
-  }
-
   async updateMusicData(id: number, updateMusicDataDto: UpdateMusicDataDto) {
     return this.musicRepository.updateMusicData(id, updateMusicDataDto);
   }

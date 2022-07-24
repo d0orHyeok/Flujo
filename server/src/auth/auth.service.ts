@@ -119,8 +119,8 @@ export class AuthService {
     };
   }
 
-  async findUserById(id: string) {
-    return this.userRepository.findUserById(id);
+  async findUserById(id: string, nullable?: boolean) {
+    return this.userRepository.findUserById(id, nullable);
   }
 
   async searchUser(keyward: string, pagingDto: PagingDto) {

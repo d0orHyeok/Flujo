@@ -159,11 +159,6 @@ export class MusicController {
     return this.musicService.deleteMusic(id, user);
   }
 
-  @Patch('/:id/count')
-  updateMusicCount(@Param('id', ParseIntPipe) id: number) {
-    return this.musicService.updateMusicCount(id);
-  }
-
   @Patch('/:id/update')
   @UseGuards(JwtAuthGuard)
   updateMusicData(

@@ -13,6 +13,7 @@ import {
   Repository,
   SelectQueryBuilder,
 } from 'typeorm';
+import { History } from 'src/entities/history.entity';
 
 @EntityRepository(Music)
 export class MusicRepository extends Repository<Music> {
@@ -24,7 +25,10 @@ export class MusicRepository extends Repository<Music> {
           .from(User, 'l')
           .where('l.id = likes.id');
       }, 'lcount')
-      .orderBy('music.count', 'DESC')
+      .addSelect((subQuery) => {
+        return subQuery.select('COUNT(h.id)', 'count').from(History, 'h');
+      }, 'playcount')
+      .orderBy('playcount', 'DESC')
       .addOrderBy('lcount', 'DESC');
   }
 
@@ -35,7 +39,8 @@ export class MusicRepository extends Repository<Music> {
       .loadRelationCountAndMap('music.likesCount', 'music.likes')
       .loadRelationCountAndMap('music.commentsCount', 'music.comments')
       .loadRelationCountAndMap('music.playlistsCount', 'music.playlists')
-      .loadRelationCountAndMap('music.repostsCount', 'music.reposts');
+      .loadRelationCountAndMap('music.repostsCount', 'music.reposts')
+      .loadRelationCountAndMap('music.count', 'music.history');
   }
 
   musicDetailQuery() {
@@ -53,7 +58,8 @@ export class MusicRepository extends Repository<Music> {
       .loadRelationCountAndMap('cu.followersCount', 'cu.followers')
       .loadRelationCountAndMap('music.commentsCount', 'music.comments')
       .loadRelationCountAndMap('music.playlistsCount', 'music.playlists')
-      .loadRelationCountAndMap('music.repostsCount', 'music.reposts');
+      .loadRelationCountAndMap('music.repostsCount', 'music.reposts')
+      .loadRelationCountAndMap('music.count', 'music.history');
   }
 
   // Create
@@ -88,7 +94,6 @@ export class MusicRepository extends Repository<Music> {
       const musics = await this.musicSimpleQuery()
         .where('music.status = :status', { status: 'PUBLIC' })
         .getMany();
-
       return musics;
     } catch (error) {
       console.log(error);
@@ -182,8 +187,20 @@ export class MusicRepository extends Repository<Music> {
   async findPopularMusicsByUserId(userId: string) {
     const minCount = 9;
     const query = this.musicDetailQuery()
-      .where('music.userId = :userId', { userId })
-      .andWhere((qb) => qb.where('music.count > :minCount', { minCount }));
+      .where('music.userId = :userId', {
+        userId,
+      })
+      .andWhere(
+        (qb) => {
+          const subQuery = qb
+            .subQuery()
+            .select('COUNT(h.id)', 'count')
+            .from(History, 'h')
+            .getQuery();
+          return `${subQuery} > :minCount`;
+        },
+        { minCount },
+      );
     return this.orderSelectQuery(query).take(10).getMany();
   }
 
@@ -234,12 +251,6 @@ export class MusicRepository extends Repository<Music> {
         `Error to update music, music ID: ${music.id}`,
       );
     }
-  }
-
-  async updateMusicCount(id: number) {
-    const music = await this.findMusicById(id);
-    music.count += 1;
-    return this.updateMusic(music);
   }
 
   async updateMusicData(id: number, updateMusicDataDto: UpdateMusicDataDto) {

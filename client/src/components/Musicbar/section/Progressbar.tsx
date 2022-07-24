@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from '@redux/hook'
 import React, { useCallback, useEffect, useState } from 'react'
 import convertTimeToString from '@api/functions/convertTimeToString'
 import * as S from './Progressbar.style'
-import { countMusic } from '@api/musicApi'
+import { createHistory } from '@api/Hooks/historyApi'
 
 export const DurationArea = () => {
   const progress = useAppSelector((state) => state.player.progress)
@@ -25,6 +25,7 @@ const Progressbar = () => {
   const progress = useAppSelector((state) => state.player.progress)
   const { isPlay, repeat } = useAppSelector((state) => state.player.controll)
   const currentMusic = useAppSelector((state) => state.player.currentMusic)
+  const userId = useAppSelector((state) => state.user.userData?.id)
 
   const { percent } = progress
   const [start, setStart] = useState(false) // 재생을 시작했는지 확인하는 변수
@@ -88,11 +89,16 @@ const Progressbar = () => {
     if (!currentMusic?.id) {
       return
     }
-    countMusic(currentMusic.id)
+    const body = {
+      musicId: currentMusic.id,
+      userId,
+    }
+
+    createHistory(body)
       .then(() => setStartPercent(100))
       .catch(() => setStartPercent(100))
       .finally(() => setCount(true))
-  }, [currentMusic?.id])
+  }, [currentMusic?.id, userId])
 
   useEffect(() => {
     if (!start && isPlay) {
@@ -108,8 +114,8 @@ const Progressbar = () => {
   useEffect(() => {
     if (start && !count) {
       // 아직 카운트를 증가시키지 않았고 재생시간을 확인중일 때
-      if (percent - startPercent >= 20) {
-        // 20%이상을 들었으면 재생횟수를 증가
+      if (percent - startPercent >= 33) {
+        // 33%이상을 들었으면 재생횟수를 증가
         triggerCount()
       }
     }

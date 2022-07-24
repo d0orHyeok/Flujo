@@ -44,7 +44,7 @@ export class CommentRepository extends Repository<Comment> {
       console.log(error);
       throw new InternalServerErrorException(
         error,
-        `Error ocuur create music.`,
+        `Error ocuur create comment.`,
       );
     }
   }
@@ -53,10 +53,10 @@ export class CommentRepository extends Repository<Comment> {
     try {
       const result = await this.delete({ id: commentId });
       if (result.affected === 0) {
-        throw new NotFoundException(`Can't find Playlist with id ${commentId}`);
+        throw new NotFoundException(`Can't find Comment with id ${commentId}`);
       }
     } catch (error) {
-      throw new InternalServerErrorException(error, 'Error to delete playlist');
+      throw new InternalServerErrorException(error, 'Error to delete comment');
     }
   }
 }

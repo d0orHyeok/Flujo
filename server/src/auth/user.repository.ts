@@ -109,13 +109,17 @@ export class UserRepository extends Repository<User> {
     return user;
   }
 
-  async findUserById(id: string) {
+  async findUserById(id: string, nullable?: boolean) {
     const user = await this.getDetailQuery()
       .where('user.id = :id', { id })
       .getOne();
 
     if (!user) {
-      throw new NotFoundException(`Can't find User with id: ${id}`);
+      if (nullable) {
+        return null;
+      } else {
+        throw new NotFoundException(`Can't find User with id: ${id}`);
+      }
     }
 
     return user;

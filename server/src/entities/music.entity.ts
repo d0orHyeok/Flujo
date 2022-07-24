@@ -14,6 +14,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { EntityStatus } from './common.types';
+import { History } from './history.entity';
 
 @Entity()
 export class Music extends BaseEntity {
@@ -64,10 +65,6 @@ export class Music extends BaseEntity {
   @Column({ default: EntityStatus.PUBLIC })
   status: EntityStatus;
 
-  // Play Count
-  @Column({ default: 0 })
-  count: number;
-
   // Create User
   @Column({ nullable: true, name: 'userId' })
   userId: string;
@@ -77,6 +74,10 @@ export class Music extends BaseEntity {
   })
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user: User;
+
+  // History
+  @OneToMany(() => History, (history) => history.music)
+  history: History[];
 
   @ManyToMany(() => User, (user) => user.repostMusics)
   reposts: User[];

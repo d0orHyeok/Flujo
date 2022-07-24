@@ -15,6 +15,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import ShortUniqueId from 'short-unique-id';
+import { History } from './history.entity';
 
 @Entity()
 @Unique(['username'])
@@ -61,13 +62,17 @@ export class User extends BaseEntity {
   @JoinTable()
   following: User[];
 
-  // User Create Entity
+  // User Relation column
   @OneToMany(() => Music, (music) => music.user, { eager: true })
   musics: Music[];
   @OneToMany(() => Playlist, (playlist) => playlist.user, { eager: true })
   playlists: Playlist[];
   @OneToMany(() => Comment, (comment) => comment.user)
   comments: Comment[];
+
+  // History
+  @OneToMany(() => History, (history) => history.user)
+  history: History[];
 
   // Date
   @CreateDateColumn()

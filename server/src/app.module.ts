@@ -9,6 +9,7 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { PlaylistModule } from './playlist/playlist.module';
 import { CommentModule } from './comment/comment.module';
+import { HistoryModule } from './history/history.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { CommentModule } from './comment/comment.module';
     AuthModule,
     PlaylistModule,
     CommentModule,
+    HistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],
