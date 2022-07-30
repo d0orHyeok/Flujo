@@ -1,3 +1,4 @@
+import { HistoryRepository } from './../history/history.repository';
 import { PagingDto } from 'src/common/dto/paging.dto';
 import { PlaylistRepository } from './../playlist/playlist.repository';
 import { AuthProfileDto } from './dto/auth-profile.dto';
@@ -25,6 +26,7 @@ export class AuthService {
     private userRepository: UserRepository,
     private musicRepository: MusicRepository,
     private playlistRepository: PlaylistRepository,
+    private historyRepository: HistoryRepository,
     private jwtService: JwtService,
     private config: ConfigService,
   ) {}
@@ -117,6 +119,13 @@ export class AuthService {
       httpOnly: true,
       maxAge: 0,
     };
+  }
+
+  async getRecentHistory(userId: string) {
+    return this.historyRepository.findHistorysByUserId(userId, {
+      skip: 0,
+      take: 10,
+    });
   }
 
   async findUserById(id: string, nullable?: boolean) {

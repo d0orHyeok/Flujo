@@ -1,3 +1,4 @@
+import { PagingDto } from './../common/dto/paging.dto';
 import { EntityRepository, Repository } from 'typeorm';
 import { User } from 'src/entities/user.entity';
 import { Music } from 'src/entities/music.entity';
@@ -12,15 +13,31 @@ export class HistoryRepository extends Repository<History> {
   getDetailQuery() {
     return this.createQueryBuilder('history')
       .leftJoinAndSelect('history.user', 'user')
-      .leftJoinAndSelect('history.music', 'music');
+      .leftJoinAndSelect('history.music', 'music')
+      .leftJoinAndSelect('music.user', 'hmu');
   }
 
-  async findHistorysByUserId(userId: string) {
+  async findHistorysByUserId(userId: string, pagingDto: PagingDto) {
+    const { skip, take } = pagingDto;
+
     try {
       return this.getDetailQuery()
         .where('history.userId = :userId', {
           userId,
         })
+        .andWhere((qb) => {
+          const subQuery = qb.connection
+            .createQueryBuilder()
+            .select('h.musicId')
+            .addSelect('MAX(h.createdAt)', 'createdAt')
+            .from(History, 'h')
+            .groupBy('h.musicId')
+            .getQuery();
+          return `(history.musicId, history.createdAt) IN (${subQuery})`;
+        })
+        .orderBy('history.createdAt', 'DESC')
+        .skip(skip)
+        .take(take)
         .getMany();
     } catch (error) {
       console.log(error);

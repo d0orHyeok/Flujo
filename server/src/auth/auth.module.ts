@@ -1,3 +1,4 @@
+import { HistoryRepository } from './../history/history.repository';
 import { PlaylistRepository } from './../playlist/playlist.repository';
 import { MusicRepository } from 'src/music/music.repository';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
@@ -17,6 +18,7 @@ import { UserRepository } from './user.repository';
       UserRepository,
       MusicRepository,
       PlaylistRepository,
+      HistoryRepository,
     ]),
     // JWT Module
     PassportModule.register({ defaultStrategy: 'jwt' }),

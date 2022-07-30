@@ -1,13 +1,13 @@
 import { Music } from 'src/entities/music.entity';
 import {
   Entity,
-  PrimaryGeneratedColumn,
   ManyToOne,
   Column,
   CreateDateColumn,
   JoinColumn,
   UpdateDateColumn,
   BaseEntity,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from './user.entity';
 

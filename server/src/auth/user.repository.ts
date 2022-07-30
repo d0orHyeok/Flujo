@@ -58,7 +58,7 @@ export class UserRepository extends Repository<User> {
   }
 
   getDetailQuery() {
-    return this.createQueryBuilder('user')
+    return this.getSimpleQuery()
       .leftJoinAndSelect('user.musics', 'musics')
       .leftJoinAndSelect('user.playlists', 'playlists')
       .leftJoinAndSelect('playlists.musics', 'pm')
@@ -73,12 +73,6 @@ export class UserRepository extends Repository<User> {
       .leftJoinAndSelect('rp.user', 'rpu')
       .leftJoinAndSelect('user.followers', 'followers')
       .leftJoinAndSelect('user.following', 'following')
-      .loadRelationCountAndMap('user.followersCount', 'user.followers')
-      .loadRelationCountAndMap('user.followingCount', 'user.following')
-      .loadRelationCountAndMap('user.playlistsCount', 'user.playlists')
-      .loadRelationCountAndMap('user.likeMusicsCount', 'user.likeMusics')
-      .loadRelationCountAndMap('user.repostMusicsCount', 'user.repostMusics')
-      .loadRelationCountAndMap('user.likePlaylistsCount', 'user.likePlaylists')
       .loadRelationCountAndMap(
         'followers.followersCount',
         'followers.followers',
@@ -86,13 +80,7 @@ export class UserRepository extends Repository<User> {
       .loadRelationCountAndMap(
         'following.followersCount',
         'following.followers',
-      )
-      .loadRelationCountAndMap(
-        'user.repostPlaylistsCount',
-        'user.repostPlaylists',
-      )
-      .loadRelationCountAndMap('user.commentsCount', 'user.comments')
-      .loadRelationCountAndMap('user.musicsCount', 'user.musics');
+      );
   }
 
   async findUserByUsername(username: string): Promise<User> {

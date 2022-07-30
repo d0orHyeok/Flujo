@@ -82,7 +82,8 @@ export class AuthController {
   @Get('/info')
   @UseGuards(JwtAuthGuard)
   async getUserData(@GetUser() user: User) {
-    return user;
+    const history = await this.authService.getRecentHistory(user.id);
+    return { ...user, history };
   }
 
   @Get('/search/:keyward')
