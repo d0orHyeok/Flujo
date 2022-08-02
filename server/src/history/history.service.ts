@@ -5,6 +5,7 @@ import { HistoryRepository } from './history.repository';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MusicRepository } from 'src/music/music.repository';
+import { User } from 'src/entities/user.entity';
 
 @Injectable()
 export class HistoryService {
@@ -26,5 +27,9 @@ export class HistoryService {
 
   async findHistorysByUserId(userId: string, pagingDto: PagingDto) {
     return this.historytRepository.findHistorysByUserId(userId, pagingDto);
+  }
+
+  async clearHistory(user: User) {
+    return this.historytRepository.clearHistory(user);
   }
 }

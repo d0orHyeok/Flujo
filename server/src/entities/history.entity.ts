@@ -16,6 +16,9 @@ export class History extends BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ default: false })
+  clear: boolean;
+
   // History whe played the music
   @Column({ nullable: true, name: 'userId' })
   userId: string;

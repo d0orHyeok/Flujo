@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -33,5 +34,11 @@ export class HistoryController {
     @Body(ValidationPipe) createHistoryDto: CreateHistoryDto,
   ) {
     return this.historyService.createHistory(createHistoryDto);
+  }
+
+  @Patch('/clear')
+  @UseGuards(JwtAuthGuard)
+  async clearHistory(@GetUser() user: User) {
+    return this.historyService.clearHistory(user);
   }
 }

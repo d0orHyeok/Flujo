@@ -14,7 +14,13 @@ export class HistoryRepository extends Repository<History> {
     return this.createQueryBuilder('history')
       .leftJoinAndSelect('history.user', 'user')
       .leftJoinAndSelect('history.music', 'music')
-      .leftJoinAndSelect('music.user', 'hmu');
+      .leftJoinAndSelect('music.user', 'hmu')
+      .leftJoinAndSelect('music.likes', 'hml')
+      .loadRelationCountAndMap('music.likesCount', 'music.likes')
+      .loadRelationCountAndMap('music.commentsCount', 'music.comments')
+      .loadRelationCountAndMap('music.playlistsCount', 'music.playlists')
+      .loadRelationCountAndMap('music.repostsCount', 'music.reposts')
+      .loadRelationCountAndMap('music.count', 'music.history');
   }
 
   async findHistorysByUserId(userId: string, pagingDto: PagingDto) {
@@ -56,6 +62,28 @@ export class HistoryRepository extends Repository<History> {
       throw new InternalServerErrorException(
         error,
         `Error ocuur create history.`,
+      );
+    }
+  }
+
+  async clearHistory(user: User) {
+    try {
+      const historys = await this.getDetailQuery()
+        .where('history.userId = :userId', { userId: user.id })
+        .getMany();
+
+      const clearedHistory = historys.map((history) => {
+        return { ...history, user: null, userId: null };
+      });
+
+      await this.save(clearedHistory);
+
+      return;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        error,
+        `Error to clear userId:"${user.id}" history`,
       );
     }
   }

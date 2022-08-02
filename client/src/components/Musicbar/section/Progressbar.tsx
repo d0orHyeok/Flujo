@@ -114,8 +114,8 @@ const Progressbar = () => {
   useEffect(() => {
     if (start && !count) {
       // 아직 카운트를 증가시키지 않았고 재생시간을 확인중일 때
-      if (percent - startPercent >= 33) {
-        // 33%이상을 들었으면 재생횟수를 증가
+      if (percent - startPercent >= 66) {
+        // 66%이상을 들었으면 재생횟수를 증가
         triggerCount()
       }
     }
