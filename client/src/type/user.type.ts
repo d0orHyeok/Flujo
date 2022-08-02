@@ -1,3 +1,4 @@
+import { IHistory } from './history.type'
 import { IComment } from './comment.type'
 import { IMusic } from './music.type'
 import { IPlaylist } from './playlist.type'
@@ -29,6 +30,7 @@ export interface IUserRelationData {
   musics: IMusic[]
   playlists: IPlaylist[]
   comments: IComment[]
+  historys: IHistory[]
 
   // Count
   likeMusicsCount: number

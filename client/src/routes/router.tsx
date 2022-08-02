@@ -14,6 +14,7 @@ import TrackDetailPage from '@pages/TrackDetailPage/TrackDetailPage'
 import PlaylistDetailPage from '@pages/PlaylistDetailPage/playlistDetailPage'
 import ProfileDetailPage from '@pages/ProfileDetailPage/ProfileDetailPage'
 import TagPage from '@pages/TagPage/TagPage'
+import HistoryPage from '@pages/HistoryPage/HistoryPage'
 
 const userDetailPage = ['likes', 'following', 'followers', 'comments']
 
@@ -76,6 +77,9 @@ const Router = () => {
       <Route path="/tags/:tag" element={withUser(TagPage, null)}>
         <Route path=":nav" element={withUser(TagPage, null)} />
       </Route>
+
+      {/* History Page */}
+      <Route path="/history" element={withUser(HistoryPage, true)} />
     </Routes>
   )
 }

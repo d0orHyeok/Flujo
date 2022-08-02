@@ -97,6 +97,9 @@ const ProfileArea = ({ className, fold }: ProfileAreaProps) => {
         <MenuItem onClick={handleClickAndNavigate(`/profile/you`)}>
           <Link to="/profile/you">Profile</Link>
         </MenuItem>
+        <MenuItem onClick={handleClickAndNavigate(`/history`)}>
+          <Link to="/history">History</Link>
+        </MenuItem>
         <MenuItem onClick={handleClickAndNavigate('/settings')}>
           <Link to="/settings">Settings</Link>
         </MenuItem>

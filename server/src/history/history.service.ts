@@ -1,3 +1,4 @@
+import { PagingDto } from './../common/dto/paging.dto';
 import { CreateHistoryDto } from './dto/create-history.dto';
 import { AuthService } from './../auth/auth.service';
 import { HistoryRepository } from './history.repository';
@@ -21,5 +22,9 @@ export class HistoryService {
     const music = await this.musicRepository.findMusicById(musicId);
 
     return this.historytRepository.createHistory(user, music);
+  }
+
+  async findHistorysByUserId(userId: string, pagingDto: PagingDto) {
+    return this.historytRepository.findHistorysByUserId(userId, pagingDto);
   }
 }
