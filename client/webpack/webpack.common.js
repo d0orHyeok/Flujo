@@ -17,7 +17,7 @@ module.exports = {
       '@styles': path.resolve(__dirname, '..', './src/styles'),
       '@appTypes': path.resolve(__dirname, '..', './src/types'),
     },
-    extensions: ['.tsx', '.ts', '.js'],
+    extensions: ['.tsx', '.ts', '.js', '.jsx'],
   },
   module: {
     rules: [
