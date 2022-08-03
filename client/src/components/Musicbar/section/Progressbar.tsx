@@ -132,6 +132,12 @@ const Progressbar = () => {
     }
   }, [count, percent, repeat])
 
+  useEffect(() => {
+    setCount(false)
+    setStartPercent(0)
+    setStart(false)
+  }, [currentMusic])
+
   return (
     <>
       <S.ProgressBox

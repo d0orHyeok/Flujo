@@ -24,7 +24,6 @@ export const Container = styled.div`
   }
 
   & .musicCard-infoBox {
-    height: 160px;
     min-width: 0;
     width: 100%;
     display: flex;
@@ -33,6 +32,10 @@ export const Container = styled.div`
     justify-content: space-between;
     width: 100%;
     padding-top: 10px;
+
+    & .musicCard-waveform {
+      width: 100%;
+    }
   }
 
   ${({ theme }) => theme.device.tablet} {
