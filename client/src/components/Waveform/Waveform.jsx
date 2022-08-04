@@ -81,7 +81,10 @@ const Waveform = ({ music, active = false }) => {
       container: containerRef.current,
       progressColor: 'purple',
       barWidth: 2,
+      responsive: true,
+      hideScrollbar: true,
     })
+    waveSurfer.setVolume(0)
     waveSurfer.setHeight(60)
     waveSurfer.load(music.link)
     waveSurfer.on('ready', () => {

@@ -29,22 +29,8 @@ const Container = styled.div`
 const PlaylistImage = styled(AnyHeadStyle.AnyHeadImage)`
   flex-shrink: 0;
   margin-left: 2em;
-  width: 250px;
-  height: 250px;
-
-  @media screen and (max-width: 1000px) {
-    width: 200px;
-    height: 200px;
-  }
-
-  @media screen and (max-width: 600px) {
-    width: 125px;
-    height: 125px;
-  }
-
-  ${({ theme }) => theme.device.mobile} {
-    display: none;
-  }
+  width: 200px;
+  height: 200px;
 `
 
 const PlaylistInfo = styled(AnyHeadStyle.AnyHeadInfo)`
@@ -65,23 +51,12 @@ const PlayButton = styled(PrimaryButton)`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
-  ${({ theme }) => theme.device.tablet} {
-    width: 30px;
-    height: 30px;
-    font-size: 10px;
-    margin-right: 10px;
-  }
 `
 
 const SubInfo = styled.div`
   flex-shrink: 0;
   text-align: right;
   margin-left: 1em;
-
-  ${({ theme }) => theme.device.tablet} {
-    display: none;
-  }
 
   & .ago {
     font-size: 0.9em;
@@ -112,15 +87,6 @@ const PlaylistMusicCounter = styled.div`
 
   & .durationSum {
     color: #929292;
-  }
-
-  ${({ theme }) => theme.device.tablet} {
-    bottom: 20px;
-    left: 20px;
-  }
-
-  @media screen and (max-width: 600px) {
-    display: none;
   }
 `
 

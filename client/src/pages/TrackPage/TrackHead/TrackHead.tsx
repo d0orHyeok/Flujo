@@ -9,6 +9,7 @@ import { setCurrentMusic, togglePlay } from '@redux/features/player/playerSlice'
 import { PrimaryButton } from '@components/Common/Button'
 import * as AnyHeadStyle from '@styles/AnyHead.style'
 import { Link } from 'react-router-dom'
+import Waveform from '@components/Waveform/Waveform'
 
 interface TrackHeadProps {
   music: IMusic
@@ -25,14 +26,29 @@ const Container = styled.div`
 const MusicCover = styled(AnyHeadStyle.AnyHeadImage)`
   flex-shrink: 0;
   margin-left: 30px;
+`
 
-  @media screen and (max-width: 600px) {
-    width: 125px;
-    height: 125px;
+const InfoArea = styled.div`
+  width: 100%;
+  min-width: 0;
+  height: 200px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  & .infoArea-flexbox {
+    min-width: 0;
+    width: 100%;
+    display: flex;
+    margin-bottom: auto;
   }
 
-  ${({ theme }) => theme.device.mobile} {
-    display: none;
+  & .infoArea-waveform {
+    width: 100%;
+  }
+
+  @media screen and (max-width: 1000px) {
+    height: 150px;
   }
 `
 
@@ -86,10 +102,6 @@ const SubInfo = styled.div`
     font-size: 0.9em;
     line-height: 0.9em;
   }
-
-  ${({ theme }) => theme.device.tablet} {
-    display: none;
-  }
 `
 
 const TrackHead = ({ music }: TrackHeadProps) => {
@@ -135,32 +147,39 @@ const TrackHead = ({ music }: TrackHeadProps) => {
   return (
     <Wrapper background={background}>
       <Container>
-        <PlayButton onClick={handleClickPlay}>
-          {!isPlay ? (
-            <FaPlay style={{ transform: 'translateX(2px)' }} />
-          ) : (
-            <FaPause />
-          )}
-        </PlayButton>
-        <MusicInfo>
-          <div className="info info-main">{music.title}</div>
-          <div className="info info-link">
-            <Link to={`/profile/${music.userId}`}>
-              {music.user?.nickname || music.userId}
-            </Link>
-          </div>
-        </MusicInfo>
+        <InfoArea>
+          <div className="infoArea-flexbox">
+            <PlayButton onClick={handleClickPlay}>
+              {!isPlay ? (
+                <FaPlay style={{ transform: 'translateX(2px)' }} />
+              ) : (
+                <FaPause />
+              )}
+            </PlayButton>
+            <MusicInfo>
+              <div className="info info-main">{music.title}</div>
+              <div className="info info-link">
+                <Link to={`/profile/${music.userId}`}>
+                  {music.user?.nickname || music.userId}
+                </Link>
+              </div>
+            </MusicInfo>
 
-        <SubInfo>
-          <div className="ago">{caculateDateAgo(music.createdAt)}</div>
-          {music.genre ? (
-            <div className="genre">
-              <Link to={`/tags/${music.genre}`}>{`#${music.genre}`}</Link>
-            </div>
-          ) : (
-            <></>
-          )}
-        </SubInfo>
+            <SubInfo>
+              <div className="ago">{caculateDateAgo(music.createdAt)}</div>
+              {music.genre ? (
+                <div className="genre">
+                  <Link to={`/tags/${music.genre}`}>{`#${music.genre}`}</Link>
+                </div>
+              ) : (
+                <></>
+              )}
+            </SubInfo>
+          </div>
+          <div className="infoArea-waveform">
+            <Waveform music={music} active={currentMusic?.id === music.id} />
+          </div>
+        </InfoArea>
 
         <MusicCover>
           {music?.cover ? (

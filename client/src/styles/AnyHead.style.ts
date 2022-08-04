@@ -6,12 +6,6 @@ export const AnyHeadWrapper = styled.div<{ background: string }>`
   padding: 30px;
 
   ${({ background }) => background}
-
-  ${({ theme }) => theme.device.tablet} {
-    font-size: 14px;
-    line-height: 14px;
-    padding: 20px;
-  }
 `
 
 export const AnyHeadImage = styled.div`
@@ -24,7 +18,7 @@ export const AnyHeadImage = styled.div`
     object-fit: cover;
   }
 
-  ${({ theme }) => theme.device.tablet} {
+  @media screen and (max-width: 1000px) {
     width: 150px;
     height: 150px;
   }
