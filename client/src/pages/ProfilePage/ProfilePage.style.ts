@@ -11,6 +11,7 @@ export const Wrapper = styled.div`
 `
 
 export const Container = styled.div`
+  position: relative;
   padding: 10px 30px;
   display: flex;
   min-width: 900px;
@@ -28,7 +29,10 @@ export const Container = styled.div`
   }
 
   & .profile-side {
+    position: sticky;
+    top: 65px;
     width: 300px;
+    height: 100%;
     flex-shrink: 0;
   }
 `

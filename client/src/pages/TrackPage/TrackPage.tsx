@@ -28,9 +28,9 @@ const TrackPage = () => {
   const [music, setMusic] = useState<IMusic>()
   const [relatedMusics, setRelatedMusics] = useState<IMusic[]>([])
   const [existRelated, setExistRelated] = useState(false)
-  const [minHeight, setMinHeight] = useState<string>()
 
   const relatedTargetRef = useRef<RelatedTargetHandler>(null)
+  const sideRef = useRef<HTMLDivElement>(null)
 
   const getMusicData = useCallback(async () => {
     if (!userId || !permalink) {
@@ -89,14 +89,22 @@ const TrackPage = () => {
     }
   }, [music, relatedMusics])
 
-  useEffect(() => {
-    if (existRelated) {
-      const height = relatedTargetRef.current?.getContentSize().height
-      setMinHeight(height ? `${height + 40}px` : undefined)
-    } else {
-      setMinHeight(undefined)
+  const resizeSideContent = useCallback(() => {
+    if (sideRef.current) {
+      const docH = document.body.offsetHeight
+      const sideH = sideRef.current.getBoundingClientRect().height
+      const calcH = Math.floor(docH - sideH - 101)
+      sideRef.current.style.top = `${calcH < 81 ? calcH : 75}px`
     }
-  }, [existRelated, music, relatedMusics])
+  }, [])
+
+  useEffect(() => {
+    resizeSideContent()
+    window.addEventListener('resize', resizeSideContent)
+    return () => {
+      window.removeEventListener('resize', resizeSideContent)
+    }
+  }, [resizeSideContent])
 
   return !music ? (
     <Loading />
@@ -109,7 +117,7 @@ const TrackPage = () => {
       </Helmet>
       <PageStyle.Wrapper>
         <TrackHead music={music} />
-        <PageStyle.Container related={existRelated} minHeight={minHeight}>
+        <PageStyle.Toolbox>
           <CommentBox className="comment" music={music} setMusic={setMusic} />
           <InteractionBar
             className="interaction"
@@ -118,21 +126,10 @@ const TrackPage = () => {
             visibleOption={['plays', 'likes', 'reposts']}
           />
           <PageStyle.StyledDivider />
+        </PageStyle.Toolbox>
+        <PageStyle.Container>
           <PageStyle.Content media={existRelated ? 1000 : undefined}>
-            <PageStyle.SubContent className="subcontent">
-              <UserSmallCard className="content-uploader" user={music.user} />
-              {existRelated ? (
-                <PageStyle.SideContent className="sidecontent">
-                  <RelatedTarget
-                    ref={relatedTargetRef}
-                    target={music}
-                    relatedMusics={relatedMusics}
-                  />
-                </PageStyle.SideContent>
-              ) : (
-                <></>
-              )}
-            </PageStyle.SubContent>
+            <UserSmallCard className="content-uploader" user={music.user} />
             <PageStyle.MainContent className="maincontent">
               {music.description?.trim().length || music.tags?.length ? (
                 <PageStyle.StyledDivider
@@ -160,6 +157,17 @@ const TrackPage = () => {
               <TrackComments music={music} setMusic={setMusic} />
             </PageStyle.MainContent>
           </PageStyle.Content>
+          {existRelated ? (
+            <PageStyle.SideContent ref={sideRef} className="sidecontent">
+              <RelatedTarget
+                ref={relatedTargetRef}
+                target={music}
+                relatedMusics={relatedMusics}
+              />
+            </PageStyle.SideContent>
+          ) : (
+            <></>
+          )}
         </PageStyle.Container>
       </PageStyle.Wrapper>
     </>

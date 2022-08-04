@@ -25,9 +25,9 @@ const PlaylistPage = () => {
 
   const [playlist, setPlaylist] = useState<IPlaylist | null>(null)
   const [existRelated, setExistRelated] = useState(false)
-  const [minHeight, setMinHeight] = useState<string>()
 
   const relatedTargetRef = useRef<RelatedTargetHandler>(null)
+  const sideRef = useRef<HTMLDivElement>(null)
 
   const getPlaylistDataFromServer = useCallback(async () => {
     if (!userId || !permalink) {
@@ -60,14 +60,22 @@ const PlaylistPage = () => {
     }
   }, [playlist])
 
-  useEffect(() => {
-    if (existRelated) {
-      const height = relatedTargetRef.current?.getContentSize().height
-      setMinHeight(height ? `${height + 40}px` : undefined)
-    } else {
-      setMinHeight(undefined)
+  const resizeSideContent = useCallback(() => {
+    if (sideRef.current) {
+      const docH = document.body.offsetHeight
+      const sideH = sideRef.current.getBoundingClientRect().height
+      const calcH = Math.floor(docH - sideH - 101)
+      sideRef.current.style.top = `${calcH < 81 ? calcH : 75}px`
     }
-  }, [existRelated, playlist])
+  }, [])
+
+  useEffect(() => {
+    resizeSideContent()
+    window.addEventListener('resize', resizeSideContent)
+    return () => {
+      window.removeEventListener('resize', resizeSideContent)
+    }
+  }, [resizeSideContent])
 
   return !playlist ? (
     <Loading />
@@ -80,27 +88,17 @@ const PlaylistPage = () => {
       </Helmet>
       <PageStyle.Wrapper>
         <PlaylistHead playlist={playlist} />
-        <PageStyle.Container related={existRelated} minHeight={minHeight}>
+        <PageStyle.Toolbox>
           <InteractionBar
             className="interaction"
             target={playlist}
             setTarget={setPlaylist}
           />
           <PageStyle.StyledDivider />
+        </PageStyle.Toolbox>
+        <PageStyle.Container>
           <PageStyle.Content media={existRelated ? 1000 : undefined}>
-            <PageStyle.SubContent className="subcontent">
-              <UserSmallCard
-                className="content-uploader"
-                user={playlist.user}
-              />
-              {existRelated ? (
-                <PageStyle.SideContent className="sidecontent">
-                  <RelatedTarget ref={relatedTargetRef} target={playlist} />
-                </PageStyle.SideContent>
-              ) : (
-                <></>
-              )}
-            </PageStyle.SubContent>
+            <UserSmallCard className="content-uploader" user={playlist.user} />
             <PageStyle.MainContent className="maincontent">
               {playlist.description?.trim().length || playlist.tags?.length ? (
                 <PageStyle.StyledDivider
@@ -126,7 +124,15 @@ const PlaylistPage = () => {
               )}
               <PlaylistMusics playlist={playlist} />
             </PageStyle.MainContent>
+            <div style={{ height: '300px' }}></div>
           </PageStyle.Content>
+          {existRelated ? (
+            <PageStyle.SideContent ref={sideRef} className="sidecontent">
+              <RelatedTarget ref={relatedTargetRef} target={playlist} />
+            </PageStyle.SideContent>
+          ) : (
+            <></>
+          )}
         </PageStyle.Container>
       </PageStyle.Wrapper>
     </>

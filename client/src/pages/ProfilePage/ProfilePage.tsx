@@ -1,6 +1,12 @@
 import { IUser } from '@appTypes/types.type.'
 import { useAppSelector } from '@redux/hook'
-import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react'
 import { useParams } from 'react-router-dom'
 import * as S from './ProfilePage.style'
 import CanNotFind from '../../components/CanNotFind/CanNotFind'
@@ -23,6 +29,8 @@ const ProfilePage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [editable, setEditable] = useState(false)
   const [profileData, setProfileData] = useState<IUser>()
+
+  const sideRef = useRef<HTMLDivElement>(null)
 
   const getProfileData = useCallback(async () => {
     if (userId === 'you' || userData?.id === userId) {
@@ -63,6 +71,23 @@ const ProfilePage = () => {
     window.scrollTo(0, 0)
   }, [nav])
 
+  const resizeSideContent = useCallback(() => {
+    if (sideRef.current) {
+      const docH = document.body.offsetHeight
+      const sideH = sideRef.current.getBoundingClientRect().height
+      const calcH = Math.floor(docH - sideH - 91)
+      sideRef.current.style.top = `${calcH < 81 ? calcH : 65}px`
+    }
+  }, [])
+
+  useEffect(() => {
+    resizeSideContent()
+    window.addEventListener('resize', resizeSideContent)
+    return () => {
+      window.removeEventListener('resize', resizeSideContent)
+    }
+  }, [resizeSideContent])
+
   return (
     <>
       {isLoading ? (
@@ -102,7 +127,7 @@ const ProfilePage = () => {
                   <></>
                 )}
               </div>
-              <div className="profile-side">
+              <div ref={sideRef} className="profile-side">
                 <ProfileSide user={profileData} />
               </div>
             </S.Container>
