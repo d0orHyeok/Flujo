@@ -70,7 +70,7 @@ const UploadMusic = ({ files, resetFiles }: UploadMusicProps) => {
     // 서버에 업로드 요청
     uploadMusic(formData)
       .then(() => {
-        openAlert('업로드에 성공하였습니다.')
+        openAlert('업로드에 성공하였습니다.', { severity: 'success' })
         if (window.confirm('계속해서 업로드 하시겠습니까?')) {
           resetFiles && resetFiles()
         } else {

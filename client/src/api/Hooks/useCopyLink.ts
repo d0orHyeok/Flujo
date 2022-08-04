@@ -11,10 +11,15 @@ function useCopyLink() {
         navigator.clipboard
           .writeText(link)
           .then(() => {
-            openAlert(!message ? '클립보드에 복사되었습니다.' : message.success)
+            openAlert(
+              !message ? '클립보드에 복사되었습니다.' : message.success,
+              { severity: 'success' }
+            )
           })
           .catch(() => {
-            openAlert(!message ? '복사를 다시 시도해주세요.' : message.fail)
+            openAlert(!message ? '복사를 다시 시도해주세요.' : message.fail, {
+              severity: 'error',
+            })
           })
       } else {
         // 흐름 2.
@@ -39,7 +44,9 @@ function useCopyLink() {
         document.execCommand('copy')
         // 흐름 6.
         document.body.removeChild(textarea)
-        openAlert(!message ? '클립보드에 복사되었습니다.' : message.success)
+        openAlert(!message ? '클립보드에 복사되었습니다.' : message.success, {
+          severity: 'success',
+        })
       }
     },
     [openAlert]

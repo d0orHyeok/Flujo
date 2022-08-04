@@ -119,14 +119,13 @@ const RegisterPage = () => {
       .then(() => {
         console.log('Register Success')
         navigate('/')
-        openAlert('회원가입 되었습니다.')
+        openAlert('Successfully sign up ', { severity: 'success' })
       })
       .catch((err) => {
         if (err.response.status === 409) {
           setRegisterInput({ ...registerInput, username: '' })
           setInputValidate({ ...inputValidate, username: -1 })
           document.getElementById('username')?.focus()
-
           alert('이미 존재하는 아이디입니다.')
         } else {
           alert('회원가입 실패')
@@ -153,7 +152,7 @@ const RegisterPage = () => {
             onChange={handleChangeInput}
             success={inputValidate.username === 1}
             error={inputValidate.username === -1}
-            errorText="영문자, 숫자를 포함한 6~20자의 아이디를 입력해주세요"
+            errorText=""
           />
           <TextField
             className="register-input"

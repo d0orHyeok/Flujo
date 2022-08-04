@@ -20,7 +20,7 @@ interface IAlertContext {
 }
 
 interface IOpenAlertProps {
-  severity?: AlertColor
+  severity: AlertColor
   anchorOrigin?: SnackbarOrigin
 }
 
@@ -35,7 +35,7 @@ export const AlertProvider = ({ children }: IAlertProviderProps) => {
   })
 
   function onClose() {
-    setAlertOption({ ...alertOption, open: false, severity: 'success' })
+    setAlertOption({ ...alertOption, open: false })
   }
 
   return (
@@ -55,7 +55,7 @@ export const useAlert = () => {
   const context = useContext(AlertContext)
   const { alertOption, setAlertOption }: IAlertContext = context
 
-  function openAlert(message: string, option?: IOpenAlertProps) {
+  function openAlert(message: string, option: IOpenAlertProps) {
     setAlertOption({
       ...alertOption,
       open: true,

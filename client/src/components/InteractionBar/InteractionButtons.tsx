@@ -224,7 +224,14 @@ const InteractionButtons = ({
     const additem = 'title' in target ? [target] : target.musics || []
 
     dispatch(addMusic(additem))
-  }, [dispatch, target])
+
+    const message =
+      additem.length === 1
+        ? `"${additem[0].title}" added to Next up`
+        : `${additem.length} tracks added to Next up`
+
+    openAlert(message, { severity: 'info' })
+  }, [dispatch, openAlert, target])
 
   const handleClickDelete = useCallback(async () => {
     if (!confirm('Are you sure you want to delete it?')) return

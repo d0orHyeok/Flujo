@@ -47,7 +47,7 @@ const PopoverDiv = styled.div<PopoverDivProps>`
 
   border: 1px solid;
   border-color: ${({ theme }) => theme.colors.border1};
-  border-radius: 4px;
+  border-radius: 10px;
   box-shadow: 0 2px 5px 0 ${({ theme }) => theme.colors.bgTextRGBA(0.16)};
   background-color: ${({ theme }) => theme.colors.bgColor};
 
@@ -72,7 +72,6 @@ const PopoverUser = ({ user, ...props }: PopoverUserProps) => {
 
   const handleClose = useCallback((event: MouseEvent) => {
     event.preventDefault()
-    setAnchorTop(false)
     setOpen(false)
   }, [])
 

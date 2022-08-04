@@ -67,7 +67,7 @@ const Login = ({ onClose }: LoginProps) => {
       console.log('Login Success')
       closeModal()
       await dispatch(userAuth())
-      openAlert('로그인 되었습니다.')
+      openAlert('로그인 되었습니다.', { severity: 'success' })
     } catch (error) {
       console.log('Login Fail', error)
       if (error !== 'Auth Error') {
