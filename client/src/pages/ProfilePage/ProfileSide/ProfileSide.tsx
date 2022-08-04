@@ -54,7 +54,7 @@ const ProfileSide = ({ user }: ProfileSideProps) => {
   }, [getComments])
 
   useEffect(() => {
-    const sorted = sortByCreatedAt(user.likeMusics)
+    const sorted = sortByCreatedAt([...user.likeMusics])
     setUserLikes(sorted)
   }, [user])
 
