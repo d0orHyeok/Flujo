@@ -223,17 +223,28 @@ const Musiclist = () => {
                       <span className="duration">
                         {convertTimeToString(Number(musicItem.duration))}
                       </span>
-                      <LikeFilledButton
-                        isLike={
-                          likeMusics.findIndex(
-                            (lm) => lm.id === musicItem.id
-                          ) !== -1
-                        }
-                        className="btn"
-                        onClick={handleClickLike}
-                        aria-valuetext={`${musicItem.id}`}
-                      />
+                      {index === currentIndex ? (
+                        <LikeFilledButton
+                          title="Like"
+                          isLike={
+                            likeMusics.findIndex(
+                              (lm) => lm.id === musicItem.id
+                            ) !== -1
+                          }
+                          className="btn"
+                          onClick={handleClickLike}
+                          aria-valuetext={`${musicItem.id}`}
+                        />
+                      ) : (
+                        <button
+                          className="btn"
+                          onClick={() => dispatch(removeMusic(indexItem))}
+                        >
+                          <IoMdClose className="icon" />
+                        </button>
+                      )}
                       <MoreButton
+                        title="More"
                         id="playlist-moreBtn"
                         className="btn moreBtn"
                         onClick={handleClickItem}
