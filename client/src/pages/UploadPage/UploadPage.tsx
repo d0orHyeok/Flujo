@@ -14,6 +14,13 @@ const UploadPage = () => {
 
   const handleResetFiles = useCallback(() => {
     setMusicFiles(undefined)
+    const inputEl = document
+      .getElementsByTagName('input')
+      .namedItem('music-upload')
+    if (inputEl && inputEl.files) {
+      const dataTranster = new DataTransfer()
+      inputEl.files = dataTranster.files
+    }
   }, [])
 
   return (

@@ -31,7 +31,7 @@ const UploadMusic = ({ files, resetFiles }: UploadMusicProps) => {
   const [editNavIndex, setEditNavIndex] = useState(0)
   const [musicMetadata, setMusicMetadata] = useState<IExtractMetadata>()
 
-  const uploadFile = () => {
+  const uploadFile = async () => {
     if (!files || !musicMetadata) {
       // 파일과 메타데이터가 없다면 재업로드 요청
       resetFiles && resetFiles()
@@ -68,16 +68,25 @@ const UploadMusic = ({ files, resetFiles }: UploadMusicProps) => {
     )
 
     // 서버에 업로드 요청
-    uploadMusic(formData)
-      .then(() => {
-        openAlert('업로드에 성공하였습니다.', { severity: 'success' })
-        if (window.confirm('계속해서 업로드 하시겠습니까?')) {
-          resetFiles && resetFiles()
-        } else {
-          navigate('/')
-        }
-      })
-      .catch(() => openAlert('업로드에 실패하였습니다', { severity: 'error' }))
+    let reset = false
+    try {
+      await uploadMusic(formData)
+      openAlert('업로드에 성공하였습니다.', { severity: 'success' })
+      if (window.confirm('계속해서 업로드 하시겠습니까?')) {
+        reset = true
+      } else {
+        reset = false
+        navigate('/')
+      }
+    } catch (error) {
+      reset = false
+      console.error(error)
+      openAlert('업로드에 실패하였습니다', { severity: 'error' })
+    } finally {
+      if (resetFiles && reset) {
+        resetFiles()
+      }
+    }
   }
 
   const handleClickCancel = useCallback(() => {
