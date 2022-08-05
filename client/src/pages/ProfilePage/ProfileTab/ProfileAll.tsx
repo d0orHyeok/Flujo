@@ -6,7 +6,7 @@ import LoadingArea from '@components/Loading/LoadingArea'
 import MusicCard from '@components/MusicCard/MusicCard'
 import PlaylistCard from '@components/PlaylistCard/PlaylistCard'
 import { IUser, IPlaylist, IMusic } from '@appTypes/types.type.'
-import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import * as CommonStyle from './common.style'
@@ -25,7 +25,14 @@ interface ProfileAllProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const ProfileAll = ({ user, editable, ...props }: ProfileAllProps) => {
-  const [items, setItems] = useState<any[]>([])
+  const [items, setItems] = useState<any[]>(
+    sortByCreatedAt([
+      ...user.musics,
+      ...user.playlists,
+      ...user.repostMusics,
+      ...user.repostPlaylists,
+    ])
+  )
   const [displayItems, setDisplayItems] = useState<(IMusic | IPlaylist)[]>([])
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(0)
@@ -38,6 +45,7 @@ const ProfileAll = ({ user, editable, ...props }: ProfileAllProps) => {
 
     const getNum = 15
     const skip = page * getNum
+
     const getItems = items.slice(skip, skip + getNum)
     if (!getItems || getItems.length < getNum) {
       setDone(true)
@@ -71,16 +79,6 @@ const ProfileAll = ({ user, editable, ...props }: ProfileAllProps) => {
     },
     [loading, done]
   )
-
-  useLayoutEffect(() => {
-    const arr = [
-      ...user.musics,
-      ...user.playlists,
-      ...user.repostMusics,
-      ...user.repostPlaylists,
-    ]
-    setItems(sortByCreatedAt(arr))
-  }, [user.musics, user.playlists, user.repostMusics, user.repostPlaylists])
 
   useEffect(() => {
     getItems()
