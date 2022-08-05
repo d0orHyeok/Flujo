@@ -18,6 +18,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { User } from 'src/entities/user.entity';
 import { CookieOptions } from 'express';
+import { extname } from 'path';
 
 @Injectable()
 export class AuthService {
@@ -141,7 +142,11 @@ export class AuthService {
     const imageUrl =
       this.config.get<string>('SERVER_URL') +
       '/' +
-      uploadFileDisk(image, `${filename}`, 'profile');
+      uploadFileDisk(
+        image,
+        `${filename}${extname(image.originalname)}`,
+        'profile',
+      );
 
     const existProfileImage = user.profileImage;
     user.profileImage = imageUrl;
