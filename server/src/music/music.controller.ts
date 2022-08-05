@@ -140,11 +140,14 @@ export class MusicController {
       fileBase + originalname,
     );
 
+    const waveform = await this.musicService.generateWaveformData(music);
+
     const createMusicData = {
       ...data,
       filename,
       link,
       cover: coverUrl,
+      waveform,
     };
 
     return this.musicService.createMusic(createMusicData, user);

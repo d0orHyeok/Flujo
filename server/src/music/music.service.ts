@@ -14,7 +14,9 @@ import { Music } from 'src/entities/music.entity';
 import { getStorage } from 'firebase-admin/storage';
 import * as NodeID3 from 'node-id3';
 import * as uuid from 'uuid';
-import { extname } from 'path';
+import { extname, resolve } from 'path';
+import * as shell from 'shelljs';
+import { readFileSync } from 'fs';
 
 @Injectable()
 export class MusicService {
@@ -247,5 +249,38 @@ export class MusicService {
         err,
       );
     }
+  }
+
+  async generateWaveformData(file: Express.Multer.File) {
+    // 파형을 분석하여 json 형식의 데이터로 반환한다.
+
+    // 음악파일 임시저장
+    const tempFilePath = uploadFileDisk(
+      file,
+      `${Date.now()}${file.originalname}`,
+      'temp',
+    );
+    // 임시 저장할 json 파일명
+    const jsonFilename = `${tempFilePath
+      .split('.')
+      .slice(0, -1)
+      .join('.')}.json`;
+
+    // 파형분석 명령어
+    const command = `audiowaveform -i ${resolve(tempFilePath)} -o ${resolve(
+      jsonFilename,
+    )} --pixels-per-second 20 --bits 8`;
+
+    // 파형분석
+    const child = shell.exec(command);
+
+    let jsonData = null;
+    if (child.code === 0) {
+      // 분석이 잘 되었다면 jsondata를 반환
+      jsonData = readFileSync(jsonFilename, 'utf8');
+      deleteFileDisk(jsonFilename); // 임시 저장된 json파일 삭제
+    }
+    deleteFileDisk(tempFilePath); // 임시 저장된 음악파일 삭제
+    return jsonData;
   }
 }

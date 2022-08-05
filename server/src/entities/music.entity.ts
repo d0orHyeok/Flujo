@@ -46,6 +46,8 @@ export class Music extends BaseEntity {
   genreLower: string[];
   @Column('text', { nullable: true, array: true, select: false })
   tagsLower: string[];
+  @Column({ nullable: true })
+  waveform: string;
 
   // Optional Metadata
   @Column({ nullable: true })

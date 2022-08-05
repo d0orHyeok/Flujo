@@ -8,6 +8,7 @@ export interface IMusicOptionalData {
   description?: string
   tags?: string[]
   cover?: string
+  waveform?: string
 }
 
 export interface IMusicMetadata {

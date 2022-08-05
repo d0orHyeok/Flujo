@@ -77,24 +77,25 @@ const Waveform = ({ music, active = false }) => {
   )
 
   useLayoutEffect(() => {
-    const waveSurfer = WaveSurfer.create({
-      container: containerRef.current,
-      progressColor: 'purple',
-      barWidth: 2,
-      responsive: true,
-      hideScrollbar: true,
-    })
-    waveSurfer.setVolume(0)
-    waveSurfer.setHeight(60)
-    waveSurfer.load(music.link)
-    waveSurfer.on('ready', () => {
+    if (music.waveform) {
+      const waveSurfer = WaveSurfer.create({
+        container: containerRef.current,
+        progressColor: 'purple',
+        barWidth: 2,
+        responsive: true,
+        hideScrollbar: true,
+        normalize: true,
+      })
+      waveSurfer.setVolume(0)
+      waveSurfer.setHeight(60)
+      waveSurfer.load(containerRef.current, JSON.parse(music.waveform).data)
       waveSurferRef.current = waveSurfer
-    })
 
-    return () => {
-      waveSurfer.destroy()
+      return () => {
+        waveSurfer.destroy()
+      }
     }
-  }, [music.link])
+  }, [music.waveform])
 
   const setPlaying = useCallback(() => {
     if (!waveSurferRef.current) {
@@ -126,14 +127,14 @@ const Waveform = ({ music, active = false }) => {
     setPercent()
   }, [setPercent])
 
-  return (
-    <>
-      <StyledDiv
-        ref={containerRef}
-        className={active ? 'active' : undefined}
-        onClick={handleClick}
-      />
-    </>
+  return music.waveform ? (
+    <StyledDiv
+      ref={containerRef}
+      className={active ? 'active' : undefined}
+      onClick={handleClick}
+    />
+  ) : (
+    <></>
   )
 }
 
