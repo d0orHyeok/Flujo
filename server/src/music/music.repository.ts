@@ -264,7 +264,9 @@ export class MusicRepository extends Repository<Music> {
   async findTrendingMusics(genre?: string) {
     try {
       let query = this.musicSimpleQuery();
-      query = genre ? query.where('music.genre IN (:genre)', { genre }) : query;
+      query = genre
+        ? query.where('music.genre IN (:genre)', { genre: [genre] })
+        : query;
       return this.orderSelectQuery(query, 'week').take(100).getMany();
     } catch (error) {
       throw new InternalServerErrorException(error, 'Error to get musics');

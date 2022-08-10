@@ -40,7 +40,7 @@ const PlaylistPage = () => {
       setPlaylist(response.data)
     } catch (error: any) {
       console.error(error.response || error)
-      navigate('playlist/notfound')
+      navigate('/playlist/notfound')
     }
   }, [navigate, permalink, userId])
 
