@@ -78,6 +78,10 @@ export class MusicService {
     return this.musicRepository.findMusicsByTag(tag, pagingDto);
   }
 
+  async findTrendingMusics(genre?: string) {
+    return this.musicRepository.findTrendingMusics(genre);
+  }
+
   changeMusicFileData(
     file: Express.Multer.File,
     data: UploadMusicDataDto,
@@ -200,6 +204,39 @@ export class MusicService {
     }
   }
 
+  async generateWaveformData(file: Express.Multer.File) {
+    // 음악의 파형을 분석하고 데이터를 반환
+
+    // Save music file temporarily
+    const tempFilePath = uploadFileDisk(
+      file,
+      `${Date.now()}${file.originalname}`,
+      'temp',
+    );
+    // File name to save waveform data
+    const jsonFilename = `${tempFilePath
+      .split('.')
+      .slice(0, -1)
+      .join('.')}.json`;
+
+    // Audiowaveform Command
+    const command = `audiowaveform -i ${resolve(tempFilePath)} -o ${resolve(
+      jsonFilename,
+    )} --pixels-per-second 20 --bits 8`;
+
+    // Execute command
+    const child = shell.exec(command);
+
+    let jsonData = null;
+    if (child.code === 0) {
+      // If success, read json file
+      jsonData = readFileSync(jsonFilename, 'utf8');
+      deleteFileDisk(jsonFilename); // Delete temporarily saved json files
+    }
+    deleteFileDisk(tempFilePath); // Delete temporarily saved music files
+    return jsonData;
+  }
+
   // firebase function
   createPersistentDownloadUrl = (pathToFile, downloadToken) => {
     const bucket = 'wave-f1616.appspot.com';
@@ -249,38 +286,5 @@ export class MusicService {
         err,
       );
     }
-  }
-
-  async generateWaveformData(file: Express.Multer.File) {
-    // 파형을 분석하여 json 형식의 데이터로 반환한다.
-
-    // 음악파일 임시저장
-    const tempFilePath = uploadFileDisk(
-      file,
-      `${Date.now()}${file.originalname}`,
-      'temp',
-    );
-    // 임시 저장할 json 파일명
-    const jsonFilename = `${tempFilePath
-      .split('.')
-      .slice(0, -1)
-      .join('.')}.json`;
-
-    // 파형분석 명령어
-    const command = `audiowaveform -i ${resolve(tempFilePath)} -o ${resolve(
-      jsonFilename,
-    )} --pixels-per-second 20 --bits 8`;
-
-    // 파형분석
-    const child = shell.exec(command);
-
-    let jsonData = null;
-    if (child.code === 0) {
-      // 분석이 잘 되었다면 jsondata를 반환
-      jsonData = readFileSync(jsonFilename, 'utf8');
-      deleteFileDisk(jsonFilename); // 임시 저장된 json파일 삭제
-    }
-    deleteFileDisk(tempFilePath); // 임시 저장된 음악파일 삭제
-    return jsonData;
   }
 }

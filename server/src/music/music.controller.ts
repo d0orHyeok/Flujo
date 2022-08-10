@@ -102,6 +102,11 @@ export class MusicController {
     return this.musicService.findMusicsByTag(tag, pagingDto);
   }
 
+  @Get('/trend')
+  getTrendingMusics(@Query('genre') genre?: string) {
+    return this.musicService.findTrendingMusics(genre);
+  }
+
   @Post('/upload')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(

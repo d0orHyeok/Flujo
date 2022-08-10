@@ -17,7 +17,25 @@ import { History } from 'src/entities/history.entity';
 
 @EntityRepository(Music)
 export class MusicRepository extends Repository<Music> {
-  orderSelectQuery(query: SelectQueryBuilder<Music>) {
+  getDate(dateAgo: number | 'week' | 'month') {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const date = today.getDate();
+    const day = today.getDay();
+
+    if (dateAgo === 'month') {
+      return new Date(year, month - 1, 1);
+    } else {
+      const subDate = dateAgo !== 'week' ? dateAgo : day === 0 ? 7 : day;
+      return new Date(year, month, date - subDate);
+    }
+  }
+
+  orderSelectQuery(
+    query: SelectQueryBuilder<Music>,
+    dateOption?: number | 'week' | 'month',
+  ) {
     return query
       .addSelect((subQuery) => {
         return subQuery
@@ -26,7 +44,10 @@ export class MusicRepository extends Repository<Music> {
           .where('l.id = likes.id');
       }, 'lcount')
       .addSelect((subQuery) => {
-        return subQuery.select('COUNT(h.id)', 'count').from(History, 'h');
+        const sq = subQuery.select('COUNT(h.id)', 'count').from(History, 'h');
+        return dateOption
+          ? sq.where('h.createdAt >= :date', { date: this.getDate(dateOption) })
+          : sq;
       }, 'playcount')
       .orderBy('playcount', 'DESC')
       .addOrderBy('lcount', 'DESC');
@@ -237,6 +258,16 @@ export class MusicRepository extends Repository<Music> {
       return this.orderSelectQuery(query).skip(skip).take(take).getMany();
     } catch (error) {
       throw new InternalServerErrorException(error, `Error to search musics`);
+    }
+  }
+
+  async findTrendingMusics(genre?: string) {
+    try {
+      let query = this.musicSimpleQuery();
+      query = genre ? query.where('music.genre IN (:genre)', { genre }) : query;
+      return this.orderSelectQuery(query, 'week').take(100).getMany();
+    } catch (error) {
+      throw new InternalServerErrorException(error, 'Error to get musics');
     }
   }
 
