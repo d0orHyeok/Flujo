@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async'
 import * as S from './TrendPage.style'
 import { IMusic } from '@appTypes/music.type'
 import { getTrendingMusics } from '@api/musicApi'
+import SmallCardSlider from '@components/SmallCardSlider/SmallCardSlider'
 
 interface IChart {
   title: string
@@ -49,7 +50,7 @@ const TrendPage = () => {
       <S.Wrapper>
         <S.Container>
           <h2 className="chart-title">All music genres</h2>
-          {charts[0].musics[0].title}
+          <SmallCardSlider musics={charts[0].musics} />
         </S.Container>
       </S.Wrapper>
     </>

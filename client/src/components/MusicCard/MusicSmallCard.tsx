@@ -14,12 +14,11 @@ import { LikeFilledButton, MoreButton } from '@components/Common/Button'
 import EmptyMusicCover from '@styles/EmptyImage/EmptyMusicCover.style'
 import { userToggleLike } from '@redux/thunks/userThunks'
 
-interface IMusicCardProps {
+interface IMusicCardProps extends React.HTMLAttributes<HTMLDivElement> {
   music: IMusic
-  style?: React.CSSProperties
 }
 
-const MusicSmallCard = ({ music, style }: IMusicCardProps) => {
+const MusicSmallCard = ({ music, ...props }: IMusicCardProps) => {
   const dispatch = useAppDispatch()
 
   const currentMusic = useAppSelector((state) => state.player.currentMusic)
@@ -70,7 +69,7 @@ const MusicSmallCard = ({ music, style }: IMusicCardProps) => {
 
   return (
     <>
-      <S.CardContainer style={style}>
+      <S.CardContainer {...props}>
         <S.ImageBox>
           <Link to={`/track/${music.userId}/${music.permalink}`}>
             {music.cover ? (
