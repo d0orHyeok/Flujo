@@ -15,6 +15,7 @@ import PlaylistDetailPage from '@pages/PlaylistDetailPage/playlistDetailPage'
 import ProfileDetailPage from '@pages/ProfileDetailPage/ProfileDetailPage'
 import TagPage from '@pages/TagPage/TagPage'
 import HistoryPage from '@pages/HistoryPage/HistoryPage'
+import TrendPage from '@pages/TrendPage/TrendPage'
 
 const userDetailPage = ['likes', 'following', 'followers', 'comments']
 
@@ -80,6 +81,9 @@ const Router = () => {
 
       {/* History Page */}
       <Route path="/history" element={withUser(HistoryPage, true)} />
+
+      {/* Trend Page */}
+      <Route path="/trend" element={withUser(TrendPage, null)} />
     </Routes>
   )
 }

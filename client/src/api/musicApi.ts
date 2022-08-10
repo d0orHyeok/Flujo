@@ -24,6 +24,11 @@ export const getPopularMusicsOfUser = (userId: string) => {
   return Axios.get(`/api/music/popular/${userId}`)
 }
 
+export const getTrendingMusics = (genre?: string) => {
+  const url = '/api/music/trend'
+  return Axios.get(!genre ? url : `${url}?genre=${genre}`)
+}
+
 export const searchMusic = (keyward: string, skip = 0, take = 10) => {
   return Axios.get(`/api/music/search/${keyward}?skip=${skip}&take=${take}`)
 }
