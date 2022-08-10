@@ -16,14 +16,14 @@ export const Slider = styled.div`
       right: 0;
     }
 
-    z-index: 100;
+    z-index: 1;
     top: 40%;
     transform: translateY(-50%);
     position: absolute;
     width: 40px;
     height: 40px;
     padding: 0;
-    background-color: rgba(${({ theme }) => theme.colors.bgColorRGB}, 0.77);
+    background-color: rgba(${({ theme }) => theme.colors.bgColorRGB}, 0.86);
     border: 1px solid ${({ theme }) => theme.colors.border1};
     color: ${({ theme }) => theme.colors.bgTextRGBA(0.86)};
 
