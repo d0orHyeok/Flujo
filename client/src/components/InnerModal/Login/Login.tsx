@@ -5,6 +5,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useAppDispatch } from '@redux/hook'
 import { userAuth, userLogin } from '@redux/thunks/userThunks'
 import { useAlert } from '@redux/context/alertProvider'
+import CheckBox from '@components/Common/Checkbox'
 
 interface LoginProps {
   onClose: () => void
@@ -112,13 +113,12 @@ const Login = ({ onClose }: LoginProps) => {
             </form>
           </S.Box>
           <S.Box className="signin-loginbox">
-            <input
-              type="checkbox"
+            <CheckBox
               id="saveID"
+              label="아이디저장"
               checked={saveID}
               onChange={handleChangeSaveID}
             />
-            <label htmlFor="saveID">아이디 저장</label>
             <S.LoginButton onClick={handleClickLogin}>로그인</S.LoginButton>
           </S.Box>
           <S.Box className="signin-more">

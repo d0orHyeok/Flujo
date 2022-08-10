@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAlert } from '@redux/context/alertProvider'
 import { userSignUp } from '@api/userApi'
 import { Helmet } from 'react-helmet-async'
+import CheckBox from '@components/Common/Checkbox'
 
 const RegisterPage = () => {
   const navigate = useNavigate()
@@ -218,15 +219,14 @@ const RegisterPage = () => {
               impedit eos. Provident natus rerum delectus, nostrum pariatur
               sunt, consequatur quia, possimus enim blanditiis necessitatibus!
             </div>
-            <input
+            <CheckBox
               id="term1"
-              type="checkbox"
+              className="term-checkbox"
               checked={checkbox.term1}
               onChange={handleChangeCheckbox}
+              textSize={'0.9rem'}
+              label={'동의합니다'}
             />
-            <label className="register-trem-label" htmlFor="term1">
-              동의합니다
-            </label>
           </S.TermBox>
           <S.TermBox className="register-term">
             <h2 className="register-term-title">Terms 2</h2>
@@ -244,15 +244,14 @@ const RegisterPage = () => {
               impedit eos. Provident natus rerum delectus, nostrum pariatur
               sunt, consequatur quia, possimus enim blanditiis necessitatibus!
             </div>
-            <input
+            <CheckBox
               id="term2"
-              type="checkbox"
+              className="term-checkbox"
               checked={checkbox.term2}
               onChange={handleChangeCheckbox}
+              textSize={'0.9rem'}
+              label={'동의합니다'}
             />
-            <label className="register-trem-label" htmlFor="term2">
-              동의합니다
-            </label>
           </S.TermBox>
           <S.RegisterButton
             className="register-button"

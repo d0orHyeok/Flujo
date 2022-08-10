@@ -27,14 +27,6 @@ export const Content = styled(ModalStyle.ModalContent)`
   flex-direction: column;
   align-items: center;
 
-  & .signin-loginbox {
-    font-size: 0.9rem;
-    & input {
-      margin: 0;
-      margin-right: 8px;
-    }
-  }
-
   & .signin-more {
     display: flex;
     justify-content: space-between;

@@ -41,11 +41,6 @@ export const TermBox = styled.div`
     height: 160px;
     overflow-y: auto;
   }
-
-  & .register-trem-label {
-    font-size: 0.9rem;
-    color: ${({ theme }) => theme.colors.bgTextRGBA('0.86')};
-  }
 `
 
 export const RegisterButton = styled(PrimaryButton)`
