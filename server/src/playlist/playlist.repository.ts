@@ -33,7 +33,8 @@ export class PlaylistRepository extends Repository<Playlist> {
       .leftJoinAndSelect('playlist.reposts', 'reposts')
       .loadRelationCountAndMap('playlist.musicsCount', 'playlist.musics')
       .loadRelationCountAndMap('playlist.likesCount', 'playlist.likes')
-      .loadRelationCountAndMap('playlist.repostsCount', 'playlist.reposts');
+      .loadRelationCountAndMap('playlist.repostsCount', 'playlist.reposts')
+      .loadRelationCountAndMap('musics.count', 'musics.history');
   }
 
   async createPlaylist(

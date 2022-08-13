@@ -68,7 +68,9 @@ export class MusicRepository extends Repository<Music> {
       .loadRelationCountAndMap('music.commentsCount', 'music.comments')
       .loadRelationCountAndMap('music.playlistsCount', 'music.playlists')
       .loadRelationCountAndMap('music.repostsCount', 'music.reposts')
-      .loadRelationCountAndMap('music.count', 'music.history');
+      .loadRelationCountAndMap('music.count', 'music.history')
+      .loadRelationCountAndMap('user.followersCount', 'user.followers')
+      .loadRelationCountAndMap('user.musicsCount', 'user.musics');
   }
 
   musicDetailQuery() {
