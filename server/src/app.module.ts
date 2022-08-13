@@ -10,6 +10,9 @@ import { join } from 'path';
 import { PlaylistModule } from './playlist/playlist.module';
 import { CommentModule } from './comment/comment.module';
 import { HistoryModule } from './history/history.module';
+import { MusicRepository } from './music/music.repository';
+import { UserRepository } from './auth/user.repository';
+import { PlaylistRepository } from './playlist/playlist.repository';
 
 @Module({
   imports: [
@@ -17,6 +20,11 @@ import { HistoryModule } from './history/history.module';
     ConfigurationModule,
     // DB Connection
     TypeOrmModule.forRoot(),
+    TypeOrmModule.forFeature([
+      PlaylistRepository,
+      UserRepository,
+      MusicRepository,
+    ]),
     // Serve Static file
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..'),
