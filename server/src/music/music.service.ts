@@ -78,8 +78,12 @@ export class MusicService {
     return this.musicRepository.findMusicsByTag(tag, pagingDto);
   }
 
-  async findTrendingMusics(genre?: string) {
-    return this.musicRepository.findTrendingMusics(genre);
+  async findTrendingMusics(genre?: string, date?: number | 'week' | 'month') {
+    return this.musicRepository.findTrendingMusics(genre, date);
+  }
+
+  async findNewReleaseMusics(genre?: string, date?: number | 'week' | 'month') {
+    return this.musicRepository.findNewReleaseMusics(genre, date);
   }
 
   changeMusicFileData(
@@ -210,9 +214,10 @@ export class MusicService {
     // Save music file temporarily
     const tempFilePath = uploadFileDisk(
       file,
-      `${Date.now()}${file.originalname}`,
+      `${Date.now()}${file.originalname.replace(/ /g, '')}`,
       'temp',
     );
+
     // File name to save waveform data
     const jsonFilename = `${tempFilePath
       .split('.')
@@ -220,9 +225,9 @@ export class MusicService {
       .join('.')}.json`;
 
     // Audiowaveform Command
-    const command = `audiowaveform -i ${resolve(tempFilePath)} -o ${resolve(
-      jsonFilename,
-    )} --pixels-per-second 20 --bits 8`;
+    const command = await `audiowaveform -i ${resolve(
+      tempFilePath,
+    )} -o ${resolve(jsonFilename)} --pixels-per-second 20 --bits 8`;
 
     // Execute command
     const child = shell.exec(command);

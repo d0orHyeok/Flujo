@@ -29,6 +29,7 @@ import { UploadedFilesPipe } from './pipes/uploaded-files.pipe';
 import { UploadMusicDto } from './dto/upload-music.dto';
 import { uploadFileDisk } from 'src/fileFunction';
 import { ConfigService } from '@nestjs/config';
+import { CheckDatePipe } from './pipes/check-date.pipe';
 
 @Controller('music')
 export class MusicController {
@@ -103,8 +104,19 @@ export class MusicController {
   }
 
   @Get('/trend')
-  getTrendingMusics(@Query('genre') genre?: string) {
-    return this.musicService.findTrendingMusics(genre);
+  getTrendingMusics(
+    @Query('genre') genre?: string,
+    @Query('date', CheckDatePipe) date?: number | 'week' | 'month',
+  ) {
+    return this.musicService.findTrendingMusics(genre, date);
+  }
+
+  @Get('/newrelease')
+  getNewReleaseMusics(
+    @Query('genre') genre?: string,
+    @Query('date', CheckDatePipe) date?: number | 'week' | 'month',
+  ) {
+    return this.musicService.findNewReleaseMusics(genre, date);
   }
 
   @Post('/upload')

@@ -36,7 +36,7 @@ export class MusicRepository extends Repository<Music> {
     query: SelectQueryBuilder<Music>,
     dateOption?: number | 'week' | 'month',
   ) {
-    return query
+    const q = query
       .addSelect((subQuery) => {
         return subQuery
           .select('COUNT(l.id)', 'count')
@@ -44,13 +44,20 @@ export class MusicRepository extends Repository<Music> {
           .where('l.id = likes.id');
       }, 'lcount')
       .addSelect((subQuery) => {
-        const sq = subQuery.select('COUNT(h.id)', 'count').from(History, 'h');
+        const sq = subQuery
+          .select('COUNT(h.id)', 'count')
+          .from(History, 'h')
+          .where('h.musicId = music.id');
+
         return dateOption
-          ? sq.where('h.createdAt >= :date', { date: this.getDate(dateOption) })
+          ? sq.andWhere('h.createdAt >= :date', {
+              date: this.getDate(dateOption),
+            })
           : sq;
       }, 'playcount')
-      .orderBy('playcount', 'DESC')
-      .addOrderBy('lcount', 'DESC');
+      .orderBy('playcount', 'DESC');
+
+    return dateOption ? q : q.addOrderBy('lcount', 'DESC');
   }
 
   musicSimpleQuery() {
@@ -261,13 +268,29 @@ export class MusicRepository extends Repository<Music> {
     }
   }
 
-  async findTrendingMusics(genre?: string) {
+  async findTrendingMusics(genre?: string, date?: number | 'week' | 'month') {
     try {
       let query = this.musicSimpleQuery();
       query = genre
         ? query.where('music.genre IN (:genre)', { genre: [genre] })
         : query;
-      return this.orderSelectQuery(query, 'week').take(100).getMany();
+      return this.orderSelectQuery(query, date || 'week')
+        .take(100)
+        .getMany();
+    } catch (error) {
+      throw new InternalServerErrorException(error, 'Error to get musics');
+    }
+  }
+
+  async findNewReleaseMusics(genre?: string, date?: number | 'week' | 'month') {
+    try {
+      let query = this.musicSimpleQuery().where('music.createdAt >= :date', {
+        date: this.getDate(date || 'week'),
+      });
+      query = genre
+        ? query.andWhere('music.genre IN (:genre)', { genre: [genre] })
+        : query;
+      return this.orderSelectQuery(query).take(100).getMany();
     } catch (error) {
       throw new InternalServerErrorException(error, 'Error to get musics');
     }
