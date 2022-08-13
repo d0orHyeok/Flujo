@@ -11,6 +11,7 @@ import Select, { Option } from '@components/Common/Select/Select'
 
 interface IChart {
   title: string
+  link: string
   genre?: string
   musics: IMusic[]
 }
@@ -90,8 +91,9 @@ const BaseChartPage = ({
       // 서버로 부터 장르들을 가져온다.
       const newCharts = await Promise.all(
         genres.map(async (genre) => {
+          const link = genre.toLowerCase().replace(/[^a-z]/g, '')
           const musics: IMusic[] = await handleGetChartedTracks(genre, period)
-          return { title: genre, genre, musics }
+          return { title: genre, link, genre, musics }
         })
       )
       setCharts((prevState) => [...prevState, ...newCharts])
@@ -119,7 +121,7 @@ const BaseChartPage = ({
 
   useEffect(() => {
     handleGetChartedTracks(undefined, period).then((musics) =>
-      setCharts([{ title: 'All music genres', musics }])
+      setCharts([{ title: 'All music genres', link: 'all', musics }])
     )
   }, [handleGetChartedTracks, period])
 
@@ -201,9 +203,7 @@ const BaseChartPage = ({
               return (
                 <S.ChartItem key={index}>
                   <h2 className="chart-title">
-                    <Link to={`/sets/${chart.genre ? chart.genre : 'All'}`}>
-                      {chart.title}
-                    </Link>
+                    <Link to={chart.link}>{chart.title}</Link>
                   </h2>
                   <SmallCardSlider musics={chart.musics} />
                 </S.ChartItem>
