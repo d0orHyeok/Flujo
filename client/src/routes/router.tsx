@@ -15,7 +15,8 @@ import PlaylistDetailPage from '@pages/PlaylistDetailPage/playlistDetailPage'
 import ProfileDetailPage from '@pages/ProfileDetailPage/ProfileDetailPage'
 import TagPage from '@pages/TagPage/TagPage'
 import HistoryPage from '@pages/HistoryPage/HistoryPage'
-import TrendPage from '@pages/TrendPage/TrendPage'
+import TrendPage from '@pages/ChartPage/TrendPage'
+import NewPage from '@pages/ChartPage/NewPage'
 
 const userDetailPage = ['likes', 'following', 'followers', 'comments']
 
@@ -84,6 +85,9 @@ const Router = () => {
 
       {/* Trend Page */}
       <Route path="/trend" element={withUser(TrendPage, null)} />
+
+      {/* New Release Page */}
+      <Route path="/newrelease" element={withUser(NewPage, null)} />
     </Routes>
   )
 }
