@@ -203,7 +203,20 @@ const BaseChartPage = ({
               return (
                 <S.ChartItem key={index}>
                   <h2 className="chart-title">
-                    <Link to={chart.link}>{chart.title}</Link>
+                    <Link
+                      to={
+                        chart.link +
+                        `?date=${
+                          period === 'Weekly'
+                            ? 'week'
+                            : period === 'Monthly'
+                            ? 'month'
+                            : period
+                        }`
+                      }
+                    >
+                      {chart.title}
+                    </Link>
                   </h2>
                   <SmallCardSlider musics={chart.musics} />
                 </S.ChartItem>

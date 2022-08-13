@@ -38,6 +38,7 @@ const TrendDetailPage = () => {
         title={title}
         description={`Trending ${title.toLowerCase()} tracks on Wave`}
         getMusics={getTrendingMusics}
+        genre={!genre ? undefined : title}
       />
     </>
   )

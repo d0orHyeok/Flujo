@@ -8,7 +8,7 @@ import React, {
   useRef,
   useEffect,
 } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import ChartDetailHead from './ChartDetailHead/ChartDetailHead'
 import * as S from './ChartDetailPage.style'
 import { IoPerson } from 'react-icons/io5'
@@ -25,13 +25,16 @@ interface IChartDetailPagePrpps {
   getMusics: (...args: any[]) => any
   title: string
   description: string
+  genre?: string
 }
 
 const ChartDetailPage = ({
   title,
   description,
+  genre,
   getMusics,
 }: IChartDetailPagePrpps) => {
+  const { search } = useLocation()
   const dispatch = useAppDispatch()
   const openLogin = useLoginOpen()
 
@@ -45,6 +48,7 @@ const ChartDetailPage = ({
   const [loading, setLoading] = useState(true)
   const [musics, setMusics] = useState<IMusic[]>([])
   const [users, setUsers] = useState<IUser[]>([])
+  const [date, setDate] = useState('week')
 
   const handleClickFollow = useCallback(
     (userId: string) => (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -76,7 +80,7 @@ const ChartDetailPage = ({
   const getChartMusics = useCallback(async () => {
     setLoading(true)
     try {
-      const response = await getMusics()
+      const response = await getMusics(genre, date)
       const getItems = response?.data || []
       setMusics(getItems)
     } catch (error) {
@@ -85,7 +89,7 @@ const ChartDetailPage = ({
     } finally {
       setLoading(false)
     }
-  }, [getMusics])
+  }, [getMusics, genre, date])
 
   const resizeSideContent = useCallback(() => {
     if (sideRef.current) {
@@ -109,6 +113,24 @@ const ChartDetailPage = ({
   useLayoutEffect(() => {
     getChartMusics()
   }, [getChartMusics])
+
+  useLayoutEffect(() => {
+    if (!search) {
+      setDate('week')
+    } else {
+      const newDate = search.replace('?date=', '')
+      if (newDate === 'month') {
+        setDate('month')
+      } else {
+        const num = Number(newDate)
+        if (num < 8 && num > 0) {
+          setDate(`${num}`)
+        } else {
+          setDate('week')
+        }
+      }
+    }
+  }, [search])
 
   useLayoutEffect(() => {
     if (musics.length) {

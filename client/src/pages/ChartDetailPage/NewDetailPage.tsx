@@ -38,6 +38,7 @@ const NewDetailPage = () => {
         title={title}
         description={`New release ${title.toLowerCase()} tracks on Wave`}
         getMusics={getNewReleaseMusics}
+        genre={!genre ? undefined : title}
       />
     </>
   )
