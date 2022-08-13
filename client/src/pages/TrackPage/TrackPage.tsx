@@ -128,7 +128,10 @@ const TrackPage = () => {
           <PageStyle.StyledDivider />
         </PageStyle.Toolbox>
         <PageStyle.Container>
-          <PageStyle.Content media={existRelated ? 1000 : undefined}>
+          <PageStyle.Content
+            border={existRelated}
+            media={existRelated ? 1000 : undefined}
+          >
             <UserSmallCard className="content-uploader" user={music.user} />
             <PageStyle.MainContent className="maincontent">
               {music.description?.trim().length || music.tags?.length ? (

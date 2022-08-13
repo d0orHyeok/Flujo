@@ -1,5 +1,5 @@
 import styled from 'styled-components'
-import React, { useState, useCallback, useLayoutEffect } from 'react'
+import React, { useState, useCallback, useLayoutEffect, useEffect } from 'react'
 import { IPlaylist } from '@appTypes/types.type.'
 import {
   EmptyPlaylistImage,
@@ -8,13 +8,18 @@ import {
 import * as AnyHeadStyle from '@styles/AnyHead.style'
 import { PrimaryButton } from '@components/Common/Button'
 import { FaPlay, FaPause } from 'react-icons/fa'
-import { useAppSelector } from '@redux/hook'
+import { useAppDispatch, useAppSelector } from '@redux/hook'
 import {
   caculateDateAgo,
   convertTimeToString,
   getGradientFromImageUrl,
 } from '@api/functions'
 import { Link } from 'react-router-dom'
+import {
+  addMusic,
+  clearMusics,
+  togglePlay,
+} from '@redux/features/player/playerSlice'
 
 const Wrapper = styled(AnyHeadStyle.AnyHeadWrapper)`
   position: relative;
@@ -95,10 +100,29 @@ interface PlaylistHeadProps {
 }
 
 const PlaylistHead = ({ playlist }: PlaylistHeadProps) => {
+  const dispatch = useAppDispatch()
+
   const isPlay = useAppSelector((state) => state.player.controll.isPlay)
+  const nextups = useAppSelector((state) => state.player.musics)
+
+  const [active, setActive] = useState(false)
 
   const [background, setBackground] = useState<string>(
     EmptyPlaylistImageBackground
+  )
+
+  const handleClickPlay = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault()
+      if (!active) {
+        dispatch(clearMusics())
+        dispatch(addMusic(playlist.musics))
+        dispatch(togglePlay(true))
+      } else {
+        dispatch(togglePlay())
+      }
+    },
+    [active, dispatch, playlist.musics]
   )
 
   const changeBackground = useCallback(async () => {
@@ -113,6 +137,19 @@ const PlaylistHead = ({ playlist }: PlaylistHeadProps) => {
     }
   }, [playlist.image])
 
+  useEffect(() => {
+    if (nextups.length !== playlist.musics.length) {
+      setActive(false)
+    } else {
+      const bol =
+        nextups.findIndex(
+          (nextup) =>
+            playlist.musics.findIndex((m) => m.id === nextup.id) === -1
+        ) === -1
+      setActive(bol)
+    }
+  }, [nextups, playlist.musics])
+
   useLayoutEffect(() => {
     changeBackground()
   }, [changeBackground])
@@ -120,8 +157,8 @@ const PlaylistHead = ({ playlist }: PlaylistHeadProps) => {
   return (
     <Wrapper background={background}>
       <Container>
-        <PlayButton>
-          {!isPlay ? (
+        <PlayButton onClick={handleClickPlay}>
+          {!isPlay || !active ? (
             <FaPlay style={{ transform: 'translateX(2px)' }} />
           ) : (
             <FaPause />

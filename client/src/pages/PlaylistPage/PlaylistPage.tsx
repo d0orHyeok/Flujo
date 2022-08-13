@@ -97,7 +97,10 @@ const PlaylistPage = () => {
           <PageStyle.StyledDivider />
         </PageStyle.Toolbox>
         <PageStyle.Container>
-          <PageStyle.Content media={existRelated ? 1000 : undefined}>
+          <PageStyle.Content
+            border={existRelated}
+            media={existRelated ? 1000 : undefined}
+          >
             <UserSmallCard className="content-uploader" user={playlist.user} />
             <PageStyle.MainContent className="maincontent">
               {playlist.description?.trim().length || playlist.tags?.length ? (
@@ -122,9 +125,8 @@ const PlaylistPage = () => {
               ) : (
                 <></>
               )}
-              <PlaylistMusics playlist={playlist} />
+              <PlaylistMusics musics={playlist.musics} />
             </PageStyle.MainContent>
-            <div style={{ height: '300px' }}></div>
           </PageStyle.Content>
           {existRelated ? (
             <PageStyle.SideContent ref={sideRef} className="sidecontent">

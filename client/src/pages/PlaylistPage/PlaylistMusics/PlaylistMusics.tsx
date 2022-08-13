@@ -1,5 +1,5 @@
 import { numberFormat } from '@api/functions'
-import { IPlaylist } from '@appTypes/types.type.'
+import { IMusic } from '@appTypes/types.type.'
 import { EmptyMusicCover } from '@styles/EmptyImage'
 import React from 'react'
 import { FaPlay } from 'react-icons/fa'
@@ -13,6 +13,7 @@ const StyledUl = styled.ul`
 const MusicItem = styled.li`
   display: flex;
   align-items: center;
+  width: 100%;
   padding: 5px;
   &:not(:last-child) {
     border-bottom: 1px solid ${({ theme }) => theme.colors.border1};
@@ -33,6 +34,7 @@ const MusicItem = styled.li`
 
   & .musicItem-info {
     min-width: 0;
+    flex-grow: 1;
     display: flex;
     align-items: center;
 
@@ -44,6 +46,7 @@ const MusicItem = styled.li`
 
     & .index {
       margin: 0 10px;
+      font-size: 0.9em;
     }
 
     & .uploader {
@@ -67,6 +70,7 @@ const MusicItem = styled.li`
 
     & .count {
       margin-left: auto;
+      margin-right: 4px;
       font-size: 12px;
 
       & .icon.play {
@@ -78,15 +82,15 @@ const MusicItem = styled.li`
 `
 
 interface PlaylistMusicsProps {
-  playlist: IPlaylist
+  musics: IMusic[]
 }
 
-const PlaylistMusics = ({ playlist }: PlaylistMusicsProps) => {
+const PlaylistMusics = ({ musics }: PlaylistMusicsProps) => {
   return (
     <>
-      {playlist.musics ? (
+      {musics ? (
         <StyledUl>
-          {playlist.musics.map((music, index) => (
+          {musics.map((music, index) => (
             <MusicItem key={index}>
               <div className="musicItem-imgBox">
                 <Link

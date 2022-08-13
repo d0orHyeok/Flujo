@@ -1,6 +1,5 @@
 import { numberFormat } from '@api/functions'
 import { IUser } from '@appTypes/types.type.'
-
 import { EmptyProfileImage } from '@styles/EmptyImage'
 import React, { useCallback } from 'react'
 import { Link } from 'react-router-dom'

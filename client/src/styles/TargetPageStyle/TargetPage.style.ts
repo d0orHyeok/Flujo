@@ -1,5 +1,5 @@
 import { Divider } from '@mui/material'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 export const Wrapper = styled.div`
   min-height: 100%;
@@ -36,20 +36,24 @@ export const SideContent = styled.div`
   height: 100%;
   position: sticky;
   top: 80px;
-  right: 0;
 `
 
 export const StyledDivider = styled(Divider)`
   background-color: ${({ theme }) => theme.colors.border1};
 `
 
-export const Content = styled.div<{ media?: number }>`
+export const Content = styled.div<{ media?: number; border?: boolean }>`
   min-width: 0;
   display: flex;
+  width: 100%;
 
-  margin-right: 20px;
-  padding-right: 20px;
-  border-right: 1px solid ${({ theme }) => theme.colors.border1};
+  ${({ border }) =>
+    border &&
+    css`
+      margin-right: 20px;
+      padding-right: 20px;
+      border-right: 1px solid ${({ theme }) => theme.colors.border1};
+    `}
 
   & .media-divider {
     display: none;
