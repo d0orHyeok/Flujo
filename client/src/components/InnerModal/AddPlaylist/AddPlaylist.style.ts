@@ -140,6 +140,7 @@ export const CreatePlaylist = styled(Content)`
 
   & .inputBox.flex {
     display: flex;
+    align-items: flex-start;
   }
 `
 

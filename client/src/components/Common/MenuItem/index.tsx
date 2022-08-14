@@ -51,7 +51,7 @@ interface ICustionMusicMenuItemProps extends MenuItemProps {
 }
 
 interface IAddMusicMenuItemProps extends ICustionMusicMenuItemProps {
-  music?: IMusic
+  musics?: IMusic[]
 }
 
 interface IAddPlaylistMenuItemProps extends ICustionMusicMenuItemProps {
@@ -59,7 +59,7 @@ interface IAddPlaylistMenuItemProps extends ICustionMusicMenuItemProps {
 }
 
 const AddMusicMenuItem = ({
-  music,
+  musics,
   onClick,
   onClose,
   ...props
@@ -71,13 +71,13 @@ const AddMusicMenuItem = ({
       if (onClick) {
         onClick(event)
       } else {
-        if (music) {
-          dispatch(addMusic(music))
+        if (musics) {
+          dispatch(addMusic(musics))
         }
         onClose && onClose(event)
       }
     },
-    [dispatch, music, onClick, onClose]
+    [dispatch, musics, onClick, onClose]
   )
 
   return (
