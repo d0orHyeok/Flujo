@@ -4,7 +4,7 @@ import Loading from '@components/Loading/Loading'
 import RelatedTarget, {
   RelatedTargetHandler,
 } from '@components/RelatedTarget/RelatedTarget'
-import UserSmallCard from '@components/UserCard/UserSmallCard'
+import UserContentCard from '@components/UserCard/UserContentCard'
 import { IPlaylist } from '@appTypes/types.type.'
 import React, {
   useCallback,
@@ -101,7 +101,10 @@ const PlaylistPage = () => {
             border={existRelated}
             media={existRelated ? 1000 : undefined}
           >
-            <UserSmallCard className="content-uploader" user={playlist.user} />
+            <UserContentCard
+              className="content-uploader"
+              user={playlist.user}
+            />
             <PageStyle.MainContent className="maincontent">
               {playlist.description?.trim().length || playlist.tags?.length ? (
                 <PageStyle.StyledDivider

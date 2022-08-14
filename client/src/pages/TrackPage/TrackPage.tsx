@@ -16,7 +16,7 @@ import { getMusicByPermalink, findRelatedMusics } from '@api/musicApi'
 import RelatedTarget, {
   RelatedTargetHandler,
 } from '../../components/RelatedTarget/RelatedTarget'
-import UserSmallCard from '@components/UserCard/UserSmallCard'
+import UserContentCard from '@components/UserCard/UserContentCard'
 import TrackComments from './TrackComments/TrackComments'
 import useInterval from '@api/Hooks/userInterval'
 import { Helmet } from 'react-helmet-async'
@@ -132,7 +132,7 @@ const TrackPage = () => {
             border={existRelated}
             media={existRelated ? 1000 : undefined}
           >
-            <UserSmallCard className="content-uploader" user={music.user} />
+            <UserContentCard className="content-uploader" user={music.user} />
             <PageStyle.MainContent className="maincontent">
               {music.description?.trim().length || music.tags?.length ? (
                 <PageStyle.StyledDivider

@@ -224,7 +224,7 @@ const RegisterPage = () => {
               className="term-checkbox"
               checked={checkbox.term1}
               onChange={handleChangeCheckbox}
-              textSize={'0.9rem'}
+              textsize={'0.9rem'}
               label={'동의합니다'}
             />
           </S.TermBox>
@@ -249,7 +249,7 @@ const RegisterPage = () => {
               className="term-checkbox"
               checked={checkbox.term2}
               onChange={handleChangeCheckbox}
-              textSize={'0.9rem'}
+              textsize={'0.9rem'}
               label={'동의합니다'}
             />
           </S.TermBox>

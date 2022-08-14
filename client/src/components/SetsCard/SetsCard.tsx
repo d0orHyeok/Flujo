@@ -17,7 +17,7 @@ import { MusicMenu } from '@components/Common/Menu'
 import { MoreButton } from '@components/Common/Button'
 import { EmptyPlaylistImage } from '@styles/EmptyImage'
 
-interface ISetsCardProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface ISetsCardProps extends React.HTMLAttributes<HTMLDivElement> {
   mainText: { name: string; link: string }
   subText: string
   musics: IMusic[]

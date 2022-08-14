@@ -8,7 +8,7 @@ import React from 'react'
 import styled from 'styled-components'
 
 const StyledFormControlLabel = styled(FormControlLabel)<{
-  textSize?: string
+  textsize?: string
 }>`
   &.MuiFormControlLabel-root {
     margin-left: -9px;
@@ -18,7 +18,7 @@ const StyledFormControlLabel = styled(FormControlLabel)<{
     color: ${({ theme }) => theme.colors.bgText};
   }
   & .MuiFormControlLabel-label {
-    font-size: ${({ textSize }) => textSize || '13px'};
+    font-size: ${({ textsize }) => textsize || '13px'};
     color: ${({ theme }) => theme.colors.bgTextRGBA(0.6)};
     font-family: inherit;
     line-height: 100%;
@@ -38,21 +38,21 @@ const StyledCheckBox = styled(Checkbox)`
 interface ICheckboxProps extends CheckboxProps {
   label?: string | number
   formControlLabelProps?: FormControlLabelProps
-  textSize?: string
+  textsize?: string
 }
 
 const CheckBox = ({
   label,
   formControlLabelProps,
-  textSize,
+  textsize,
   ...props
 }: ICheckboxProps) => {
   return (
     <StyledFormControlLabel
       {...formControlLabelProps}
-      textSize={textSize}
       control={<StyledCheckBox {...props} defaultChecked />}
       label={label || ''}
+      textsize={textsize}
     />
   )
 }

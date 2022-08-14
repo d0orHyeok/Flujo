@@ -1,7 +1,8 @@
 import Axios from './Axios'
 
-export const getAllMusic = () => {
-  return Axios.get('/api/music/')
+export const getAllMusic = (option?: 'trend' | 'newrelease') => {
+  const query = !option ? '' : `?option=${option}`
+  return Axios.get('/api/music/' + query)
 }
 
 export const getMusicByPermalink = (userId: string, permalink: string) => {
