@@ -79,11 +79,16 @@ export class AuthController {
     return { accessToken };
   }
 
+  @Get('/random')
+  async getRandomUsers() {
+    return this.authService.getRandomUsers();
+  }
+
   @Get('/info')
   @UseGuards(JwtAuthGuard)
   async getUserData(@GetUser() user: User) {
-    const history = await this.authService.getRecentHistory(user.id);
-    return { ...user, history };
+    const historys = await this.authService.getRecentHistory(user.id);
+    return { ...user, historys };
   }
 
   @Get('/search/:keyward')

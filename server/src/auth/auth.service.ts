@@ -122,6 +122,10 @@ export class AuthService {
     };
   }
 
+  async getRandomUsers() {
+    return this.userRepository.getRandomUsers();
+  }
+
   async getRecentHistory(userId: string) {
     return this.historyRepository.findHistorysByUserId(userId, {
       skip: 0,

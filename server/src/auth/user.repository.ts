@@ -113,6 +113,29 @@ export class UserRepository extends Repository<User> {
     return user;
   }
 
+  async getRandomUsers() {
+    try {
+      const ids = (
+        await this.createQueryBuilder('user').select('user.id').getMany()
+      ).map((value) => value.id);
+
+      const maxLength = ids.length < 6 ? ids.length : 6;
+      const randomIds: string[] = [];
+
+      while (randomIds.length < maxLength) {
+        const randomIndex = Math.floor(Math.random() * ids.length);
+        const item = ids[randomIndex];
+        if (!randomIds.includes(item)) {
+          randomIds.push(item);
+        }
+      }
+
+      return this.getSimpleQuery().whereInIds(randomIds).getMany();
+    } catch (error) {
+      throw new InternalServerErrorException(error, 'Error to get musics');
+    }
+  }
+
   async searchUser(keyward: string, pagingDto: PagingDto) {
     const { skip, take } = pagingDto;
 
