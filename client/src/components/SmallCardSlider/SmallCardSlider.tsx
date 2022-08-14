@@ -1,26 +1,27 @@
 import React, { useCallback, useEffect, useRef } from 'react'
 import { IconButton } from '@mui/material'
 import { AiOutlineLeft, AiOutlineRight } from 'react-icons/ai'
-import { IMusic } from '@appTypes/music.type'
-import MusicSmallCard from '@components/MusicCard/MusicSmallCard'
+import MusicSmallCard, {
+  IMusicSmallCardProps,
+} from '@components/MusicCard/MusicSmallCard'
 import * as S from './SmallCardSlider.style'
+import SetsCard, { ISetsCardProps } from '@components/SetsCard/SetsCard'
+import UserSmallCard, {
+  IUserSmallCardProps,
+} from '@components/UserCard/UserSmallCard'
 
 interface ISmallCardSliderProps {
-  musics: IMusic[]
+  cardsProps: (IMusicSmallCardProps | ISetsCardProps | IUserSmallCardProps)[]
 }
 
-const SmallCardSlider = ({ musics }: ISmallCardSliderProps) => {
+const SmallCardSlider = ({ cardsProps }: ISmallCardSliderProps) => {
   const sliderRef = useRef<HTMLDivElement>(null)
 
   const handleOnScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
     // 스크롤 이동 시 스크롤 위치에 따라 버튼이 보여질지 설정
     const el = event.currentTarget
-    const leftBtn = sliderRef.current?.querySelector(
-      '.chart-musicBox-btn.leftBtn'
-    )
-    const rightBtn = sliderRef.current?.querySelector(
-      '.chart-musicBox-btn.rightBtn'
-    )
+    const leftBtn = sliderRef.current?.querySelector('.chart-box-btn.leftBtn')
+    const rightBtn = sliderRef.current?.querySelector('.chart-box-btn.rightBtn')
 
     if (el.scrollLeft === 0) {
       // 맨 왼쪽이면 왼쪽이동버튼 숨김
@@ -40,8 +41,8 @@ const SmallCardSlider = ({ musics }: ISmallCardSliderProps) => {
     (direction?: 'left' | 'right') =>
       (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault()
-        const el = sliderRef.current?.querySelector('.chart-musicBox')
-        const musicCardEl = el?.querySelector('.chart-musicCard')
+        const el = sliderRef.current?.querySelector('.chart-box')
+        const musicCardEl = el?.querySelector('.chart-card')
         if (!el || !musicCardEl) {
           return
         }
@@ -67,13 +68,11 @@ const SmallCardSlider = ({ musics }: ISmallCardSliderProps) => {
 
   const handleResizeHideBtn = useCallback(() => {
     // 화면크기가 바뀔때 스크롤 유무에 따라 버튼이 보여질지 설정
-    const el = sliderRef.current?.querySelector('.chart-musicBox')
+    const el = sliderRef.current?.querySelector('.chart-box')
     if (el) {
-      const leftBtn = sliderRef.current?.querySelector(
-        '.chart-musicBox-btn.leftBtn'
-      )
+      const leftBtn = sliderRef.current?.querySelector('.chart-box-btn.leftBtn')
       const rightBtn = sliderRef.current?.querySelector(
-        '.chart-musicBox-btn.rightBtn'
+        '.chart-box-btn.rightBtn'
       )
       el.scrollWidth <= el.clientWidth
         ? rightBtn?.classList.add('hide')
@@ -96,25 +95,31 @@ const SmallCardSlider = ({ musics }: ISmallCardSliderProps) => {
   return (
     <S.Slider ref={sliderRef}>
       <IconButton
-        className="chart-musicBox-btn leftBtn hide"
+        className="chart-box-btn leftBtn hide"
         onClick={handleClickButton('left')}
       >
         <AiOutlineLeft />
       </IconButton>
       <IconButton
-        className="chart-musicBox-btn rightBtn"
+        className="chart-box-btn rightBtn"
         onClick={handleClickButton('right')}
       >
         <AiOutlineRight />
       </IconButton>
-      <div className="chart-musicBox" onScroll={handleOnScroll}>
-        {musics.map((music, index) => (
-          <MusicSmallCard
-            className="chart-musicCard"
-            key={index}
-            music={music}
-          />
-        ))}
+      <div className="chart-box" onScroll={handleOnScroll}>
+        {cardsProps.map((props, index) => {
+          if ('mainText' in props) {
+            return <SetsCard className="chart-card" key={index} {...props} />
+          } else if ('user' in props) {
+            return (
+              <UserSmallCard className="chart-card" key={index} {...props} />
+            )
+          } else {
+            return (
+              <MusicSmallCard className="chart-card" key={index} {...props} />
+            )
+          }
+        })}
       </div>
     </S.Slider>
   )

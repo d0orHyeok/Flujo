@@ -3,7 +3,7 @@ import styled from 'styled-components'
 export const Slider = styled.div`
   position: relative;
 
-  & .chart-musicBox-btn {
+  & .chart-box-btn {
     &.hide {
       display: none;
     }
@@ -40,7 +40,7 @@ export const Slider = styled.div`
     }
   }
 
-  & .chart-musicBox {
+  & .chart-box {
     display: flex;
     align-items: center;
     overflow-x: scroll;
@@ -51,7 +51,7 @@ export const Slider = styled.div`
       display: none; /* Chrome, Safari, Opera*/
     }
 
-    & .chart-musicCard {
+    & .chart-card {
       flex-shrink: 0;
       &:not(:last-child) {
         margin-right: 20px;

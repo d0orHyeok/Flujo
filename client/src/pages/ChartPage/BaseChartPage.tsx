@@ -218,7 +218,11 @@ const BaseChartPage = ({
                       {chart.title}
                     </Link>
                   </h2>
-                  <SmallCardSlider musics={chart.musics} />
+                  <SmallCardSlider
+                    cardsProps={chart.musics.map((music) => {
+                      return { music }
+                    })}
+                  />
                 </S.ChartItem>
               )
             })}
