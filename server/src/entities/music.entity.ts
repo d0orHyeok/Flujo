@@ -16,6 +16,34 @@ import {
 import { EntityStatus } from './common.types';
 import { History } from './history.entity';
 
+export const musicGenres = [
+  'Hip-hop & Rap',
+  'Pop',
+  'R&B & Soul',
+  'Electronic',
+  'House',
+  'Soundtrack',
+  'Dance & EDM',
+  'Jazz & Blues',
+  'Folk & Singer-Songwriter',
+  'Rock',
+  'Indie',
+  'Classical',
+  'Piano',
+  'Ambient',
+  'Techno',
+  'Trap',
+  'Dubstep',
+  'Country',
+  'Metal',
+  'Trance',
+  'Latin',
+  'Drum & Base',
+  'Reggae',
+  'Disco',
+  'World',
+];
+
 @Entity()
 export class Music extends BaseEntity {
   @PrimaryGeneratedColumn()

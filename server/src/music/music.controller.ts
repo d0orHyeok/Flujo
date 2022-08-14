@@ -30,6 +30,7 @@ import { UploadMusicDto } from './dto/upload-music.dto';
 import { uploadFileDisk } from 'src/fileFunction';
 import { ConfigService } from '@nestjs/config';
 import { CheckDatePipe } from './pipes/check-date.pipe';
+import { musicGenres } from 'src/entities/music.entity';
 
 @Controller('music')
 export class MusicController {
@@ -40,8 +41,34 @@ export class MusicController {
   private logger = new Logger('MusicController');
 
   @Get('/')
-  async getAllMusic() {
-    return this.musicService.getAllMusic();
+  async getAllMusic(@Query('option') option?: string) {
+    if (option) {
+      const genres = [undefined, ...musicGenres];
+      const musicsList = await Promise.all(
+        genres.map((genre) => {
+          return option === 'newrelease'
+            ? this.musicService.findNewReleaseMusics(genre)
+            : this.musicService.findTrendingMusics(genre);
+        }),
+      );
+
+      const items = genres
+        .map((genre, index) => {
+          return {
+            genre: genre || 'All music genres',
+            musics: musicsList[index],
+          };
+        })
+        .filter((item) => item.musics.length);
+      return items;
+    } else {
+      return this.musicService.getAllMusic();
+    }
+  }
+
+  @Get('/random')
+  randomMusic() {
+    return this.musicService.getRandomMusics();
   }
 
   @Get('/ids')

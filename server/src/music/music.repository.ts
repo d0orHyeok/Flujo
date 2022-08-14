@@ -131,6 +131,32 @@ export class MusicRepository extends Repository<Music> {
     }
   }
 
+  async getRandomMusics() {
+    try {
+      const ids = (
+        await this.createQueryBuilder('music')
+          .select('music.id')
+          .where('music.status = :status', { status: 'PUBLIC' })
+          .getMany()
+      ).map((value) => value.id);
+
+      const maxLength = ids.length < 10 ? ids.length : 10;
+      const randomIds: number[] = [];
+
+      while (randomIds.length < maxLength) {
+        const randomIndex = Math.floor(Math.random() * ids.length);
+        const item = ids[randomIndex];
+        if (!randomIds.includes(item)) {
+          randomIds.push(item);
+        }
+      }
+
+      return this.musicSimpleQuery().whereInIds(randomIds).getMany();
+    } catch (error) {
+      throw new InternalServerErrorException(error, 'Error to get musics');
+    }
+  }
+
   async findMusicById(id: number): Promise<Music> {
     const music = await this.musicDetailQuery()
       .where('music.id = :id', { id })
@@ -170,6 +196,7 @@ export class MusicRepository extends Repository<Music> {
     const music = await this.findMusicById(id);
 
     const { title, album, artist } = music;
+    const nickname = music.user.nickname;
     const { skip, take } = musicPagingDto;
 
     try {
@@ -188,6 +215,11 @@ export class MusicRepository extends Repository<Music> {
             if (artist && artist.length) {
               query = query.orWhere(`music.artist LIKE :artist`, {
                 artist: `%${artist}%`,
+              });
+            }
+            if (nickname) {
+              query = query.orWhere(`user.nickname Like :nickname`, {
+                nickname: `%${nickname}%`,
               });
             }
             return query;

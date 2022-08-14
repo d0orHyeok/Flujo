@@ -35,6 +35,10 @@ export class MusicService {
     return this.musicRepository.getAllMusic();
   }
 
+  async getRandomMusics() {
+    return this.musicRepository.getRandomMusics();
+  }
+
   async findMusicById(id: number) {
     const music = await this.musicRepository.findMusicById(id);
     const user = await this.authService.findUserById(music.userId);
