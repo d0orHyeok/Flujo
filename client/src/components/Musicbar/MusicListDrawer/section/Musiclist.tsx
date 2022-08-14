@@ -164,7 +164,7 @@ const Musiclist = () => {
       {/* 재생목록 영역 */}
       <S.AreaPlaylist className="area-playlist">
         <S.PlaylistHead>
-          <h2>재생목록</h2>
+          <h2>Next up</h2>
           <div className="button-wrap">
             <ShuffleButton
               title="Shuffle"
@@ -181,8 +181,8 @@ const Musiclist = () => {
             <S.ClearBtn onClick={handleClickClear}>Clear</S.ClearBtn>
           </div>
         </S.PlaylistHead>
-        <S.PlaylistContainer>
-          <ul>
+        <div className="playlist-container">
+          <ul className="playlist-container-list">
             {indexArray.map((indexItem, index) => {
               const musicItem = musics[indexItem]
               if (musicItem)
@@ -232,6 +232,7 @@ const Musiclist = () => {
                             ) !== -1
                           }
                           className="btn"
+                          style={{ marginRight: '8px' }}
                           onClick={handleClickLike}
                           aria-valuetext={`${musicItem.id}`}
                         />
@@ -256,7 +257,7 @@ const Musiclist = () => {
                 )
             })}
           </ul>
-        </S.PlaylistContainer>
+        </div>
       </S.AreaPlaylist>
       <MusicMenu
         anchorEl={anchorEl}

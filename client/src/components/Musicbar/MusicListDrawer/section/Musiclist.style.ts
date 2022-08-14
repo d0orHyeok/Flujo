@@ -25,6 +25,7 @@ export const MusicImage = styled.div`
 `
 
 export const AreaPlaylist = styled.div`
+  position: relative;
   width: 400px;
   height: 100%;
   background-color: ${({ theme }) => theme.colors.bgColorRGBA(0.03)};
@@ -32,15 +33,32 @@ export const AreaPlaylist = styled.div`
   ${({ theme }) => theme.device.tablet} {
     width: 100%;
   }
+
+  & .playlist-container {
+    position: absolute;
+    top: 50px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    &::-webkit-scrollbar {
+      width: 8px;
+      background-color: ${({ theme }) => theme.colors.bgColorRGBA(0.15)};
+    }
+    &::-webkit-scrollbar-thumb {
+      border-radius: 4px;
+      background-color: ${({ theme }) => theme.colors.bgColorRGBA(0.3)};
+    }
+  }
 `
 
 export const PlaylistHead = styled.div`
-  margin: 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 0;
-  font-size: 1rem;
+  height: 50px;
+  padding: 0 20px;
+  font-size: 16px;
 
   & .button-wrap {
     display: flex;
@@ -49,7 +67,7 @@ export const PlaylistHead = styled.div`
   }
 
   & .btn {
-    margin-right: 1rem;
+    margin-right: 16px;
     font-size: inherit;
 
     &:last-child {
@@ -70,21 +88,15 @@ export const ClearBtn = styled.button`
   }
 `
 
-export const PlaylistContainer = styled.div``
-
 export const PlaylistItem = styled.li<{ select?: boolean }>`
   position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.5rem 1rem;
+  padding: 10px 20px;
 
   background-color: ${({ theme, select }) =>
     select && theme.colors.bgColorRGBA(0.08)};
-
-  & > * {
-    flex-shrink: 0;
-  }
 
   & .btn {
     display: none;
@@ -117,6 +129,7 @@ export const ItemImageBox = styled.div`
   width: 40px;
   height: 40px;
   cursor: pointer;
+  flex-shrink: 0;
 
   & .image {
     height: 100%;
@@ -135,6 +148,7 @@ export const ItemImageBox = styled.div`
 `
 
 export const ItemInfoBox = styled.div`
+  min-width: 0;
   flex-grow: 1;
   font-size: 0.8rem;
   line-height: 1rem;
@@ -162,7 +176,8 @@ export const ItemControlBox = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 60px;
+  flex-shrink: 0;
+
   & .duration {
     font-size: 0.8rem;
     color: ${({ theme }) => theme.colors.bgTextRGBA(0.6)};
@@ -171,7 +186,6 @@ export const ItemControlBox = styled.div`
   & .btn {
     font-size: 14px;
     border: none;
-    padding: 0 5px;
   }
 `
 
