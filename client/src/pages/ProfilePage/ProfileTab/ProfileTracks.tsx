@@ -28,7 +28,8 @@ const ProfileTracks = ({ userId, editable, ...props }: ProfileTracksProps) => {
     setLoading(true)
     try {
       const skip = page * getNum
-      const response = await getUserMusics(userId, skip, skip + getNum)
+      const take = skip + getNum
+      const response = await getUserMusics(userId, { skip, take })
       const getItems: IMusic[] = response.data
       if (!getItems || getItems.length < getNum) {
         setDone(true)

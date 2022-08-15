@@ -7,7 +7,12 @@ import {
 } from '@nestjs/common';
 import { User } from 'src/entities/user.entity';
 import { Playlist } from './../entities/playlist.entity';
-import { EntityRepository, Repository, SelectQueryBuilder } from 'typeorm';
+import {
+  Brackets,
+  EntityRepository,
+  Repository,
+  SelectQueryBuilder,
+} from 'typeorm';
 import { Music } from 'src/entities/music.entity';
 import { PagingDto } from 'src/common/dto/paging.dto';
 
@@ -70,6 +75,23 @@ export class PlaylistRepository extends Repository<Playlist> {
     }
   }
 
+  filterPrivate(query: SelectQueryBuilder<Playlist>, uid?: string) {
+    return query.andWhere(
+      new Brackets((qb) => {
+        const query = qb.where('playlist.status = :status', {
+          status: 'PUBLIC',
+        });
+
+        return !uid
+          ? query
+          : query.orWhere('playlist.status = :st AND playlist.userId = :uid', {
+              st: 'PRIVATE',
+              uid,
+            });
+      }),
+    );
+  }
+
   async findPlaylistById(playlistId: number) {
     const playlist = await this.getDetailPlaylistQuery()
       .where('playlist.id = :id', { id: playlistId })
@@ -96,14 +118,19 @@ export class PlaylistRepository extends Repository<Playlist> {
     return playlist;
   }
 
-  async findDetailPlaylistsById(id: number, pagingDto: PagingDto) {
+  async findDetailPlaylistsById(
+    id: number,
+    pagingDto: PagingDto,
+    uid?: string,
+  ) {
     const { skip, take } = pagingDto;
 
     try {
-      const result = await this.createQueryBuilder('playlist')
+      const query = this.createQueryBuilder('playlist')
         .leftJoinAndSelect('playlist.musics', 'musics')
         .select('playlist.id')
-        .where('musics.id = :musicsid', { musicsid: id })
+        .where('musics.id = :musicsid', { musicsid: id });
+      const result = await this.filterPrivate(query, uid)
         .skip(skip)
         .take(take)
         .getMany();
@@ -117,12 +144,19 @@ export class PlaylistRepository extends Repository<Playlist> {
     }
   }
 
-  async findPlaylistsByUserId(userId: string, pagingDto: PagingDto) {
+  async findPlaylistsByUserId(
+    userId: string,
+    pagingDto: PagingDto,
+    uid?: string,
+  ) {
     const { skip, take } = pagingDto;
 
     try {
-      return this.getDetailPlaylistQuery()
-        .where('playlist.userId = :userId', { userId })
+      const query = this.getDetailPlaylistQuery().where(
+        'playlist.userId = :userId',
+        { userId },
+      );
+      return this.filterPrivate(query, uid)
         .orderBy('playlist.createdAt', 'DESC')
         .skip(skip)
         .take(take)
@@ -135,17 +169,18 @@ export class PlaylistRepository extends Repository<Playlist> {
     }
   }
 
-  async searchPlaylist(keyward: string, pagingDto: PagingDto) {
+  async searchPlaylist(keyward: string, pagingDto: PagingDto, uid?: string) {
     const { skip, take } = pagingDto;
 
     const whereString = `%${keyward.toLocaleLowerCase()}%`;
 
     try {
-      const query = this.getDetailPlaylistQuery()
+      let query = this.getDetailPlaylistQuery()
         .where('LOWER(playlist.name) LIKE :name', { name: whereString })
         .orWhere('LOWER(user.nickname) LIKE :nickname', {
           nickname: whereString,
         });
+      query = this.filterPrivate(query, uid);
       return this.orderSelectQuery(query).skip(skip).take(take).getMany();
     } catch (error) {
       throw new InternalServerErrorException(
@@ -155,15 +190,17 @@ export class PlaylistRepository extends Repository<Playlist> {
     }
   }
 
-  async findPlaylistsByTag(tag: string, pagingDto: PagingDto) {
+  async findPlaylistsByTag(tag: string, pagingDto: PagingDto, uid?: string) {
     const { skip, take } = pagingDto;
 
     try {
-      const query = this.getDetailPlaylistQuery()
+      let query = this.getDetailPlaylistQuery()
         .addSelect('playlist.tagsLower')
         .where('playlist.tagsLower IN (:tag)', {
           tag: [tag.toLowerCase()],
         });
+      query = this.filterPrivate(query, uid);
+
       return this.orderSelectQuery(query).skip(skip).take(take).getMany();
     } catch (error) {
       throw new InternalServerErrorException(error, `Error to find playlists`);

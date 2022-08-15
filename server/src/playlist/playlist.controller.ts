@@ -26,9 +26,9 @@ export class PlaylistController {
   constructor(private playlistService: PlaylistService) {}
 
   @Get('/ids')
-  getPlaylistsByIds(@Query('ids') ids: string) {
+  getPlaylistsByIds(@Query('ids') ids: string, @Query('uid') uid?: string) {
     const playlistIds = ids.split(',').map((v) => Number(v));
-    return this.playlistService.findPlaylistsByIds(playlistIds);
+    return this.playlistService.findPlaylistsByIds(playlistIds, uid);
   }
 
   @Get('permalink/:userId/:permalink')
@@ -44,9 +44,10 @@ export class PlaylistController {
     @Param('id') id: number,
     @Query('skip') skip?: number,
     @Query('take') take?: number,
+    @Query('uid') uid?: string,
   ) {
     const pagingDto = { take: take || 15, skip: skip || 0 };
-    return this.playlistService.findDetailPlaylistsById(id, pagingDto);
+    return this.playlistService.findDetailPlaylistsById(id, pagingDto, uid);
   }
 
   @Get('/user/:userId')
@@ -54,9 +55,10 @@ export class PlaylistController {
     @Param('userId') userId: string,
     @Query('skip') skip?: number,
     @Query('take') take?: number,
+    @Query('uid') uid?: string,
   ) {
     const pagingDto = { take: take || 10, skip: skip || 0 };
-    return this.playlistService.findPlaylistsByUserId(userId, pagingDto);
+    return this.playlistService.findPlaylistsByUserId(userId, pagingDto, uid);
   }
 
   @Get('/search/:keyward')
@@ -64,9 +66,10 @@ export class PlaylistController {
     @Param('keyward') keyward: string,
     @Query('skip') skip?: number,
     @Query('take') take?: number,
+    @Query('uid') uid?: string,
   ) {
     const pagingDto = { take: take || 10, skip: skip || 0 };
-    return this.playlistService.searchPlaylist(keyward, pagingDto);
+    return this.playlistService.searchPlaylist(keyward, pagingDto, uid);
   }
 
   @Get('/tag/:tag')
@@ -74,9 +77,10 @@ export class PlaylistController {
     @Param('tag') tag: string,
     @Query('skip') skip?: number,
     @Query('take') take?: number,
+    @Query('uid') uid?: string,
   ) {
     const pagingDto = { take: take || 10, skip: skip || 0 };
-    return this.playlistService.findPlaylistsByTag(tag, pagingDto);
+    return this.playlistService.findPlaylistsByTag(tag, pagingDto, uid);
   }
 
   @Post('/create')

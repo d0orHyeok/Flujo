@@ -6,6 +6,7 @@ import PlaylistCard from '@components/PlaylistCard/PlaylistCard'
 import { AiOutlineMenu } from 'react-icons/ai'
 import { getUserPlaylists } from '@api/playlistApi'
 import LoadingArea from '@components/Loading/LoadingArea'
+import { useAppSelector } from '@redux/hook'
 
 const StyledPlaylistCard = styled(PlaylistCard)`
   &:not(:last-child) {
@@ -26,6 +27,8 @@ interface ProfilePlaylistsProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const ProfilePlaylists = ({ userId, ...props }: ProfilePlaylistsProps) => {
+  const uid = useAppSelector((state) => state.user.userData?.id)
+
   const [playlists, setPlaylists] = useState<IPlaylist[]>([])
   const [page, setPage] = useState(0)
   const [done, setDone] = useState(false)
@@ -41,7 +44,8 @@ const ProfilePlaylists = ({ userId, ...props }: ProfilePlaylistsProps) => {
     setLoading(true)
     try {
       const skip = page * getNum
-      const response = await getUserPlaylists(userId, skip, skip + getNum)
+      const take = skip + getNum
+      const response = await getUserPlaylists(userId, { skip, take, uid })
       const getItems: IPlaylist[] = response.data
       if (!getItems || getItems.length < getNum) {
         setDone(true)
@@ -53,7 +57,7 @@ const ProfilePlaylists = ({ userId, ...props }: ProfilePlaylistsProps) => {
     } finally {
       setLoading(false)
     }
-  }, [userId, done, page])
+  }, [userId, done, page, uid])
 
   const handleOnView = useCallback(
     (inView: boolean) => {

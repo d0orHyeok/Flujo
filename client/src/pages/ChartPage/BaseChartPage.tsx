@@ -57,7 +57,7 @@ const BaseChartPage = ({
       const date =
         period === 'Weekly' ? 'week' : period === 'Monthly' ? 'month' : period
       try {
-        const response = await getMusics(genre, date)
+        const response = await getMusics({ genre, date })
         const getItems: IMusic[] = response.data
         return getItems
       } catch (error) {

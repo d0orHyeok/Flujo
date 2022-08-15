@@ -5,9 +5,9 @@ import { findRelatedMusics, getAllMusic } from '@api/musicApi'
 import { Helmet } from 'react-helmet-async'
 import { ISetsCardProps } from '@components/SetsCard/SetsCard'
 import SmallCardSlider from '@components/SmallCardSlider/SmallCardSlider'
-import { useAppSelector } from '@redux/hook'
 import Axios from '@api/Axios'
 import Loading from '@components/Loading/Loading'
+import { useAppSelector } from '@redux/hook'
 
 interface ChartItem {
   genre: string
@@ -15,7 +15,7 @@ interface ChartItem {
 }
 
 const HomePage = () => {
-  const myId = useAppSelector((state) => state.user.userData?.id)
+  const uid = useAppSelector((state) => state.user.userData?.id)
   const historys = useAppSelector(
     (state) => state.user.userData?.historys || []
   )
@@ -32,7 +32,7 @@ const HomePage = () => {
 
   const getChartItems = useCallback(async (option: 'trend' | 'newrelease') => {
     try {
-      const response = await getAllMusic(option)
+      const response = await getAllMusic({ option })
       const items: ChartItem[] = response.data
       return items.map((item) => {
         const path =
@@ -54,30 +54,40 @@ const HomePage = () => {
   }, [])
 
   const getRelated = useCallback(async () => {
-    if (!myId) {
+    if (!uid) {
       return
     }
     try {
       const items: IMusic[] = []
-      await Promise.all(
-        likeMusics.slice(0, 3).map(async (music) => {
-          const res = await findRelatedMusics(music.id, 0, 5)
-          items.push(...res.data)
-        })
-      )
-      await Promise.all(
-        historys.slice(0, 3).map(async (history) => {
-          const res = await findRelatedMusics(history.music.id, 0, 5)
-          items.push(...res.data)
-        })
-      )
+      if (likeMusics?.length) {
+        await Promise.all(
+          likeMusics.slice(0, 3).map(async (music) => {
+            const res = await findRelatedMusics(music.id, {
+              skip: 0,
+              take: 5,
+            })
+            items.push(...res.data)
+          })
+        )
+      }
+      if (history?.length) {
+        await Promise.all(
+          historys.slice(0, 3).map(async (history) => {
+            const res = await findRelatedMusics(history.music.id, {
+              skip: 0,
+              take: 5,
+            })
+            items.push(...res.data)
+          })
+        )
+      }
 
       setRelatedMusics(items.sort((a, b) => b.count - a.count))
     } catch (error) {
       console.error(error)
       setRelatedMusics([])
     }
-  }, [historys, likeMusics, myId])
+  }, [historys, likeMusics, uid])
 
   const getRandomMusics = useCallback(async () => {
     try {
@@ -187,7 +197,7 @@ const HomePage = () => {
           <></>
         )}
         {/* 재생기록 */}
-        {historys.length ? (
+        {historys?.length ? (
           <S.Container>
             <h2 className="section-title">Listening history</h2>
             <div className="section-description">

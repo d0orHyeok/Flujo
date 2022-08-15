@@ -5,6 +5,7 @@ import React, { useCallback, useLayoutEffect, useState } from 'react'
 import styled from 'styled-components'
 import NoItem from './NoItem.style'
 import LoadingArea from '@components/Loading/LoadingArea'
+import { useAppSelector } from '@redux/hook'
 
 const StyledPlaylistCard = styled(PlaylistCard)`
   margin: 10px 0;
@@ -19,6 +20,8 @@ const TrackDetailPlaylists = ({
   musicId,
   ...props
 }: TrackDetailPlaylistsProps) => {
+  const uid = useAppSelector((state) => state.user.userData?.id)
+
   const [playlists, setPlaylists] = useState<IPlaylist[]>([])
   const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -32,11 +35,12 @@ const TrackDetailPlaylists = ({
     setLoading(true)
     try {
       const skip = page * 15
-      const response = await findPlaylistsContainsMusic(
-        musicId,
+      const take = skip + 15
+      const response = await findPlaylistsContainsMusic(musicId, {
         skip,
-        skip + 15
-      )
+        take,
+        uid,
+      })
       const getItems: IPlaylist[] = response.data
       if (!getItems || getItems.length < 15) {
         setDone(true)
@@ -48,7 +52,7 @@ const TrackDetailPlaylists = ({
     } finally {
       setLoading(false)
     }
-  }, [done, musicId, page])
+  }, [done, musicId, page, uid])
 
   const handleOnView = useCallback(
     (inView: boolean) => {

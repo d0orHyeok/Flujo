@@ -2,6 +2,7 @@ import { getMusicsByTag } from '@api/musicApi'
 import { IMusic } from '@appTypes/music.type'
 import LoadingArea from '@components/Loading/LoadingArea'
 import MusicCard from '@components/MusicCard/MusicCard'
+import { useAppSelector } from '@redux/hook'
 import React, { useCallback, useEffect, useState } from 'react'
 
 interface ITagTracksProps {
@@ -9,6 +10,8 @@ interface ITagTracksProps {
 }
 
 const TagTracks = ({ tag }: ITagTracksProps) => {
+  const uid = useAppSelector((state) => state.user.userData?.id)
+
   const [musics, setMusics] = useState<IMusic[]>([])
   const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -28,7 +31,8 @@ const TagTracks = ({ tag }: ITagTracksProps) => {
     try {
       const getNum = 15
       const skip = page * getNum
-      const response = await getMusicsByTag(tag, skip, skip + getNum)
+      const take = skip + getNum
+      const response = await getMusicsByTag(tag, { skip, take, uid })
       const getItems = response.data
       if (!getItems || getItems.length < getNum) {
         setDone(true)
@@ -40,7 +44,7 @@ const TagTracks = ({ tag }: ITagTracksProps) => {
     } finally {
       setLoading(false)
     }
-  }, [page, tag])
+  }, [page, tag, uid])
 
   useEffect(() => {
     getTaggedMusic()

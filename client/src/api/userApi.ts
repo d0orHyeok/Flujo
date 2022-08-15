@@ -15,6 +15,11 @@ export const getUserById = (userId: string) => {
   return Axios.get(`/api/auth/${userId}`)
 }
 
-export const searchUser = (keyward: string, skip = 0, take = 10) => {
-  return Axios.get(`/api/auth/search/${keyward}?skip=${skip}&take=${take}`)
+interface PagingParams {
+  skip: number
+  take: number
+}
+
+export const searchUser = (keyward: string, params?: PagingParams) => {
+  return Axios.get(`/api/auth/search/${keyward}`, { params })
 }

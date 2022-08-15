@@ -80,7 +80,7 @@ const ChartDetailPage = ({
   const getChartMusics = useCallback(async () => {
     setLoading(true)
     try {
-      const response = await getMusics(genre, date)
+      const response = await getMusics({ genre, date })
       const getItems = response?.data || []
       setMusics(getItems)
     } catch (error) {

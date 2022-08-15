@@ -119,12 +119,26 @@ export class MusicRepository extends Repository<Music> {
   }
 
   // Find
+  filterPrivate(query: SelectQueryBuilder<Music>, uid?: string) {
+    return query.andWhere(
+      new Brackets((qb) => {
+        const query = qb.where('music.status = :status', {
+          status: 'PUBLIC',
+        });
+
+        return !uid
+          ? query
+          : query.orWhere('music.status = :st AND music.userId = :uid', {
+              st: 'PRIVATE',
+              uid,
+            });
+      }),
+    );
+  }
+
   async getAllMusic(): Promise<Music[]> {
     try {
-      const musics = await this.musicSimpleQuery()
-        .where('music.status = :status', { status: 'PUBLIC' })
-        .getMany();
-      return musics;
+      return this.musicSimpleQuery().getMany();
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(error, 'Error to get musics');
@@ -133,12 +147,10 @@ export class MusicRepository extends Repository<Music> {
 
   async getRandomMusics() {
     try {
-      const ids = (
-        await this.createQueryBuilder('music')
-          .select('music.id')
-          .where('music.status = :status', { status: 'PUBLIC' })
-          .getMany()
-      ).map((value) => value.id);
+      const query = this.createQueryBuilder('music').select('music.id');
+      const ids = (await this.filterPrivate(query).getMany()).map(
+        (value) => value.id,
+      );
 
       const maxLength = ids.length < 10 ? ids.length : 10;
       const randomIds: number[] = [];
@@ -188,8 +200,9 @@ export class MusicRepository extends Repository<Music> {
     }
   }
 
-  async findMusicByIds(musicIds: number[]) {
-    return this.musicSimpleQuery().whereInIds(musicIds).getMany();
+  async findMusicByIds(musicIds: number[], uid?: string) {
+    const query = this.musicSimpleQuery().whereInIds(musicIds);
+    return this.filterPrivate(query, uid).getMany();
   }
 
   async findRelatedMusic(id: number, musicPagingDto: PagingDto) {
@@ -204,27 +217,31 @@ export class MusicRepository extends Repository<Music> {
         .where('music.id != :id', { id: music.id })
         .andWhere(
           new Brackets((qb) => {
-            let query = qb.where('music.title LIKE :title', {
+            let query = qb.where('LOWER(music.title) LIKE LOWER(:title)', {
               title: `%${title}%`,
             });
             if (album && album.length) {
-              query = query.orWhere('music.album LIKE :album', {
+              query = query.orWhere('LOWER(music.album) LIKE LOWER(:album)', {
                 album: `%${album}%`,
               });
             }
             if (artist && artist.length) {
-              query = query.orWhere(`music.artist LIKE :artist`, {
+              query = query.orWhere(`LOWER(music.artist) LIKE LOWER(:artist)`, {
                 artist: `%${artist}%`,
               });
             }
             if (nickname) {
-              query = query.orWhere(`user.nickname Like :nickname`, {
-                nickname: `%${nickname}%`,
-              });
+              query = query.orWhere(
+                `LOWER(user.nickname) Like LOWER(:nickname)`,
+                {
+                  nickname: `%${nickname}%`,
+                },
+              );
             }
             return query;
           }),
         )
+        .andWhere('music.status = :status', { status: 'PUBLIC' })
         .skip(skip)
         .take(take)
         .getMany();
@@ -236,19 +253,27 @@ export class MusicRepository extends Repository<Music> {
     }
   }
 
-  async findMusicsByUserId(userId: string, pagingDto: PagingDto) {
+  async findMusicsByUserId(userId: string, pagingDto: PagingDto, uid?: string) {
     const { skip, take } = pagingDto;
-    return this.musicDetailQuery()
-      .where('music.userId = :userId', { userId })
-      .orderBy('music.createdAt', 'DESC')
-      .skip(skip)
-      .take(take)
-      .getMany();
+
+    const query = this.musicDetailQuery().where('music.userId = :userId', {
+      userId,
+    });
+
+    try {
+      return this.filterPrivate(query, uid)
+        .orderBy('music.createdAt', 'DESC')
+        .skip(skip)
+        .take(take)
+        .getMany();
+    } catch (error) {
+      throw new InternalServerErrorException(error, 'Error to get musics');
+    }
   }
 
-  async findPopularMusicsByUserId(userId: string) {
+  async findPopularMusicsByUserId(userId: string, uid?: string) {
     const minCount = 9;
-    const query = this.musicDetailQuery()
+    let query = this.musicDetailQuery()
       .where('music.userId = :userId', {
         userId,
       })
@@ -263,39 +288,47 @@ export class MusicRepository extends Repository<Music> {
         },
         { minCount },
       );
-    return this.orderSelectQuery(query).take(10).getMany();
+    query = this.filterPrivate(query, uid);
+
+    try {
+      return this.orderSelectQuery(query).take(10).getMany();
+    } catch (error) {
+      throw new InternalServerErrorException(error, 'Error to get musics');
+    }
   }
 
-  async searchMusic(keyward: string, pagingDto: PagingDto) {
+  async searchMusic(keyward: string, pagingDto: PagingDto, uid?: string) {
     const { skip, take } = pagingDto;
 
     try {
-      const query = this.musicSimpleQuery()
+      let query = this.musicSimpleQuery()
         .where('LOWER(music.title) LIKE LOWER(:title)', {
           title: `%${keyward}%`,
         })
         .orWhere('LOWER(user.nickname) LIKE LOWER(:nickname)', {
           nickname: `%${keyward}%`,
         });
+      query = this.filterPrivate(query, uid);
       return this.orderSelectQuery(query).skip(skip).take(take).getMany();
     } catch (error) {
       throw new InternalServerErrorException(error, `Error to search musics`);
     }
   }
 
-  async findMusicsByTag(tag: string, pagingDto: PagingDto) {
+  async findMusicsByTag(tag: string, pagingDto: PagingDto, uid?: string) {
     const { skip, take } = pagingDto;
 
     const searchArray = [tag.toLowerCase()];
 
     try {
-      const query = this.musicSimpleQuery()
+      let query = this.musicSimpleQuery()
         .addSelect('music.genreLower')
         .addSelect('music.tagsLower')
         .where('music.genreLower IN (:genre) OR music.tagsLower IN (:tag)', {
           genre: searchArray,
           tag: searchArray,
         });
+      query = this.filterPrivate(query, uid);
       return this.orderSelectQuery(query).skip(skip).take(take).getMany();
     } catch (error) {
       throw new InternalServerErrorException(error, `Error to search musics`);
@@ -304,9 +337,11 @@ export class MusicRepository extends Repository<Music> {
 
   async findTrendingMusics(genre?: string, date?: number | 'week' | 'month') {
     try {
-      let query = this.musicSimpleQuery();
+      let query = this.musicSimpleQuery().where('music.status = :status', {
+        status: 'PUBLIC',
+      });
       query = genre
-        ? query.where('music.genre IN (:genre)', { genre: [genre] })
+        ? query.andWhere('music.genre IN (:genre)', { genre: [genre] })
         : query;
       return this.orderSelectQuery(query, date || 'week')
         .take(100)
@@ -318,9 +353,13 @@ export class MusicRepository extends Repository<Music> {
 
   async findNewReleaseMusics(genre?: string, date?: number | 'week' | 'month') {
     try {
-      let query = this.musicSimpleQuery().where('music.createdAt >= :date', {
-        date: this.getDate(date || 'week'),
-      });
+      let query = this.musicSimpleQuery()
+        .where('music.createdAt >= :date', {
+          date: this.getDate(date || 'week'),
+        })
+        .andWhere('music.status = :status', {
+          status: 'PUBLIC',
+        });
       query = genre
         ? query.andWhere('music.genre IN (:genre)', { genre: [genre] })
         : query;

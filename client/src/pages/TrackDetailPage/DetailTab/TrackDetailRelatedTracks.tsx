@@ -32,7 +32,8 @@ const TrackDetailRelatedTracks = ({
     setLoading(true)
     try {
       const skip = page * 15
-      const response = await findRelatedMusics(musicId, skip, skip + 15)
+      const take = skip + 15
+      const response = await findRelatedMusics(musicId, { skip, take })
       const getItems: IMusic[] = response.data
       if (!getItems || getItems.length < 15) {
         setDone(true)

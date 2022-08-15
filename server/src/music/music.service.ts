@@ -54,19 +54,16 @@ export class MusicService {
     return { ...music, user };
   }
 
-  async findMusicsByIds(musicIds: number[]) {
-    return this.musicRepository
-      .musicDetailQuery()
-      .whereInIds(musicIds)
-      .getMany();
+  async findMusicsByIds(musicIds: number[], uid?: string) {
+    return this.musicRepository.findMusicByIds(musicIds, uid);
   }
 
-  async findMusicsByUserId(userId: string, pagingDto: PagingDto) {
-    return this.musicRepository.findMusicsByUserId(userId, pagingDto);
+  async findMusicsByUserId(userId: string, pagingDto: PagingDto, uid?: string) {
+    return this.musicRepository.findMusicsByUserId(userId, pagingDto, uid);
   }
 
-  async findPopularMusicsByUserId(userId: string) {
-    return this.musicRepository.findPopularMusicsByUserId(userId);
+  async findPopularMusicsByUserId(userId: string, uid?: string) {
+    return this.musicRepository.findPopularMusicsByUserId(userId, uid);
   }
 
   async findRelatedMusic(id: number, pagingDto: PagingDto) {
@@ -74,12 +71,12 @@ export class MusicService {
     return this.musicRepository.findRelatedMusic(id, pagingDto);
   }
 
-  async searchMusic(keyward: string, pagingDto: PagingDto) {
-    return this.musicRepository.searchMusic(keyward, pagingDto);
+  async searchMusic(keyward: string, pagingDto: PagingDto, uid?: string) {
+    return this.musicRepository.searchMusic(keyward, pagingDto, uid);
   }
 
-  async findMusicsByTag(tag: string, pagingDto: PagingDto) {
-    return this.musicRepository.findMusicsByTag(tag, pagingDto);
+  async findMusicsByTag(tag: string, pagingDto: PagingDto, uid?: string) {
+    return this.musicRepository.findMusicsByTag(tag, pagingDto, uid);
   }
 
   async findTrendingMusics(genre?: string, date?: number | 'week' | 'month') {

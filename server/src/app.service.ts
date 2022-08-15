@@ -16,9 +16,13 @@ export class AppService {
     return 'Hello World!';
   }
 
-  async searchAll(keyward: string, pagingDto: PagingDto) {
+  async searchAll(keyward: string, pagingDto: PagingDto, uid?: string) {
     try {
-      const musics = await this.musicRepository.searchMusic(keyward, pagingDto);
+      const musics = await this.musicRepository.searchMusic(
+        keyward,
+        pagingDto,
+        uid,
+      );
       const users = await this.userRepository.searchUser(keyward, pagingDto);
       const playlists = await this.playlistRepository.searchPlaylist(
         keyward,

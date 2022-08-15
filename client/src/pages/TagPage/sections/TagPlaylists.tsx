@@ -2,6 +2,7 @@ import { getPlaylistsByTag } from '@api/playlistApi'
 import { IPlaylist } from '@appTypes/playlist.type'
 import LoadingArea from '@components/Loading/LoadingArea'
 import PlaylistCard from '@components/PlaylistCard/PlaylistCard'
+import { useAppSelector } from '@redux/hook'
 import React, { useCallback, useEffect, useState } from 'react'
 
 interface ITagPlaylistsProps {
@@ -9,6 +10,8 @@ interface ITagPlaylistsProps {
 }
 
 const TagPlaylists = ({ tag }: ITagPlaylistsProps) => {
+  const uid = useAppSelector((state) => state.user.userData?.id)
+
   const [playlists, setPlaylists] = useState<IPlaylist[]>([])
   const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -28,7 +31,8 @@ const TagPlaylists = ({ tag }: ITagPlaylistsProps) => {
     try {
       const getNum = 15
       const skip = page * getNum
-      const response = await getPlaylistsByTag(tag, skip, skip + getNum)
+      const take = skip + getNum
+      const response = await getPlaylistsByTag(tag, { skip, take, uid })
       const getItems = response.data
       console.log(getItems)
       if (!getItems || getItems.length < getNum) {
@@ -41,7 +45,7 @@ const TagPlaylists = ({ tag }: ITagPlaylistsProps) => {
     } finally {
       setLoading(false)
     }
-  }, [page, tag])
+  }, [page, tag, uid])
 
   useEffect(() => {
     getTaggedPlaylist()

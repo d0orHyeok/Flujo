@@ -1,7 +1,12 @@
 import Axios from './Axios'
 
-export const getUsersHistorys = (skip = 0, take = 10) => {
-  return Axios.get(`/api/history/user?skip=${skip}&take=${take}`)
+interface PagingParms {
+  skip: number
+  take: number
+}
+
+export const getUsersHistorys = (params?: PagingParms) => {
+  return Axios.get(`/api/history/user`, { params })
 }
 
 export const clearHistory = () => {

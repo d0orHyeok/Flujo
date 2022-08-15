@@ -33,7 +33,8 @@ const SearchPeople = ({ keyward }: ISearchPeopleProps) => {
     try {
       const getNum = 15
       const skip = page * getNum
-      const response = await searchUser(keyward, skip, skip + getNum)
+      const take = skip + getNum
+      const response = await searchUser(keyward, { skip, take })
       const getItems = response.data
       if (!getItems || getItems.length < getNum) {
         setDone(true)

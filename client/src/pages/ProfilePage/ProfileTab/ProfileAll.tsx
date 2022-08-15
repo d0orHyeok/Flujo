@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import * as CommonStyle from './common.style'
+import { useAppSelector } from '@redux/hook'
 
 const StyledDiv = styled.div`
   & .profileAll-item {
@@ -25,6 +26,8 @@ interface ProfileAllProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const ProfileAll = ({ user, editable, ...props }: ProfileAllProps) => {
+  const uid = useAppSelector((state) => state.user.userData?.id)
+
   const [items, setItems] = useState<any[]>(
     sortByCreatedAt([
       ...user.musics,
@@ -58,8 +61,8 @@ const ProfileAll = ({ user, editable, ...props }: ProfileAllProps) => {
     )
 
     try {
-      const res1 = await getMusicsByIds(musicIds)
-      const res2 = await getPlaylistsByIds(playlistIds)
+      const res1 = await getMusicsByIds(musicIds, { uid })
+      const res2 = await getPlaylistsByIds(playlistIds, { uid })
       const array = sortByCreatedAt([...res1.data, ...res2.data])
       setDisplayItems((prevState) => [...prevState, ...array])
     } catch (error: any) {
@@ -69,7 +72,7 @@ const ProfileAll = ({ user, editable, ...props }: ProfileAllProps) => {
     } finally {
       setLoading(false)
     }
-  }, [done, items, page])
+  }, [done, items, page, uid])
 
   const handleOnView = useCallback(
     (inView: boolean) => {

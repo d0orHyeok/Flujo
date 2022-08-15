@@ -71,7 +71,8 @@ const HistoryPage = () => {
     try {
       const getNum = 15
       const skip = page * getNum
-      const response = await getUsersHistorys(skip, skip + getNum)
+      const take = skip + getNum
+      const response = await getUsersHistorys({ skip, take })
       const getItems = response.data
       if (!getItems || getItems.length < getNum) {
         setDone(true)

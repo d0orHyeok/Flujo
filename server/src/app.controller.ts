@@ -15,8 +15,9 @@ export class AppController {
     @Param('keyward') keyward: string,
     @Query('skip') skip?: number,
     @Query('take') take?: number,
+    @Query('uid') uid?: string,
   ) {
     const pagingDto = { take: take || 10, skip: skip || 0 };
-    return this.appService.searchAll(keyward, pagingDto);
+    return this.appService.searchAll(keyward, pagingDto, uid);
   }
 }

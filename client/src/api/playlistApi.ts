@@ -4,30 +4,46 @@ export const getPlaylistByPermalink = (userId: string, permalink: string) => {
   return Axios.get(`/api/playlist/permalink/${userId}/${permalink}`)
 }
 
+interface PagingWithUserIdParams {
+  skip: number
+  take: number
+  uid?: string
+}
+
 export const findPlaylistsContainsMusic = (
   musicId: number,
-  skip = 0,
-  take = 15
+  params?: PagingWithUserIdParams
 ) => {
-  return Axios.get(
-    `/api/playlist/playlists/detail/${musicId}?skip=${skip}&take=${take}`
-  )
+  return Axios.get(`/api/playlist/playlists/detail/${musicId}`, { params })
 }
 
-export const getPlaylistsByIds = (playlistIds: number[]) => {
-  return Axios.get(`/api/playlist/ids?ids=${playlistIds.join(',')}`)
+export const getPlaylistsByIds = (
+  playlistIds: number[],
+  params?: { uid?: string }
+) => {
+  const ids = playlistIds.join(',')
+  return Axios.get(`/api/playlist/ids?ids=${ids}`, { params })
 }
 
-export const getUserPlaylists = (userId: string, skip = 0, take = 10) => {
-  return Axios.get(`/api/playlist/user/${userId}?skip=${skip}&take=${take}`)
+export const getUserPlaylists = (
+  userId: string,
+  params?: PagingWithUserIdParams
+) => {
+  return Axios.get(`/api/playlist/user/${userId}`, { params })
 }
 
-export const searchPlaylist = (keyward: string, skip = 0, take = 10) => {
-  return Axios.get(`/api/playlist/search/${keyward}?skip=${skip}&take=${take}`)
+export const searchPlaylist = (
+  keyward: string,
+  params?: PagingWithUserIdParams
+) => {
+  return Axios.get(`/api/playlist/search/${keyward}`, { params })
 }
 
-export const getPlaylistsByTag = (tag: string, skip = 0, take = 10) => {
-  return Axios.get(`/api/playlist/tag/${tag}?skip=${skip}&take=${take}`)
+export const getPlaylistsByTag = (
+  tag: string,
+  params?: PagingWithUserIdParams
+) => {
+  return Axios.get(`/api/playlist/tag/${tag}`, { params })
 }
 
 export const updatePlaylistData = (playlistId: number, body: any) => {

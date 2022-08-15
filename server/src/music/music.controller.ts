@@ -72,9 +72,9 @@ export class MusicController {
   }
 
   @Get('/ids')
-  getMusicsByIds(@Query('ids') ids: string) {
+  getMusicsByIds(@Query('ids') ids: string, @Query('uid') uid?: string) {
     const musicIds = ids.split(',').map((v) => Number(v));
-    return this.musicService.findMusicsByIds(musicIds);
+    return this.musicService.findMusicsByIds(musicIds, uid);
   }
 
   @Get('/permalink/:userId/:permalink')
@@ -96,8 +96,11 @@ export class MusicController {
   }
 
   @Get('/popular/:userId')
-  getPopularMusics(@Param('userId') userId: string) {
-    return this.musicService.findPopularMusicsByUserId(userId);
+  getPopularMusics(
+    @Param('userId') userId: string,
+    @Query('uid') uid?: string,
+  ) {
+    return this.musicService.findPopularMusicsByUserId(userId, uid);
   }
 
   @Get('/user/:userId')
@@ -105,9 +108,10 @@ export class MusicController {
     @Param('userId') userId: string,
     @Query('skip') skip?: number,
     @Query('take') take?: number,
+    @Query('uid') uid?: string,
   ) {
     const pagingDto = { take: take || 10, skip: skip || 0 };
-    return this.musicService.findMusicsByUserId(userId, pagingDto);
+    return this.musicService.findMusicsByUserId(userId, pagingDto, uid);
   }
 
   @Get('/search/:keyward')
@@ -115,9 +119,10 @@ export class MusicController {
     @Param('keyward') keyward: string,
     @Query('skip') skip?: number,
     @Query('take') take?: number,
+    @Query('uid') uid?: string,
   ) {
     const pagingDto = { take: take || 10, skip: skip || 0 };
-    return this.musicService.searchMusic(keyward, pagingDto);
+    return this.musicService.searchMusic(keyward, pagingDto, uid);
   }
 
   @Get('/tag/:tag')
@@ -125,9 +130,10 @@ export class MusicController {
     @Param('tag') tag: string,
     @Query('skip') skip?: number,
     @Query('take') take?: number,
+    @Query('uid') uid?: string,
   ) {
     const pagingDto = { take: take || 10, skip: skip || 0 };
-    return this.musicService.findMusicsByTag(tag, pagingDto);
+    return this.musicService.findMusicsByTag(tag, pagingDto, uid);
   }
 
   @Get('/trend')

@@ -4,12 +4,15 @@ import { IMusic } from '@appTypes/music.type'
 import MusicCard from '@components/MusicCard/MusicCard'
 import NoSearchResult from './NoSearchResult'
 import LoadingArea from '@components/Loading/LoadingArea'
+import { useAppSelector } from '@redux/hook'
 
 interface ISearchTracksProps {
   keyward: string
 }
 
 const SearchTracks = ({ keyward }: ISearchTracksProps) => {
+  const uid = useAppSelector((state) => state.user.userData?.id)
+
   const [musics, setMusics] = useState<IMusic[]>([])
   const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -33,7 +36,8 @@ const SearchTracks = ({ keyward }: ISearchTracksProps) => {
     try {
       const getNum = 15
       const skip = page * getNum
-      const response = await searchMusic(keyward, skip, skip + getNum)
+      const take = skip + getNum
+      const response = await searchMusic(keyward, { skip, take, uid })
       const getItems = response.data
       if (!getItems || getItems.length < getNum) {
         setDone(true)
@@ -45,7 +49,7 @@ const SearchTracks = ({ keyward }: ISearchTracksProps) => {
     } finally {
       setLoading(false)
     }
-  }, [done, keyward, page])
+  }, [done, keyward, page, uid])
 
   useEffect(() => {
     getMusicByKeyward()

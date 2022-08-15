@@ -88,7 +88,9 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   async getUserData(@GetUser() user: User) {
     const historys = await this.authService.getRecentHistory(user.id);
-    return { ...user, historys };
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { hashedRefreshToken, password, ...userData } = user;
+    return { ...userData, historys };
   }
 
   @Get('/search/:keyward')

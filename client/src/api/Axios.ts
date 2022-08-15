@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from 'axios'
+import qs from 'qs'
 
 const Axios: AxiosInstance = axios.create({
   baseURL:
@@ -7,6 +8,10 @@ const Axios: AxiosInstance = axios.create({
       : `${process.env.REACT_APP_API_URL}`,
   withCredentials: true,
 })
+
+Axios.defaults.paramsSerializer = (params) => {
+  return qs.stringify(params)
+}
 
 Axios.interceptors.response.use(
   (response) => {

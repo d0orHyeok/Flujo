@@ -2,7 +2,7 @@ import { UserRepository } from 'src/auth/user.repository';
 import { UpdatePlaylistDto } from './dto/updatePlaylistDto';
 import { CreatePlaylistDto } from './dto/createPlaylistDto';
 import { MusicRepository } from './../music/music.repository';
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/entities/user.entity';
 import { PlaylistRepository } from './playlist.repository';
@@ -37,11 +37,15 @@ export class PlaylistService {
     return { ...playlist, user };
   }
 
-  async findPlaylistsByIds(playlistIds: number[]) {
-    return this.playlistRepository
+  async findPlaylistsByIds(playlistIds: number[], uid: string) {
+    const query = this.playlistRepository
       .getDetailPlaylistQuery()
-      .whereInIds(playlistIds)
-      .getMany();
+      .whereInIds(playlistIds);
+    try {
+      return this.playlistRepository.filterPrivate(query, uid).getMany();
+    } catch (error) {
+      throw new InternalServerErrorException(error, 'Error to find playlists');
+    }
   }
 
   async findPlaylistByPermalink(userId: string, permalink: string) {
@@ -53,20 +57,32 @@ export class PlaylistService {
     return { ...playlist, user };
   }
 
-  async findDetailPlaylistsById(id: number, pagingDto: PagingDto) {
-    return this.playlistRepository.findDetailPlaylistsById(id, pagingDto);
+  async findDetailPlaylistsById(
+    id: number,
+    pagingDto: PagingDto,
+    uid?: string,
+  ) {
+    return this.playlistRepository.findDetailPlaylistsById(id, pagingDto, uid);
   }
 
-  async findPlaylistsByUserId(userId: string, pagingDto: PagingDto) {
-    return this.playlistRepository.findPlaylistsByUserId(userId, pagingDto);
+  async findPlaylistsByUserId(
+    userId: string,
+    pagingDto: PagingDto,
+    uid?: string,
+  ) {
+    return this.playlistRepository.findPlaylistsByUserId(
+      userId,
+      pagingDto,
+      uid,
+    );
   }
 
-  async searchPlaylist(keyward: string, pagingDto: PagingDto) {
-    return this.playlistRepository.searchPlaylist(keyward, pagingDto);
+  async searchPlaylist(keyward: string, pagingDto: PagingDto, uid?: string) {
+    return this.playlistRepository.searchPlaylist(keyward, pagingDto, uid);
   }
 
-  async findPlaylistsByTag(tag: string, pagingDto: PagingDto) {
-    return this.playlistRepository.findPlaylistsByTag(tag, pagingDto);
+  async findPlaylistsByTag(tag: string, pagingDto: PagingDto, uid?: string) {
+    return this.playlistRepository.findPlaylistsByTag(tag, pagingDto, uid);
   }
 
   async updatePlaylistInfo(

@@ -8,12 +8,15 @@ import { IPlaylist } from '@appTypes/playlist.type'
 import MusicCard from '@components/MusicCard/MusicCard'
 import PlaylistCard from '@components/PlaylistCard/PlaylistCard'
 import Axios from '@api/Axios'
+import { useAppSelector } from '@redux/hook'
 
 interface ISearchAllProps {
   keyward: string
 }
 
 const SearchAll = ({ keyward }: ISearchAllProps) => {
+  const uid = useAppSelector((state) => state.user.userData?.id)
+
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(0)
   const [done, setDone] = useState(false)
@@ -35,9 +38,10 @@ const SearchAll = ({ keyward }: ISearchAllProps) => {
     try {
       const getNum = 8
       const skip = page * getNum
-      const res = await Axios.get(
-        `/api/search/${keyward}?skip=${skip}&take=${skip + getNum}`
-      )
+      const take = skip + getNum
+      const res = await Axios.get(`/api/search/${keyward}`, {
+        params: { skip, take, uid },
+      })
 
       const getItems = res.data
 
@@ -52,7 +56,7 @@ const SearchAll = ({ keyward }: ISearchAllProps) => {
     } finally {
       setLoading(false)
     }
-  }, [done, keyward, page])
+  }, [done, keyward, page, uid])
 
   useEffect(() => {
     getItems()

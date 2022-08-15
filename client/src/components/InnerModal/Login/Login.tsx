@@ -116,7 +116,7 @@ const Login = ({ onClose }: LoginProps) => {
             <CheckBox
               id="saveID"
               label="아이디저장"
-              checked={saveID}
+              checked={saveID || false}
               onChange={handleChangeSaveID}
             />
             <S.LoginButton onClick={handleClickLogin}>로그인</S.LoginButton>
