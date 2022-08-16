@@ -1,5 +1,5 @@
 {
-  "name": "flujo",
+  "name": "wave",
   "description": "Music Streamming App",
   "version": "0.1.0",
   "private": false,
@@ -11,6 +11,14 @@
     "typescript"
   ],
   "author": "d0orhyeok <d0oR.hyeok@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/d0orHyeok/Wave/issues"
+  },
+  "homepage": "https://github.com/d0orHyeok/Wave#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/d0orHyeok/Wave.git"
+  },
   "proxy": "http://localhost:3000",
   "dependencies": {
     "@emotion/react": "^11.8.2",
