@@ -7,6 +7,7 @@ import { useAlert } from '@redux/context/alertProvider'
 import { userSignUp } from '@api/userApi'
 import { Helmet } from 'react-helmet-async'
 import CheckBox from '@components/Common/Checkbox'
+import RegisterLoading from './RegisterLoading'
 
 const RegisterPage = () => {
   const navigate = useNavigate()
@@ -31,6 +32,7 @@ const RegisterPage = () => {
     term1: false,
     term2: false,
   })
+  const [loading, setLoading] = useState(false)
 
   const { username, password, passwordConfirmed, email, nickname } =
     registerInput
@@ -74,7 +76,7 @@ const RegisterPage = () => {
     setInputValidate({ ...inputValidate, [id]: validate })
   }
 
-  const handleClickRegister = () => {
+  const handleClickRegister = async () => {
     // 회원가입에 필요한 정보를 확인하고 올바르면 회원가입을 요청
 
     // 입력한 정보가 올바른지 확인하고 바르지 않으면 focus
@@ -116,23 +118,26 @@ const RegisterPage = () => {
       email,
       nickname,
     }
-    userSignUp(registerInfo)
-      .then(() => {
-        console.log('Register Success')
-        navigate('/')
-        openAlert('Successfully sign up ', { severity: 'success' })
-      })
-      .catch((err) => {
-        if (err.response.status === 409) {
-          setRegisterInput({ ...registerInput, username: '' })
-          setInputValidate({ ...inputValidate, username: -1 })
-          document.getElementById('username')?.focus()
-          alert('이미 존재하는 아이디입니다.')
-        } else {
-          alert('회원가입 실패')
-        }
-        console.log('Register Error', err)
-      })
+
+    try {
+      setLoading(true)
+      await userSignUp(registerInfo)
+      console.log('Register Success')
+      navigate('/')
+      openAlert('Successfully sign up ', { severity: 'success' })
+    } catch (error: any) {
+      if (error?.response?.status === 409) {
+        setRegisterInput({ ...registerInput, username: '' })
+        setInputValidate({ ...inputValidate, username: -1 })
+        document.getElementById('username')?.focus()
+        alert('이미 존재하는 아이디입니다.')
+      } else {
+        alert('회원가입 실패')
+      }
+      console.error('Register Error', error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
@@ -140,6 +145,7 @@ const RegisterPage = () => {
       <Helmet>
         <title>Sign Up | Wave</title>
       </Helmet>
+      {!loading ? <></> : <RegisterLoading />}
       <S.Wrapper>
         <h1 className="register-title">Sign Up</h1>
         <S.InputArea>
