@@ -19,7 +19,9 @@ const NewDetailPage = () => {
     } else {
       const find = genreList.find(
         (list) =>
-          list.keywords.findIndex((keyward) => genre?.includes(keyward)) !== -1
+          list.keywords.findIndex((keyward) =>
+            genre?.toLowerCase().includes(keyward)
+          ) !== -1
       )
       if (!find) {
         navigate('/')
