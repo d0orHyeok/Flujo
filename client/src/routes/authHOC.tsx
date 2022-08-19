@@ -1,7 +1,8 @@
-import React, { useCallback, useLayoutEffect } from 'react'
+import React, { useCallback, useLayoutEffect, useState } from 'react'
 import { useAppDispatch } from '@redux/hook'
 import { userAuth } from '@redux/thunks/userThunks'
 import { useNavigate } from 'react-router-dom'
+import Loading from '@components/Loading/Loading'
 
 const withUser = <P extends object>(
   SpecificComponent: React.ComponentType<P>,
@@ -10,6 +11,7 @@ const withUser = <P extends object>(
   function AuthenticationCheck(props: P) {
     const dispatch = useAppDispatch()
     const navigate = useNavigate()
+    const [loading, setLoading] = useState(true)
 
     const authCheck = useCallback(async () => {
       if (!dispatch || !navigate) {
@@ -27,13 +29,15 @@ const withUser = <P extends object>(
           navigate('/')
         }
       }
+
+      setLoading(false)
     }, [dispatch, navigate])
 
     useLayoutEffect(() => {
       authCheck()
     }, [authCheck])
 
-    return <SpecificComponent {...props} />
+    return loading ? <Loading /> : <SpecificComponent {...props} />
   }
   return React.createElement(AuthenticationCheck)
 }

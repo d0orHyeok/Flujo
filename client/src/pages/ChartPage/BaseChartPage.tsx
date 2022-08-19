@@ -35,7 +35,6 @@ const BaseChartPage = ({
   const [page, setPage] = useState(0)
   const [done, setDone] = useState(false)
   const [loading, setLoading] = useState(false)
-
   const [charts, setCharts] = useState<IChart[]>([])
 
   const toggleExpanded = useCallback(() => {
@@ -189,7 +188,7 @@ const BaseChartPage = ({
             {charts.map((chart, index) => {
               if (!chart.musics.length) {
                 // 차트에 음악이 없다면 넘어간다
-                return <></>
+                return
               }
 
               // 장르필터에 체크된 항목만 보여지도록 한다
@@ -197,7 +196,7 @@ const BaseChartPage = ({
                 (item) => item.label === chart.genre
               )
               if (findIndex !== -1 && !genreCheck[findIndex]) {
-                return <></>
+                return
               }
 
               return (
