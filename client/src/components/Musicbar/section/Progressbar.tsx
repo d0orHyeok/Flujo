@@ -27,10 +27,7 @@ const Progressbar = () => {
   const currentMusic = useAppSelector((state) => state.player.currentMusic)
   const userId = useAppSelector((state) => state.user.userData?.id)
 
-  const { percent } = progress
-  const [start, setStart] = useState(false) // 재생을 시작했는지 확인하는 변수
-  const [count, setCount] = useState(false) // 재생횟수를 증가시켰는지 확인하는 변수
-  const [startPercent, setStartPercent] = useState(0) // 언제부터 재생을 시작했는지 확인
+  const [count, setCount] = useState({ listen: false, countMusicId: -1 }) // 재생횟수를 증가시켰는지 확인하는 변수
 
   const [progressHover, setProgressHover] = useState({
     hover: '',
@@ -63,11 +60,6 @@ const Progressbar = () => {
 
     const changedPercent = (currentTime / progress.duration) * 100
 
-    if (!count && start) {
-      // 지금까지 들은 시간을 계산하여 startPercent 재설정
-      setStartPercent(changedPercent - (percent - startPercent))
-    }
-
     dispatch(
       setProgress({
         currentTime,
@@ -84,59 +76,51 @@ const Progressbar = () => {
     }
   }
 
-  const triggerCount = useCallback(() => {
+  const triggerCount = useCallback(async (musicId: number, userId?: string) => {
     // 서버에 음악의 재생횟수를 증가하도록 요청
-    if (!currentMusic?.id) {
-      return
-    }
     const body = {
-      musicId: currentMusic.id,
+      musicId,
       userId,
     }
-
-    createHistory(body)
-      .then(() => setStartPercent(100))
-      .catch(() => setStartPercent(100))
-      .finally(() => setCount(true))
-  }, [currentMusic?.id, userId])
+    try {
+      createHistory(body)
+      setCount({ listen: true, countMusicId: musicId })
+    } catch (error) {
+      console.error(error)
+    }
+  }, [])
 
   useEffect(() => {
-    if (!start && isPlay) {
-      setStart(true)
-      setStartPercent(percent)
-    }
-    if (!isPlay) {
-      setStart(false)
-      setStartPercent(100)
-    }
-  }, [isPlay, percent, start])
+    // 음악 재생을 멈추지않고 50% 들으면 재생횟수를 증가시키도록한다.
+    if (currentMusic) {
+      const { duration, id } = currentMusic
+      const triggerTime = Math.floor((duration / 2) * 1000) // (음악 재생시간의 절반) ms
+      const timeout = setTimeout(() => triggerCount(id, userId), triggerTime)
 
-  useEffect(() => {
-    if (start && !count) {
-      // 아직 카운트를 증가시키지 않았고 재생시간을 확인중일 때
-      if (percent - startPercent >= 66) {
-        // 66%이상을 들었으면 재생횟수를 증가
-        triggerCount()
+      if ((count.countMusicId === id && count.listen) || !isPlay) {
+        // 일시정지 상태이거나 이미 한번 재생횟수를 증가시켰으면 취소
+        clearTimeout(timeout)
+      }
+
+      return () => {
+        clearTimeout(timeout)
       }
     }
-  }, [count, percent, start, startPercent, triggerCount])
+  }, [count, currentMusic, isPlay, triggerCount, userId])
 
   useEffect(() => {
-    if (repeat === 'one' && count) {
-      // 반복재생이고 한번 재생횟수 증가를 마쳤을 때
-      if (percent < 1) {
-        // 다시 재생하는 경우라면 재생횟수를 더 증가시킬 수 있도록 설정
-        setCount(false)
-        setStartPercent(percent)
+    if (currentMusic?.id) {
+      if (count.countMusicId !== currentMusic.id) {
+        // 재생중인 음악이 바뀌면 count 변수를 새로 설정해준다
+        setCount({ listen: false, countMusicId: currentMusic.id })
+      } else {
+        if (repeat === 'one' && progress.percent < 1 && count.listen) {
+          // 반복재생인 경우 지속적으로 재생횟수를 증가시킬 수 있도록 설정
+          setCount({ listen: false, countMusicId: currentMusic.id })
+        }
       }
     }
-  }, [count, percent, repeat])
-
-  useEffect(() => {
-    setCount(false)
-    setStartPercent(0)
-    setStart(false)
-  }, [currentMusic])
+  }, [count, currentMusic?.id, progress.percent, repeat])
 
   return (
     <>
