@@ -61,6 +61,7 @@ module.exports = {
     new Dotenv(),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, '..', './src/index.html'),
+      favicon: path.resolve(__dirname, '..', './public/favicon.ico'),
     }),
     new webpack.ProvidePlugin({
       Buffer: ['buffer', 'Buffer'],
