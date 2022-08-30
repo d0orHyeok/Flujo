@@ -80,7 +80,13 @@ const ProfileSide = ({ user }: ProfileSideProps) => {
           </Link>
         </S.NumBoxItem>
       </S.NumBox>
-      {user.description ? <S.DescBox>{user.description}</S.DescBox> : <></>}
+      {user.description ? (
+        <S.DescBox>
+          <pre>{user.description}</pre>
+        </S.DescBox>
+      ) : (
+        <></>
+      )}
       {userLikes.length ? (
         <>
           <S.BoxTitle>
