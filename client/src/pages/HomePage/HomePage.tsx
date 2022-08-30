@@ -1,7 +1,7 @@
 import { IMusic, IUser } from '@appTypes/types.type.'
 import * as S from './HomePage.style'
 import React, { useCallback, useState, useEffect } from 'react'
-import { findRelatedMusics, getAllMusic } from '@api/musicApi'
+import { getAllMusic } from '@api/musicApi'
 import { Helmet } from 'react-helmet-async'
 import { ISetsCardProps } from '@components/SetsCard/SetsCard'
 import SmallCardSlider from '@components/SmallCardSlider/SmallCardSlider'
@@ -19,16 +19,13 @@ const HomePage = () => {
   const historys = useAppSelector(
     (state) => state.user.userData?.historys || []
   )
-  const likeMusics = useAppSelector(
-    (state) => state.user.userData?.likeMusics || []
-  )
 
   const [loading, setLoading] = useState(true)
-  const [newReleaseItems, setNewReleaseItems] = useState<ISetsCardProps[]>([])
-  const [trendItems, setTrendItems] = useState<ISetsCardProps[]>([])
-  const [relatedMusics, setRelatedMusics] = useState<IMusic[]>([])
-  const [randomMusics, setRandomMusics] = useState<IMusic[]>([])
-  const [randomUsers, setRandomUsers] = useState<IUser[]>([])
+  const [newReleaseItems, setNewReleaseItems] = useState<ISetsCardProps[]>()
+  const [trendItems, setTrendItems] = useState<ISetsCardProps[]>()
+  const [relatedMusics, setRelatedMusics] = useState<IMusic[]>()
+  const [randomMusics, setRandomMusics] = useState<IMusic[]>()
+  const [randomUsers, setRandomUsers] = useState<IUser[]>()
 
   const getChartItems = useCallback(async (option: 'trend' | 'newrelease') => {
     try {
@@ -53,41 +50,25 @@ const HomePage = () => {
     }
   }, [])
 
+  const getAllItems = useCallback(async () => {
+    const nrItems = await getChartItems('newrelease')
+    const tItems = await getChartItems('trend')
+    setNewReleaseItems(nrItems)
+    setTrendItems(tItems)
+  }, [getChartItems])
+
   const getRelated = useCallback(async () => {
     if (!uid) {
-      return
+      return setRelatedMusics([])
     }
     try {
-      const items: IMusic[] = []
-      if (likeMusics?.length) {
-        await Promise.all(
-          likeMusics.slice(0, 3).map(async (music) => {
-            const res = await findRelatedMusics(music.id, {
-              skip: 0,
-              take: 5,
-            })
-            items.push(...res.data)
-          })
-        )
-      }
-      if (history?.length) {
-        await Promise.all(
-          historys.slice(0, 3).map(async (history) => {
-            const res = await findRelatedMusics(history.music.id, {
-              skip: 0,
-              take: 5,
-            })
-            items.push(...res.data)
-          })
-        )
-      }
-
-      setRelatedMusics(items.sort((a, b) => b.count - a.count))
+      const response = await Axios.get('/api/music/related')
+      setRelatedMusics(response.data)
     } catch (error) {
       console.error(error)
       setRelatedMusics([])
     }
-  }, [historys, likeMusics, uid])
+  }, [uid])
 
   const getRandomMusics = useCallback(async () => {
     try {
@@ -109,13 +90,17 @@ const HomePage = () => {
     }
   }, [])
 
-  const getAllItems = useCallback(async () => {
-    const nrItems = await getChartItems('newrelease')
-    const tItems = await getChartItems('trend')
-    setNewReleaseItems(nrItems)
-    setTrendItems(tItems)
-    setLoading(false)
-  }, [getChartItems])
+  const checkLoading = useCallback(() => {
+    if (
+      Boolean(newReleaseItems) &&
+      Boolean(trendItems) &&
+      Boolean(randomMusics) &&
+      Boolean(randomUsers) &&
+      Boolean(relatedMusics)
+    ) {
+      setLoading(false)
+    }
+  }, [newReleaseItems, randomMusics, randomUsers, relatedMusics, trendItems])
 
   useEffect(() => {
     getAllItems()
@@ -133,6 +118,10 @@ const HomePage = () => {
     getRandomUsers()
   }, [getRandomUsers])
 
+  useEffect(() => {
+    checkLoading()
+  }, [checkLoading])
+
   return loading ? (
     <Loading />
   ) : (
@@ -142,7 +131,7 @@ const HomePage = () => {
       </Helmet>
       <S.Wrapper>
         {/* 인기 차트 */}
-        {trendItems.length ? (
+        {trendItems?.length ? (
           <S.Container>
             <h2 className="section-title">Charts: Top 100</h2>
             <div className="section-description">
@@ -154,7 +143,7 @@ const HomePage = () => {
           <></>
         )}
         {/* 최신 차트 */}
-        {newReleaseItems.length ? (
+        {newReleaseItems?.length ? (
           <S.Container>
             <h2 className="section-title">Charts: New Release</h2>
             <div className="section-description">
@@ -166,7 +155,7 @@ const HomePage = () => {
           <></>
         )}
         {/* 랜덤 추천 */}
-        {randomUsers.length ? (
+        {randomUsers?.length ? (
           <S.Container>
             <h2 className="section-title">Artists You Should Know</h2>
             <div className="section-description">
@@ -181,7 +170,7 @@ const HomePage = () => {
         ) : (
           <></>
         )}
-        {randomMusics.length ? (
+        {randomMusics?.length ? (
           <S.Container>
             <h2 className="section-title">Recommended tracks for you</h2>
             <div className="section-description">
@@ -197,7 +186,7 @@ const HomePage = () => {
           <></>
         )}
         {/* 재생기록 */}
-        {historys?.length ? (
+        {historys && historys?.length ? (
           <S.Container>
             <h2 className="section-title">Listening history</h2>
             <div className="section-description">
@@ -213,7 +202,7 @@ const HomePage = () => {
           <></>
         )}
         {/* 연관 음악 */}
-        {relatedMusics.length ? (
+        {relatedMusics?.length ? (
           <S.Container>
             <h2 className="section-title">More of what you like</h2>
             <div className="section-description">

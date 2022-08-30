@@ -9,9 +9,13 @@ interface IUserLoginBody {
 
 export const userLogin = createAsyncThunk(
   'LOGIN',
-  async (loginBody: IUserLoginBody) => {
-    const response = await Axios.post('/api/auth/signin', loginBody)
-    return response.data.accessToken
+  async (loginBody: IUserLoginBody, { rejectWithValue }) => {
+    try {
+      const response = await Axios.post('/api/auth/signin', loginBody)
+      return response.data.accessToken
+    } catch (error: any) {
+      return rejectWithValue(error?.response?.status)
+    }
   }
 )
 

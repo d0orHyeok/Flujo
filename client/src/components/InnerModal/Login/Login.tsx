@@ -60,19 +60,36 @@ const Login = ({ onClose }: LoginProps) => {
   }
 
   const handleClickLogin = async () => {
-    if (saveID) {
-      window.localStorage.setItem('wave_id', inputValue.username)
+    const { username, password } = inputValue
+
+    if (username.length < 6 || username.length > 20) {
+      document.getElementById('username')?.focus()
+      return alert('6~20 자 사이의 아이디를 입력해주세요.')
     }
+
+    const pwRegex = /(?=.*[a-z|A-Z])(?=.*[0-9])[a-zA-Z0-9#?!@$%^&*-]{6,20}$/
+
+    if (password.length < 6 || password.length > 20) {
+      document.getElementById('password')?.focus()
+      return alert('6~20 자 사이의 비밀번호를 입력해주세요.')
+    }
+    if (!pwRegex.test(password)) {
+      document.getElementById('password')?.focus()
+      return alert('비밀번호는 영문, 숫자 ,특수문자만 이용가능합니다.')
+    }
+
+    if (saveID) {
+      window.localStorage.setItem('wave_id', username)
+    }
+
     try {
       await dispatch(userLogin(inputValue)).unwrap()
-      console.log('Login Success')
       closeModal()
       await dispatch(userAuth())
       openAlert('로그인 되었습니다.', { severity: 'success' })
-    } catch (error) {
-      console.log('Login Fail', error)
-      if (error !== 'Auth Error') {
-        const target = error === 'Wrong Password' ? 'password' : 'username'
+    } catch (status: any) {
+      if (status !== 500) {
+        const target = status === 401 ? 'password' : 'username'
         setIsError({ ...isError, [target]: true })
         document.getElementById(target)?.focus()
       }
