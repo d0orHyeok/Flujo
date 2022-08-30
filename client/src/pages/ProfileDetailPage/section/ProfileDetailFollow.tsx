@@ -196,7 +196,9 @@ const ProfileDetailFollow = ({
       <LoadingArea loading={loading} hide={done} onInView={handleOnView} />
     </StyledUl>
   ) : (
-    <NoItem>asdfasdfs</NoItem>
+    <NoItem>{`'${
+      user.nickname || user.username
+    }' has no ${option} yet`}</NoItem>
   )
 }
 

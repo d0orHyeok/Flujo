@@ -67,7 +67,7 @@ const ProfileDetailLikes = ({ user, ...props }: IProfileDetailLikesProps) => {
     getMusics()
   }, [getMusics])
 
-  return !musics.length ? (
+  return musics.length ? (
     <>
       <div {...props}>
         {musics.map((music, index) => (
