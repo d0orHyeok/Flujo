@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Route, Routes, useLocation, useNavigate } from 'react-router-dom'
+import { Route, Routes, useLocation } from 'react-router-dom'
 import HomePage from '@pages/HomePage/HomePage'
 import RegisterPage from '@pages/RegisterPage/RegisterPage'
 import withUser from './authHOC'
@@ -23,14 +23,11 @@ import NewDetailPage from '@pages/ChartDetailPage/NewDetailPage'
 const userDetailPage = ['likes', 'following', 'followers', 'comments']
 
 const Router = () => {
-  const location = useLocation()
-  const navigate = useNavigate()
+  const loacation = useLocation()
 
   useEffect(() => {
-    if (location.pathname === '/') {
-      navigate('/home')
-    }
-  }, [navigate, location.pathname])
+    window.scrollTo(0, 0)
+  }, [loacation.pathname])
 
   return (
     <Routes>
