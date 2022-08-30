@@ -7,7 +7,7 @@ import { useAlert } from '@redux/context/alertProvider'
 import { userSignUp } from '@api/userApi'
 import { Helmet } from 'react-helmet-async'
 import CheckBox from '@components/Common/Checkbox'
-import RegisterLoading from './RegisterLoading'
+import LoadingPage from '@components/Loading/LoadingPage'
 
 const RegisterPage = () => {
   const navigate = useNavigate()
@@ -145,7 +145,7 @@ const RegisterPage = () => {
       <Helmet>
         <title>Sign Up | Wave</title>
       </Helmet>
-      {!loading ? <></> : <RegisterLoading />}
+      {!loading ? <></> : <LoadingPage />}
       <S.Wrapper>
         <h1 className="register-title">Sign Up</h1>
         <S.InputArea>

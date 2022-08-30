@@ -15,7 +15,7 @@ const StyledContainer = styled.div`
   justify-content: center;
 `
 
-const RegisterLoading = () => {
+const LoadingPage = () => {
   return (
     <StyledContainer>
       <LoadingBar />
@@ -23,4 +23,4 @@ const RegisterLoading = () => {
   )
 }
 
-export default RegisterLoading
+export default LoadingPage

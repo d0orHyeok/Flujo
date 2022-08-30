@@ -13,6 +13,7 @@ import { useNavigate } from 'react-router-dom'
 import { uploadMusic } from '@api/musicApi'
 import { IExtractMetadata } from '@components/ExtractMusic/extractMetadata.types'
 import ExtractMusicNav from '@components/ExtractMusic/ExtractMusicNav/ExtractMusicNav'
+import LoadingPage from '@components/Loading/LoadingPage'
 
 interface UploadMusicProps {
   files?: FileList
@@ -30,6 +31,7 @@ const UploadMusic = ({ files, resetFiles }: UploadMusicProps) => {
 
   const [editNavIndex, setEditNavIndex] = useState(0)
   const [musicMetadata, setMusicMetadata] = useState<IExtractMetadata>()
+  const [loading, setLoading] = useState(false)
 
   const uploadFile = async () => {
     if (!files || !musicMetadata) {
@@ -47,6 +49,7 @@ const UploadMusic = ({ files, resetFiles }: UploadMusicProps) => {
       return
     }
     openAlert('업로드를 시작합니다.', { severity: 'info' })
+    setLoading(true)
 
     const { cover, ...musicData } = basicInfoData
     const { title, genre, description } = musicData
@@ -71,6 +74,7 @@ const UploadMusic = ({ files, resetFiles }: UploadMusicProps) => {
     let reset = false
     try {
       await uploadMusic(formData)
+      setLoading(false)
       openAlert('업로드에 성공하였습니다.', { severity: 'success' })
       if (window.confirm('계속해서 업로드 하시겠습니까?')) {
         reset = true
@@ -79,6 +83,7 @@ const UploadMusic = ({ files, resetFiles }: UploadMusicProps) => {
         navigate('/')
       }
     } catch (error) {
+      setLoading(false)
       reset = false
       console.error(error)
       openAlert('업로드에 실패하였습니다', { severity: 'error' })
@@ -130,6 +135,7 @@ const UploadMusic = ({ files, resetFiles }: UploadMusicProps) => {
 
   return (
     <>
+      {loading ? <LoadingPage /> : <></>}
       <S.Container style={{ display: files ? 'block' : 'none' }}>
         <UploadHead files={files} />
         <S.EditMain className="editMain">
