@@ -17,6 +17,7 @@ import {
 } from '@redux/thunks/userThunks'
 import { fileToUint8Array, getCoverUrlFromMetadata } from '@api/functions'
 import * as ModalStyle from './common.style'
+import LoadingPage from '@components/Loading/LoadingPage'
 
 const Title = styled(ModalStyle.ModalTitle)`
   font-size: 20px;
@@ -172,6 +173,7 @@ const EditProfile = ({ onClose }: EditProfileProps) => {
   const userData = useAppSelector((state) => state.user.userData)
 
   const imageRef = useRef<HTMLInputElement>(null)
+  const [loading, setLoading] = useState(false)
   const [changed, setChanged] = useState(false)
   const [image, setImage] = useState<{ file?: File; link?: string }>({})
   const [imageDelete, setImageDelete] = useState(false)
@@ -226,21 +228,32 @@ const EditProfile = ({ onClose }: EditProfileProps) => {
     }
   }, [handleUpload, userData?.profileImage])
 
-  const handleClickSave = () => {
+  const handleClickSave = async () => {
     if (changed) {
-      if (image.file) {
-        const formData = new FormData()
-        formData.append('file', image.file)
-        dispatch(userUpdateImage(formData))
+      setLoading(true)
+      try {
+        if (image.file) {
+          const formData = new FormData()
+          formData.append('file', image.file)
+          await dispatch(userUpdateImage(formData)).unwrap()
+        }
+        if (imageDelete) {
+          await dispatch(userDeleteImage()).unwrap()
+        }
+        if (
+          userData?.nickname !== nickname ||
+          userData?.description !== description
+        ) {
+          const data = { nickname, description }
+          await dispatch(userUpdateProfile(data)).unwrap()
+        }
+      } catch (error) {
+        console.error(error)
+        alert('Error to update profile')
+      } finally {
+        setLoading(false)
+        onClose && onClose()
       }
-      if (imageDelete) {
-        dispatch(userDeleteImage())
-      }
-      if (nickname || userData?.description !== description) {
-        const data = { nickname, description }
-        dispatch(userUpdateProfile(data))
-      }
-      onClose && onClose()
     }
   }
 
@@ -273,6 +286,7 @@ const EditProfile = ({ onClose }: EditProfileProps) => {
 
   return (
     <ModalStyle.InnerModalWrapper>
+      {loading ? <LoadingPage /> : <></>}
       <ModalStyle.InnerModalContainer>
         <Title>
           Edit your Profile
