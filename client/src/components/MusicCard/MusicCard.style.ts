@@ -35,6 +35,7 @@ export const Container = styled.div`
 
     & .musicCard-waveform {
       width: 100%;
+      margin: 8px 0;
     }
   }
 

@@ -225,14 +225,18 @@ const Musicbar = () => {
                   {/* Music Info */}
                   <div className="music-info">
                     <h3 id="music-uploader" className="uploader">
-                      <Link to="#">
+                      <Link to={`/profile/${currentMusic.userId}`}>
                         {currentMusic?.user
                           ? currentMusic?.user.nickname
                           : currentMusic?.userId}
                       </Link>
                     </h3>
                     <h2 id="music-title" className="title">
-                      <Link to="#">{currentMusic?.title || ''}</Link>
+                      <Link
+                        to={`/track/${currentMusic.userId}/${currentMusic.permalink}`}
+                      >
+                        {currentMusic?.title || ''}
+                      </Link>
                     </h2>
                   </div>
                   {/* Buttons */}
