@@ -34,7 +34,6 @@ export const userSlice = createSlice({
       state.userData = undefined
     },
     [userThunks.userLogout.pending.type]: (state) => {
-      // 재발급 전에 기존의 accessToken을 폐기
       state.isLogin = false
       state.userData = undefined
     },

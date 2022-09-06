@@ -45,12 +45,12 @@ const ProfileArea = ({ className, fold }: ProfileAreaProps) => {
     [handleClose, navigate]
   )
 
-  const handleClickLogout = useCallback(() => {
+  const handleClickLogout = useCallback(async () => {
     dispatch(userLogout())
     openAlert('로그아웃 되었습니다.', { severity: 'success' })
     handleClose()
-    location.reload()
-  }, [dispatch, handleClose, openAlert])
+    navigate('/')
+  }, [dispatch, handleClose, navigate, openAlert])
 
   return (
     <>

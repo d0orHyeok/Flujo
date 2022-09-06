@@ -8,6 +8,7 @@ import SmallCardSlider from '@components/SmallCardSlider/SmallCardSlider'
 import Axios from '@api/Axios'
 import Loading from '@components/Loading/Loading'
 import { useAppSelector } from '@redux/hook'
+import { Link } from 'react-router-dom'
 
 interface ChartItem {
   genre: string
@@ -133,7 +134,9 @@ const HomePage = () => {
         {/* 인기 차트 */}
         {trendItems?.length ? (
           <S.Container>
-            <h2 className="section-title">Charts: Top 100</h2>
+            <h2 className="section-title">
+              <Link to="/trend">Charts: Top 100</Link>
+            </h2>
             <div className="section-description">
               The most played tracks on Wave this week
             </div>
@@ -145,7 +148,9 @@ const HomePage = () => {
         {/* 최신 차트 */}
         {newReleaseItems?.length ? (
           <S.Container>
-            <h2 className="section-title">Charts: New Release</h2>
+            <h2 className="section-title">
+              <Link to="/newrelease">Charts: New Release</Link>
+            </h2>
             <div className="section-description">
               Up-and-coming tracks on Wave this week
             </div>

@@ -6,6 +6,7 @@ import { useAppDispatch } from '@redux/hook'
 import { userAuth, userLogin } from '@redux/thunks/userThunks'
 import { useAlert } from '@redux/context/alertProvider'
 import CheckBox from '@components/Common/Checkbox'
+import LoadingPage from '@components/Loading/LoadingPage'
 
 interface LoginProps {
   onClose: () => void
@@ -21,6 +22,7 @@ const Login = ({ onClose }: LoginProps) => {
   const navigate = useNavigate()
   const dispatch = useAppDispatch()
   const openAlert = useAlert()
+  const [loading, setLoading] = useState(false)
 
   const [inputValue, setInputValue] = useState({
     username: window.localStorage.getItem('wave_id') || '',
@@ -82,6 +84,7 @@ const Login = ({ onClose }: LoginProps) => {
       window.localStorage.setItem('wave_id', username)
     }
 
+    setLoading(true)
     try {
       await dispatch(userLogin(inputValue)).unwrap()
       closeModal()
@@ -93,11 +96,14 @@ const Login = ({ onClose }: LoginProps) => {
         setIsError({ ...isError, [target]: true })
         document.getElementById(target)?.focus()
       }
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
     <S.Wrapper>
+      {loading ? <LoadingPage /> : <></>}
       <S.Container>
         <S.Title>
           <h1 className="modal-title">Sign In</h1>
