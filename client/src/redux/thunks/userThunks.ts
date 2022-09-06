@@ -19,10 +19,26 @@ export const userLogin = createAsyncThunk(
   }
 )
 
-export const userAuth = createAsyncThunk('AUTH', async () => {
-  const response = await Axios.get('/api/auth/info')
-  return response.data
-})
+export const userAuth = createAsyncThunk(
+  'AUTH',
+  async () => {
+    const response = await Axios.get('/api/auth/info')
+    return response.data
+  },
+  {
+    // 정보를 가져오고 30초 이내에 재요청 할경우 취소
+    condition: (userId, { getState }: { getState: any }) => {
+      const { user } = getState()
+      const { update, userData } = user
+      if (Boolean(userData)) {
+        const time_ms = Date.now() - update
+        if (Math.floor(time_ms / 1000) < 30) {
+          return false
+        }
+      }
+    },
+  }
+)
 
 export const userLogout = createAsyncThunk('LOGOUT', async () => {
   await Axios.post('/api/auth/signout')

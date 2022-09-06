@@ -28,6 +28,7 @@ export const userSlice = createSlice({
     [userThunks.userAuth.fulfilled.type]: (state, action) => {
       state.isLogin = true
       state.userData = action.payload
+      state.update = Date.now()
     },
     [userThunks.userAuth.rejected.type]: (state) => {
       state.isLogin = false
