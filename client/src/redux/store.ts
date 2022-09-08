@@ -7,6 +7,7 @@ export const store = configureStore({
     user: userReducer,
     player: playerReducer,
   },
+  devTools: process.env.NODE_ENV === 'development',
 })
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
