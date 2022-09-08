@@ -69,7 +69,7 @@ const BaseChartPage = ({
 
   const getGenreChartedMusics = useCallback(async () => {
     // 페이지 하단에 도달했을 때 장르별 차트목록을 불러온다
-    if (done) {
+    if (done || charts.length === 0) {
       return
     }
 
@@ -119,9 +119,11 @@ const BaseChartPage = ({
   }, [getGenreChartedMusics])
 
   useEffect(() => {
-    handleGetChartedTracks(undefined, period).then((musics) =>
+    setLoading(true)
+    handleGetChartedTracks(undefined, period).then((musics) => {
       setCharts([{ title: 'All music genres', link: 'all', musics }])
-    )
+      setLoading(false)
+    })
   }, [handleGetChartedTracks, period])
 
   useEffect(() => {
@@ -238,7 +240,7 @@ const BaseChartPage = ({
             </Link>
           </S.NoChart>
         )}
-        {done || charts.length === 0 ? (
+        {done ? (
           <></>
         ) : (
           <LoadingArea loading={loading} onInView={handleOnView} />

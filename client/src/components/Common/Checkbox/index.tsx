@@ -50,7 +50,7 @@ const CheckBox = ({
   return (
     <StyledFormControlLabel
       {...formControlLabelProps}
-      control={<StyledCheckBox {...props} defaultChecked />}
+      control={<StyledCheckBox {...props} />}
       label={label || ''}
       textsize={textsize}
     />
