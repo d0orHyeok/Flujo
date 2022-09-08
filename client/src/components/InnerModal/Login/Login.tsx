@@ -3,7 +3,7 @@ import TextField from '@components/Common/TextField'
 import * as S from './Login.style'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAppDispatch } from '@redux/hook'
-import { userAuth, userLogin } from '@redux/thunks/userThunks'
+import { userLogin } from '@redux/thunks/userThunks'
 import { useAlert } from '@redux/context/alertProvider'
 import CheckBox from '@components/Common/Checkbox'
 import LoadingPage from '@components/Loading/LoadingPage'
@@ -87,10 +87,9 @@ const Login = ({ onClose }: LoginProps) => {
     setLoading(true)
     try {
       await dispatch(userLogin(inputValue)).unwrap()
-      await dispatch(userAuth())
       localStorage.setItem('wave_login', 'true')
-      closeModal()
       openAlert('로그인 되었습니다.', { severity: 'success' })
+      closeModal()
     } catch (status: any) {
       if (status !== 500) {
         const target = status === 401 ? 'password' : 'username'

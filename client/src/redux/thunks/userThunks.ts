@@ -12,7 +12,7 @@ export const userLogin = createAsyncThunk(
   async (loginBody: IUserLoginBody, { rejectWithValue }) => {
     try {
       const response = await Axios.post('/api/auth/signin', loginBody)
-      return response.data.accessToken
+      return response.data
     } catch (error: any) {
       return rejectWithValue(error?.response?.status)
     }

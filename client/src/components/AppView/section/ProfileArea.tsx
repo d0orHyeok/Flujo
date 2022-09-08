@@ -4,7 +4,6 @@ import { useAppDispatch, useAppSelector } from '@redux/hook'
 import { MenuItem } from '@components/Common'
 import { BiLogInCircle } from 'react-icons/bi'
 import { userLogout } from '@redux/thunks/userThunks'
-import { useAlert } from '@redux/context/alertProvider'
 import { useNavigate, Link } from 'react-router-dom'
 import EmptyProfileImage from '@styles/EmptyImage/EmptyProfileImage.style'
 import { useLoginOpen } from '@redux/context/loginProvider'
@@ -20,7 +19,6 @@ const ProfileArea = ({ className, fold }: ProfileAreaProps) => {
   const navigate = useNavigate()
 
   const openLoginModal = useLoginOpen()
-  const openAlert = useAlert()
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
 
@@ -45,13 +43,12 @@ const ProfileArea = ({ className, fold }: ProfileAreaProps) => {
     [handleClose, navigate]
   )
 
-  const handleClickLogout = useCallback(async () => {
-    await dispatch(userLogout())
+  const handleClickLogout = useCallback(() => {
     localStorage.setItem('wave_login', 'false')
-    openAlert('로그아웃 되었습니다.', { severity: 'success' })
+    dispatch(userLogout())
     handleClose()
-    navigate('/')
-  }, [dispatch, handleClose, navigate, openAlert])
+    location.replace('/')
+  }, [dispatch, handleClose])
 
   return (
     <>

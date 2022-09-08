@@ -18,8 +18,13 @@ export const userSlice = createSlice({
   extraReducers: {
     // 로그인
     [userThunks.userLogin.fulfilled.type]: (state, action) => {
+      const { accessToken, userData } = action.payload
+
+      interceptWithAccessToken(accessToken)
+
       state.isLogin = true
-      interceptWithAccessToken(action.payload)
+      state.userData = userData
+      state.update = Date.now()
     },
     [userThunks.userLogin.rejected.type]: (state) => {
       state.isLogin = false
