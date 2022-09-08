@@ -9,6 +9,9 @@ import Axios from '@api/Axios'
 import Loading from '@components/Loading/Loading'
 import { useAppSelector } from '@redux/hook'
 import { Link } from 'react-router-dom'
+import { IoRefreshOutline } from 'react-icons/io5'
+import { IconButton } from '@mui/material'
+import Reload from './sections/Reload'
 
 interface ChartItem {
   genre: string
@@ -22,6 +25,7 @@ const HomePage = () => {
   )
 
   const [loading, setLoading] = useState(true)
+  const [reload, setReload] = useState(false)
   const [newReleaseItems, setNewReleaseItems] = useState<ISetsCardProps[]>()
   const [trendItems, setTrendItems] = useState<ISetsCardProps[]>()
   const [relatedMusics, setRelatedMusics] = useState<IMusic[]>()
@@ -90,6 +94,12 @@ const HomePage = () => {
       setRandomUsers([])
     }
   }, [])
+
+  const reloadRandomUsers = useCallback(async () => {
+    setReload(true)
+    await getRandomUsers()
+    setReload(false)
+  }, [getRandomUsers])
 
   const checkLoading = useCallback(() => {
     if (
@@ -162,15 +172,26 @@ const HomePage = () => {
         {/* 랜덤 추천 */}
         {randomUsers?.length ? (
           <S.Container>
-            <h2 className="section-title">Artists You Should Know</h2>
+            <h2 className="section-title section-title-flex">
+              <span className="title">Artists You Should Know</span>
+              <IconButton className="refreshBtn" onClick={reloadRandomUsers}>
+                <IoRefreshOutline />
+                Refresh List
+              </IconButton>
+            </h2>
+
             <div className="section-description">
               Top tracks from random artist
             </div>
-            <SmallCardSlider
-              cardsProps={randomUsers.map((user) => {
-                return { user, subText: 'Artist tracks' }
-              })}
-            />
+            {!reload ? (
+              <SmallCardSlider
+                cardsProps={randomUsers.map((user) => {
+                  return { user, subText: 'Artist tracks' }
+                })}
+              />
+            ) : (
+              <Reload />
+            )}
           </S.Container>
         ) : (
           <></>

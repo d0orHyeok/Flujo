@@ -17,6 +17,29 @@ export const Container = styled.div`
   & .section-title {
     font-size: 20px;
     margin-bottom: 10px;
+
+    &.section-title-flex {
+      display: flex;
+      align-items: flex-end;
+
+      & .refreshBtn {
+        margin-left: 12px;
+        padding: 0;
+        border: none;
+        color: ${({ theme }) => theme.colors.bgTextRGBA(0.6)};
+        font-size: 14px;
+
+        &:hover,
+        &:active {
+          color: ${({ theme }) => theme.colors.bgText};
+        }
+
+        &:active {
+          background-color: ${({ theme }) => theme.colors.bgColorRGBA(0.06)};
+          border-radius: 100%;
+        }
+      }
+    }
   }
 
   & .section-description {

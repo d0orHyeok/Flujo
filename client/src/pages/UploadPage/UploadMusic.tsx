@@ -90,6 +90,7 @@ const UploadMusic = ({ files, resetFiles }: UploadMusicProps) => {
     } finally {
       if (resetFiles && reset) {
         resetFiles()
+        window.scrollTo(0, 0)
       }
     }
   }
