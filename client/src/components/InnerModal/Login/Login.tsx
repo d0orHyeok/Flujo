@@ -87,8 +87,9 @@ const Login = ({ onClose }: LoginProps) => {
     setLoading(true)
     try {
       await dispatch(userLogin(inputValue)).unwrap()
-      closeModal()
       await dispatch(userAuth())
+      localStorage.setItem('wave_login', 'true')
+      closeModal()
       openAlert('로그인 되었습니다.', { severity: 'success' })
     } catch (status: any) {
       if (status !== 500) {

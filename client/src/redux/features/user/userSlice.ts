@@ -35,6 +35,7 @@ export const userSlice = createSlice({
       state.userData = undefined
     },
     [userThunks.userLogout.pending.type]: (state) => {
+      interceptWithAccessToken('')
       state.isLogin = false
       state.userData = undefined
     },
