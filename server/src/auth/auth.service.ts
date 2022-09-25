@@ -1,3 +1,5 @@
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateProfileImageDto } from './dto/update-profile-image.dto';
 import { HistoryRepository } from './../history/history.repository';
 import { PagingDto } from 'src/common/dto/paging.dto';
 import { PlaylistRepository } from './../playlist/playlist.repository';
@@ -19,7 +21,6 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { User } from 'src/entities/user.entity';
 import { CookieOptions } from 'express';
-import { MulterFile } from 'src/entities/common.types';
 
 @Injectable()
 export class AuthService {
@@ -90,7 +91,7 @@ export class AuthService {
         httpOnly: true,
         sameSite: 'none',
         secure: true,
-        maxAge: expiresIn,
+        maxAge: expiresIn * 1000,
       },
     };
   }
@@ -134,6 +135,19 @@ export class AuthService {
     };
   }
 
+  async getUserData(userId: string) {
+    const user: User = await this.findUserById(userId);
+    const historys = await this.historyRepository.findHistorysByUserId(
+      user.id,
+      {
+        skip: 0,
+        take: 10,
+      },
+    );
+
+    return { ...user, historys };
+  }
+
   async getRandomUsers() {
     return this.userRepository.getRandomUsers();
   }
@@ -146,73 +160,172 @@ export class AuthService {
     return this.userRepository.searchUser(keyward, pagingDto);
   }
 
-  async updateProfileImage(user: User, image: MulterFile) {
-    const imagename = `${user.id}_${Date.now()}`;
+  async changePassword(user: User, changePasswordDto: ChangePasswordDto) {
+    const { password, newPassword } = changePasswordDto;
 
-    const { filename, link } = await uploadFileFirebase(
-      image.buffer,
-      image.mimetype,
-      imagename,
-    );
-
-    const existProfileImage = user.profileImageFilename;
-    user.profileImage = link;
-    user.profileImageFilename = filename;
-
-    try {
-      await this.userRepository.save(user);
-      if (existProfileImage) {
-        await deleteFileFirebase(existProfileImage);
-      }
-      return link;
-    } catch (error) {
-      if (filename) {
-        await deleteFileFirebase(filename);
-      }
-      throw new InternalServerErrorException(error);
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return { success: false, message: 'Password not matched' };
     }
+
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    user.password = hashedPassword;
+
+    await this.userRepository.updateUser(user);
+
+    return { success: true, message: 'Successfully change password!' };
   }
 
-  async deleteProfileImage(user: User) {
-    const imagelink = user.profileImageFilename;
-    if (imagelink) {
-      await deleteFileFirebase(imagelink);
-    }
-    user.profileImage = null;
-    user.profileImageFilename = null;
-    await this.userRepository.save(user);
+  changeProfileData(user: User, authProfileDto: AuthProfileDto) {
+    const changedUser = user;
+    const entries = Object.entries(authProfileDto);
+    entries.forEach((entrie) => {
+      const [key, value] = entrie;
+      changedUser[key] = value;
+    });
+    return changedUser;
   }
 
   async updateProfileData(user: User, authProfileDto: AuthProfileDto) {
-    const { nickname, description } = authProfileDto;
-    if (nickname) user.nickname = nickname;
-    user.description = description;
-    const updateUser = await this.userRepository.save(user);
-    return {
-      nickname: updateUser.nickname,
-      description: updateUser.description,
-    };
-  }
-  async toggleFollow(user: User, targetId: string) {
-    const target = await this.userRepository.findUserById(targetId);
-    return this.userRepository.toggleFollow(user, target);
+    const changedUser = this.changeProfileData(user, authProfileDto);
+    const { nickname, description } = await this.userRepository.updateUser(
+      changedUser,
+    );
+    return { nickname, description };
   }
 
-  async toggleColumnMusic(
+  async updateProfileImage(
     user: User,
-    musicId: number,
-    column: 'like' | 'repost',
+    updateProfileImageDto: UpdateProfileImageDto,
   ) {
-    const music = await this.musicRepository.findMusicById(musicId);
-    return this.userRepository.toggleColumnTarget(user, music, column);
+    const { image, data } = updateProfileImageDto;
+
+    let profileImageFilename: string | null = null;
+    let profileImage: string | null = null;
+    const { profileImageFilename: existProfileImage } = user;
+
+    if (image) {
+      const imagename = `${user.id}_${Date.now()}`;
+      const { filename, link } = await uploadFileFirebase(
+        image.buffer,
+        image.mimetype,
+        imagename,
+      );
+      profileImageFilename = filename;
+      profileImage = link;
+    }
+
+    user.profileImage = profileImage;
+    user.profileImageFilename = profileImageFilename;
+    const changedUser = !data ? user : this.changeProfileData(user, data);
+    const updatedUser = await this.userRepository.updateUser(changedUser);
+
+    try {
+      if (existProfileImage) {
+        await deleteFileFirebase(existProfileImage);
+      }
+    } catch (error) {
+      console.log(error);
+    } finally {
+      return updatedUser;
+    }
   }
 
-  async toggleColumnPlaylist(
-    user: User,
-    playlistId: number,
+  async toggleFollow(userId: string, targetId: string) {
+    // 업데이트할 유저정보와 팔로우할 유저정보를 가져온다
+    const target = await this.userRepository.findOne(targetId);
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect('user.following', 'following')
+      .where('user.id = :userId', { userId })
+      .getOne();
+
+    // 타겟 유저를 팔로우 했는지 여부에 따라 following 배열을 수정한다.
+    const { following } = user;
+
+    let findIndex = -1;
+    const newFollowing = following.filter((f, index) => {
+      if (f.id !== target.id) {
+        return true;
+      } else {
+        findIndex = index;
+        return false;
+      }
+    });
+
+    if (findIndex === -1) {
+      newFollowing.push(target);
+    }
+    user.following = newFollowing;
+
+    // 수정된 following 정보를 저장한다.
+    try {
+      await this.userRepository.save(user);
+      return {
+        type: findIndex === -1 ? 'follow' : 'unfollow',
+        following: newFollowing,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(error, `Error to update follow`);
+    }
+  }
+
+  async toggleColumnTarget(
+    userId: string,
+    target: { name: 'music' | 'playlist'; id: number },
     column: 'like' | 'repost',
   ) {
-    const playlist = await this.playlistRepository.findPlaylistById(playlistId);
-    return this.userRepository.toggleColumnTarget(user, playlist, column);
+    const { name } = target;
+    // 업데이트할 column 이름을 설정한다.
+    // likeMusics or likePlaylists or repostMusics or repostPlaylists
+    const columnName = `${column}${name.replace(/^[a-z]/, (char) =>
+      char.toUpperCase(),
+    )}s`;
+
+    // 업데이트할 column이 포함된 유저정보와 target정보를 가져온다
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .leftJoinAndSelect(`user.${columnName}`, columnName)
+      .where('user.id = :userId', { userId })
+      .getOne();
+    const item =
+      name === 'music'
+        ? await this.musicRepository.findOne(target.id)
+        : await this.playlistRepository.findOne(target.id);
+
+    // 업데이트할 column의 데이터를 수정하고 저장한다
+    const targetItems: any[] = user[columnName] || [];
+    let findIndex = -1;
+    const newTargetItems = targetItems.filter((item, index) => {
+      if (item.id !== target.id) {
+        return true;
+      } else {
+        findIndex = index;
+        return false;
+      }
+    });
+
+    if (findIndex === -1) {
+      newTargetItems.push(item);
+    }
+    user[columnName] = newTargetItems;
+
+    try {
+      await this.userRepository.save(user);
+      return {
+        toggleType: findIndex === -1 ? column : `un${column}`,
+        [columnName]: newTargetItems,
+      };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        error,
+        `Error to update ${columnName}`,
+      );
+    }
+  }
+
+  async deleteAccount(user: User) {
+    return this.userRepository.deleteUser(user);
   }
 }
