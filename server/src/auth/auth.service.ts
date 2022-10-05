@@ -1,3 +1,4 @@
+import { EmailService } from './../email/email.service';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateProfileImageDto } from './dto/update-profile-image.dto';
 import { HistoryRepository } from './../history/history.repository';
@@ -32,6 +33,7 @@ export class AuthService {
     private historyRepository: HistoryRepository,
     private jwtService: JwtService,
     private config: ConfigService,
+    private emailService: EmailService,
   ) {}
 
   async signUp(authRegisterDto: AuthRegisterDto): Promise<void> {
@@ -61,12 +63,12 @@ export class AuthService {
     }
   }
 
-  getAccessToken(payload: any): string {
+  getAccessToken(payload: any, expiresIn?: number): string {
     const accessToken = this.jwtService.sign(payload, {
       secret: this.config.get<string>('JWT_ACCESS_TOKEN_SECREAT'),
-      expiresIn: Number(
-        this.config.get<number>('JWT_ACCESS_TOKEN_EXPIRATION_TIME'),
-      ),
+      expiresIn: !Boolean(expiresIn)
+        ? Number(this.config.get<number>('JWT_ACCESS_TOKEN_EXPIRATION_TIME'))
+        : expiresIn,
     });
 
     return accessToken;
@@ -135,6 +137,53 @@ export class AuthService {
     };
   }
 
+  async findUsernameByEmail(email: string) {
+    const users = await this.userRepository
+      .createQueryBuilder('user')
+      .select('user.username')
+      .where('user.email = :email', { email })
+      .getMany();
+
+    return !users ? null : users.map((user) => user.username);
+  }
+
+  async requestChangePassword(username: string) {
+    const user = await this.userRepository
+      .createQueryBuilder('user')
+      .where('user.username = :username', { username })
+      .getOne();
+
+    if (!user) {
+      throw new InternalServerErrorException(`Can't find user`);
+    }
+
+    const payload = { username: user.username };
+    const token = this.getAccessToken(payload, 600);
+    await this.userRepository.updateRefreshToken(user, token + user.password);
+    const transporter = this.emailService.createGmailTransporter();
+    const mailOptions = {
+      from: this.config.get<string>('MAILER_EMAIL'),
+      // to: user.email,
+      to: user.email,
+      subject: '[Wave] Password Change Link',
+      html: `
+      <div>
+      Hello! "${user.nickname || user.username}"
+      <br />
+      To change your password, click the following link:
+      <a href="${this.config.get<string>('CLIENT_URL')}/password?token=${token}"
+        >Change password
+      </a>
+      <input type="hidden" name="token" value=${token} />
+    </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return { success: true, email: user.email };
+  }
+
   async getUserData(userId: string) {
     const user: User = await this.findUserById(userId);
     const historys = await this.historyRepository.findHistorysByUserId(
@@ -160,6 +209,19 @@ export class AuthService {
     return this.userRepository.searchUser(keyward, pagingDto);
   }
 
+  async changeEmail(user: User, email: string) {
+    user.email = email;
+    await this.userRepository.updateUser(user);
+    return email;
+  }
+
+  async setPassword(user: User, password: string) {
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(password, salt);
+    user.password = hashedPassword;
+    await this.userRepository.updateUser(user);
+  }
+
   async changePassword(user: User, changePasswordDto: ChangePasswordDto) {
     const { password, newPassword } = changePasswordDto;
 
@@ -167,12 +229,7 @@ export class AuthService {
     if (!isMatch) {
       return { success: false, message: 'Password not matched' };
     }
-
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(newPassword, salt);
-    user.password = hashedPassword;
-
-    await this.userRepository.updateUser(user);
+    await this.setPassword(user, newPassword);
 
     return { success: true, message: 'Successfully change password!' };
   }

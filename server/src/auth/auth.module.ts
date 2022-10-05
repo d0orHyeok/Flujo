@@ -1,3 +1,4 @@
+import { EmailModule } from './../email/email.module';
 import { HistoryRepository } from './../history/history.repository';
 import { PlaylistRepository } from './../playlist/playlist.repository';
 import { MusicRepository } from 'src/music/music.repository';
@@ -30,6 +31,7 @@ import { JwtUserStrategy } from './strategies/jwt-user.strategy';
         signOptions: { expiresIn: 60 * 60 },
       }),
     }),
+    EmailModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, JwtRefreshStrategy, JwtUserStrategy],

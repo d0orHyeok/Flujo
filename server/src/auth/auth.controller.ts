@@ -1,3 +1,5 @@
+import { EmailDto } from './dto/email.dto';
+import { AuthFindPipe } from './pipes/auth-find.pipe';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateProfileImagePipe } from './pipes/update-profile-image.pipe';
 import { UpdateProfileImageDto } from './dto/update-profile-image.dto';
@@ -8,6 +10,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwTRefreshGuard } from './guards/jwt-refresh.guard';
 import { AuthService } from './auth.service';
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -41,6 +44,16 @@ export class AuthController {
     @Body(ValidationPipe) authRegisterDto: AuthRegisterDto,
   ): Promise<void> {
     await this.authService.signUp(authRegisterDto);
+  }
+
+  @Post('/find')
+  async findUsername(@Body(AuthFindPipe) values: string[]) {
+    const [type, value] = values;
+    if (type === 'email') {
+      return this.authService.findUsernameByEmail(value);
+    } else {
+      return this.authService.requestChangePassword(value);
+    }
   }
 
   @Post('/signin')
@@ -120,6 +133,27 @@ export class AuthController {
   ) {
     const pagingDto = { take: take || 10, skip: skip || 0 };
     return this.authService.searchUser(keyward, pagingDto);
+  }
+
+  @Patch('/email')
+  @UseGuards(JwtAuthGuard)
+  async changeEmail(@GetUser() user: User, @Body() emailDto: EmailDto) {
+    return this.authService.changeEmail(user, emailDto.email);
+  }
+
+  @Patch('/newpassword')
+  @UseGuards(JwtAuthGuard)
+  async setNewPassword(
+    @GetUser() user: User,
+    @Body() body: { password: string },
+  ) {
+    if (!body?.password) {
+      throw new BadRequestException(
+        'You must request with body include password',
+      );
+    }
+    user.hashedRefreshToken = null;
+    return this.authService.setPassword(user, body.password);
   }
 
   @Patch('/password')

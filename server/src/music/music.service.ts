@@ -128,7 +128,7 @@ export class MusicService {
     const ids: number[] = [];
     historys.slice(0, 3).forEach((history) => ids.push(history.musicId));
     likeMusics.slice(0, 3).forEach((music) => ids.push(music.id));
-    return this.musicRepository.findRelatedMusicsByIds(ids);
+    return ids.length ? this.musicRepository.findRelatedMusicsByIds(ids) : [];
   }
 
   async searchMusic(keyward: string, pagingDto: PagingDto, uid?: string) {
