@@ -5,10 +5,11 @@ import { useAppDispatch, useAppSelector } from '@redux/hook'
 import { addMusic } from '@redux/features/player/playerSlice'
 import { IMusic } from '@appTypes/types.type.'
 import React, { useCallback, useState } from 'react'
-import { Modal } from '@components/Common'
-import AddPlaylist from '@components/InnerModal/AddPlaylist/AddPlaylist'
+import { Dialog } from '@components/Common'
+import AddPlaylist from '@components/InDialog/AddPlaylist/AddPlaylist'
 import { selectUser } from '@redux/features/user/userSlice'
 import { useLoginOpen } from '@redux/context/loginProvider'
+import { getTransitionSlide } from '../Dialog'
 
 const MenuItem = styled(MuiMenuItem)`
   &.MuiMenuItem-root:hover {
@@ -88,6 +89,8 @@ const AddMusicMenuItem = ({
   )
 }
 
+const Transition = getTransitionSlide('down')
+
 const AddPlaylistMenuItem = ({
   musics,
   onClick,
@@ -131,9 +134,9 @@ const AddPlaylistMenuItem = ({
         <MdPlaylistAdd className="icon" />
         <span>Add to Playlist</span>
       </MusicMenuItem>
-      <Modal open={open} onClose={closeModal}>
+      <Dialog open={open} onClose={closeModal} TransitionComponent={Transition}>
         <AddPlaylist addMusics={musics} onClose={closeModal} />
-      </Modal>
+      </Dialog>
     </>
   )
 }

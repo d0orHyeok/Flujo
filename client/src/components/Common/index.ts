@@ -4,5 +4,6 @@ import MenuItem from './MenuItem'
 import Modal from './Modal'
 import Alert from './Alert'
 import TextField from './TextField'
+import Dialog from './Dialog'
 
-export { Button, Menu, MenuItem, Modal, Alert, TextField }
+export { Button, Menu, MenuItem, Modal, Alert, TextField, Dialog }

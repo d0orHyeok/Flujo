@@ -4,20 +4,23 @@ import { IoMdLink } from 'react-icons/io'
 import { GoHeart } from 'react-icons/go'
 import { MdPlaylistPlay, MdPlaylistAdd, MdOutlineEdit } from 'react-icons/md'
 import { BiRepost } from 'react-icons/bi'
-import { Button, Modal } from '@components/Common'
+import { Button } from '@components/Common'
 import { IMusic, IPlaylist } from '@appTypes/types.type.'
 import { useAppDispatch, useAppSelector } from '@redux/hook'
 import { useLoginOpen } from '@redux/context/loginProvider'
 import { useCopyLink } from '@api/Hooks'
 import { addMusic } from '@redux/features/player/playerSlice'
-import AddPlaylist from '@components/InnerModal/AddPlaylist/AddPlaylist'
-import { userToggleLike, userToggleRepost } from '@redux/thunks/userThunks'
-import EditTarget from '@components/InnerModal/EditTarget/EditTarget'
+import AddPlaylist from '@components/InDialog/AddPlaylist/AddPlaylist'
+import {
+  userDeleteItem,
+  userToggleLike,
+  userToggleRepost,
+} from '@redux/thunks/userThunks'
+import EditTarget from '@components/InDialog/EditTarget/EditTarget'
 import { RiDeleteBin6Line } from 'react-icons/ri'
-import { delelteMusic } from '@api/musicApi'
-import { deletePlaylist } from '@api/playlistApi'
-import { useNavigate } from 'react-router-dom'
 import { useAlert } from '@redux/context/alertProvider'
+import { useNavigate } from 'react-router-dom'
+import Dialog, { getTransitionSlide } from '@components/Common/Dialog'
 
 interface StyledButtonProps {
   active?: boolean
@@ -29,6 +32,7 @@ const StyledButton = styled(Button)<StyledButtonProps>`
   height: 27px;
   margin-right: 5px;
   border-radius: 3px;
+  background-color: ${({ theme }) => theme.colors.bgColor};
 
   &:last-child {
     margin-right: 0;
@@ -78,23 +82,27 @@ export interface InteractionButtonsProps {
   target: TargetType
   setTarget?: (value: any) => void
   mediaSize?: number | string
+  disableEdit?: boolean
 }
 
 interface Props
   extends React.HTMLAttributes<HTMLDivElement>,
     InteractionButtonsProps {}
 
+const Transition = getTransitionSlide('down')
+
 const InteractionButtons = ({
   target,
   setTarget,
   mediaSize,
+  disableEdit,
   ...props
 }: Props) => {
   const dispatch = useAppDispatch()
   const openLogin = useLoginOpen()
   const copyLink = useCopyLink()
-  const navigate = useNavigate()
   const openAlert = useAlert()
+  const navigate = useNavigate()
 
   const userData = useAppSelector((state) => state.user.userData)
   const [openEditTarget, setOpenEditTarget] = useState(false)
@@ -110,61 +118,71 @@ const InteractionButtons = ({
     setOpenEditTarget(false)
   }, [])
 
-  const handleClickRepost = useCallback(() => {
-    if (!userData) {
-      openLogin()
-      return
-    }
-
-    const targetType = 'title' in target ? 'music' : 'playlist'
-    dispatch(userToggleRepost({ targetId: target.id, targetType })).then(
-      (value: any) => {
-        if (value.type.indexOf('fulfilled') !== -1 && setTarget) {
-          const existReposts =
-            target.reposts ||
-            Array.from({ length: target.repostsCount || 0 }, (v, i) => i)
-          const newReposts =
-            value.payload.data.toggleType === 'repost'
-              ? [...existReposts, userData]
-              : existReposts.filter((ru) => ru.id !== userData.id)
-          setTarget({
-            ...target,
-            reposts: newReposts,
-            repostsCount: newReposts.length,
-          })
-        }
+  const handleClickRepost = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault()
+      event.stopPropagation()
+      if (!userData) {
+        openLogin()
+        return
       }
-    )
-  }, [dispatch, openLogin, setTarget, target, userData])
 
-  const handleClickLike = useCallback(() => {
-    if (!userData) {
-      openLogin()
-      return
-    }
-
-    const targetType = 'title' in target ? 'music' : 'playlist'
-    dispatch(userToggleLike({ targetId: target.id, targetType })).then(
-      (value: any) => {
-        if (value.type.indexOf('fulfilled') !== -1) {
-          if (setTarget) {
-            const existLikes =
-              target.likes ||
-              Array.from({ length: target.likesCount || 0 }, (v, i) => i)
-            const newLikes =
-              value.payload.data.toggleType === 'like'
-                ? [...existLikes, userData]
-                : existLikes.filter((l) => l.id !== userData.id)
+      const targetType = 'title' in target ? 'music' : 'playlist'
+      dispatch(userToggleRepost({ targetId: target.id, targetType })).then(
+        (value: any) => {
+          if (value.type.indexOf('fulfilled') !== -1 && setTarget) {
+            const existReposts =
+              target.reposts ||
+              Array.from({ length: target.repostsCount || 0 }, (v, i) => i)
+            const newReposts =
+              value.payload.data.toggleType === 'repost'
+                ? [...existReposts, userData]
+                : existReposts.filter((ru) => ru.id !== userData.id)
             setTarget({
               ...target,
-              likes: newLikes,
-              likesCount: newLikes.length,
+              reposts: newReposts,
+              repostsCount: newReposts.length,
             })
           }
         }
+      )
+    },
+    [dispatch, openLogin, setTarget, target, userData]
+  )
+
+  const handleClickLike = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault()
+      event.stopPropagation()
+      if (!userData) {
+        openLogin()
+        return
       }
-    )
-  }, [userData, target, openLogin, dispatch, setTarget])
+
+      const targetType = 'title' in target ? 'music' : 'playlist'
+      dispatch(userToggleLike({ targetId: target.id, targetType })).then(
+        (value: any) => {
+          if (value.type.indexOf('fulfilled') !== -1) {
+            if (setTarget) {
+              const existLikes =
+                target.likes ||
+                Array.from({ length: target.likesCount || 0 }, (v, i) => i)
+              const newLikes =
+                value.payload.data.toggleType === 'like'
+                  ? [...existLikes, userData]
+                  : existLikes.filter((l) => l.id !== userData.id)
+              setTarget({
+                ...target,
+                likes: newLikes,
+                likesCount: newLikes.length,
+              })
+            }
+          }
+        }
+      )
+    },
+    [userData, target, openLogin, dispatch, setTarget]
+  )
 
   const onSuccessCreatePlaylist = useCallback(
     (createPlaylist: IPlaylist) => {
@@ -200,57 +218,75 @@ const InteractionButtons = ({
     [setTarget, target]
   )
 
-  const handleClickAddPlaylist = useCallback(() => {
-    if (!userData) {
-      openLogin()
-      return
-    }
-
-    setOpenModal(true)
-  }, [openLogin, userData])
+  const handleClickAddPlaylist = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.stopPropagation()
+      event.preventDefault()
+      if (!userData) {
+        openLogin()
+        return
+      }
+      setOpenModal(true)
+    },
+    [openLogin, userData]
+  )
 
   const closeModal = () => {
     setOpenModal(false)
   }
 
-  const handleClickCopyLink = useCallback(() => {
-    copyLink(target.permalink, {
-      success: 'Link Copied',
-      fail: 'Fail to copy link',
-    })
-  }, [copyLink, target])
+  const handleClickCopyLink = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault()
+      event.stopPropagation()
+      copyLink(target.permalink, {
+        success: 'Link Copied',
+        fail: 'Fail to copy link',
+      })
+    },
+    [copyLink, target]
+  )
 
-  const handleClickNextup = useCallback(() => {
-    const additem = 'title' in target ? [target] : target.musics || []
+  const handleClickNextup = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault()
+      event.stopPropagation()
+      const additem = 'title' in target ? [target] : target.musics || []
 
-    dispatch(addMusic(additem))
+      dispatch(addMusic(additem))
 
-    const message =
-      additem.length === 1
-        ? `"${additem[0].title}" added to Next up`
-        : `${additem.length} tracks added to Next up`
+      const message =
+        additem.length === 1
+          ? `"${additem[0].title}" added to Next up`
+          : `${additem.length} tracks added to Next up`
 
-    openAlert(message, { severity: 'info' })
-  }, [dispatch, openAlert, target])
+      openAlert(message, { severity: 'info' })
+    },
+    [dispatch, openAlert, target]
+  )
 
   const handleClickDelete = useCallback(async () => {
     if (!confirm('Are you sure you want to delete it?')) return
 
     try {
       if ('title' in target) {
-        await delelteMusic(target.id)
-        navigate(`/profile/${target.userId}/${'tracks'}`)
+        await dispatch(
+          userDeleteItem({ targetId: target.id, targetType: 'music' })
+        ).unwrap()
         openAlert(`Delete Success: ${target.title}`, { severity: 'success' })
+        navigate(`/profile/${target.userId}/tracks`)
       } else {
-        await deletePlaylist(target.id)
-        navigate(`/profile/${target.userId}/${'playlists'}`)
+        await dispatch(
+          userDeleteItem({ targetId: target.id, targetType: 'playlist' })
+        ).unwrap()
         openAlert(`Delete Success: ${target.name}`, { severity: 'success' })
+        navigate(`/profile/${target.userId}/playlists`)
       }
     } catch (error: any) {
       console.error(error.response || error)
       openAlert(`Fail to delete`, { severity: 'error' })
     }
-  }, [navigate, openAlert, target])
+  }, [dispatch, navigate, openAlert, target])
 
   useLayoutEffect(() => {
     if (!userData) {
@@ -324,7 +360,12 @@ const InteractionButtons = ({
             <MdPlaylistAdd className="icon" />
             <span className="text">Add to Playlist</span>
           </StyledButton>
-          <Modal open={openModal} onClose={closeModal}>
+          <Dialog
+            open={openModal}
+            onClose={closeModal}
+            TransitionComponent={Transition}
+            PaperProps={{ style: { maxWidth: '500px', width: '100%' } }}
+          >
             <AddPlaylist
               addMusics={[target]}
               onClose={closeModal}
@@ -332,10 +373,10 @@ const InteractionButtons = ({
               onAddSuccess={onSuccessCreatePlaylist}
               onRemoveSuccess={onRemoveMusicSuccess}
             />
-          </Modal>
+          </Dialog>
         </>
       )}
-      {userData && target.userId === userData.id && (
+      {!disableEdit && userData && target.userId === userData.id && (
         <>
           <StyledButton
             title="Edit"
@@ -352,13 +393,17 @@ const InteractionButtons = ({
           >
             <RiDeleteBin6Line className="icon" />
           </StyledButton>
-          <Modal open={openEditTarget} onClose={closeEditTarget}>
+          <Dialog
+            open={openEditTarget}
+            onClose={closeEditTarget}
+            TransitionComponent={Transition}
+          >
             <EditTarget
               target={target}
               onClose={closeEditTarget}
               setTarget={setTarget}
             />
-          </Modal>
+          </Dialog>
         </>
       )}
     </div>

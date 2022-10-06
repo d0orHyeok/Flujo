@@ -27,6 +27,7 @@ const InteractionBar = ({
   setTarget,
   visibleOption,
   mediaSize,
+  disableEdit,
   ...props
 }: InteractionBarProps) => {
   const [temp, setTemp] = useState<IMusic | IPlaylist>()
@@ -46,6 +47,7 @@ const InteractionBar = ({
         target={temp || target}
         setTarget={setTarget ? setTarget : setTemp}
         mediaSize={mediaSize}
+        disableEdit={disableEdit}
       />
       <InteractionCount
         className="interactionCount"
