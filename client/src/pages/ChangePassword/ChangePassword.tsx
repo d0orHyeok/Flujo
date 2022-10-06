@@ -1,4 +1,5 @@
 import LoadingPage from '@components/Loading/LoadingPage'
+import Reload from '@components/Loading/Reload'
 import { passwordRegex } from '@pages/RegisterPage/regex'
 import { useAlert } from '@redux/context/alertProvider'
 import { useSetMinWidth } from '@redux/context/appThemeProvider'
@@ -6,6 +7,14 @@ import axios from 'axios'
 import React, { useCallback, useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import * as S from './ChangePassword.style'
+
+const Axios = axios.create({
+  baseURL:
+    process.env.NODE_ENV === 'development'
+      ? '/'
+      : 'https://wave-nestjs.herokuapp.com/',
+  withCredentials: true,
+})
 
 const ChangePassword = () => {
   const { search } = useLocation()
@@ -17,6 +26,7 @@ const ChangePassword = () => {
   const [loading, setLoading] = useState(true)
   const [password, setPassword] = useState({ new: '', confirm: '' })
   const [error, setError] = useState({ new: false, confirm: false })
+  const [request, setRequest] = useState(false)
 
   const checkQuery = useCallback(() => {
     const query_token = search
@@ -29,10 +39,9 @@ const ChangePassword = () => {
     const newToken = query_token.replace('token=', '')
     setToken(newToken)
 
-    axios
-      .get('/api/auth/info', {
-        headers: { Authorization: `Bearer ${newToken}` },
-      })
+    Axios.get('/api/auth/info', {
+      headers: { Authorization: `Bearer ${newToken}` },
+    })
       .then(() => setLoading(false))
       .catch(() => navigate('/notfound'))
   }, [search, navigate])
@@ -59,12 +68,13 @@ const ChangePassword = () => {
   }, [password])
 
   const handleClickChangePassword = useCallback(async () => {
-    if (Object.values(error).includes(true)) {
+    if (!Boolean(password.new.length) || Object.values(error).includes(true)) {
       return alert('Invalid password, please check password')
     }
 
     try {
-      await axios.patch(
+      setRequest(true)
+      await Axios.patch(
         '/api/auth/newpassword',
         { password: password.new },
         {
@@ -77,6 +87,8 @@ const ChangePassword = () => {
     } catch (error) {
       console.error(error)
       alert('Failed to change password')
+    } finally {
+      setRequest(false)
     }
   }, [error, password.new, token, openAlert, navigate])
 
@@ -133,9 +145,13 @@ const ChangePassword = () => {
           <div className="error">New password does not match</div>
         ) : null}
       </div>
-      <S.ChangeButton onClick={handleClickChangePassword}>
-        Change Password
-      </S.ChangeButton>
+      {!request ? (
+        <S.ChangeButton onClick={handleClickChangePassword}>
+          Change Password
+        </S.ChangeButton>
+      ) : (
+        <Reload size={50} />
+      )}
     </S.Wrapper>
   )
 }

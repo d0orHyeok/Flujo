@@ -66,7 +66,8 @@ export const Wrapper = styled.div`
 `
 
 export const ChangeButton = styled(PrimaryButton)`
-  padding: 10px;
+  padding: 0 20px;
+  height: 50px;
   border-radius: 4px;
   margin-top: 50px;
 `

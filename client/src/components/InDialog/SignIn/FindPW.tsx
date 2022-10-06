@@ -2,10 +2,12 @@ import { Button, TextField } from '@components/Common'
 import React, { useState, useCallback } from 'react'
 import * as S from './Find.style'
 import { findSigninInfo } from '@api/userApi'
+import Reload from '@components/Loading/Reload'
 
 const FindPW = () => {
   const [username, setUsername] = useState('')
   const [result, setResult] = useState<string>()
+  const [loading, setLoading] = useState(false)
 
   const handleChangeInput = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -18,6 +20,7 @@ const FindPW = () => {
   const handleClickFind = useCallback(
     async (event: React.MouseEvent<HTMLButtonElement>) => {
       event.preventDefault()
+      setLoading(true)
       try {
         const response = await findSigninInfo({ username })
         const result = response.data
@@ -27,7 +30,9 @@ const FindPW = () => {
           setResult('none')
         }
       } catch (error) {
-        return setResult('none')
+        setResult('none')
+      } finally {
+        setLoading(false)
       }
     },
     [username]
@@ -53,9 +58,13 @@ const FindPW = () => {
           error={result === 'none'}
           errorText="Username not found"
         />
-        <Button className="content-btn" onClick={handleClickFind}>
-          Find
-        </Button>
+        {!loading ? (
+          <Button className="content-btn" onClick={handleClickFind}>
+            Find
+          </Button>
+        ) : (
+          <Reload size={40} />
+        )}
         {result === 'none' || !result ? null : (
           <S.ResultBox>
             <h2 className="result-title">

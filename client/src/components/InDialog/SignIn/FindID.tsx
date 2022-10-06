@@ -3,10 +3,12 @@ import React, { useState, useCallback } from 'react'
 import * as S from './Find.style'
 import { emailRegex } from '@pages/RegisterPage/regex'
 import { findSigninInfo } from '@api/userApi'
+import Reload from '@components/Loading/Reload'
 
 const FindID = () => {
   const [email, setEmail] = useState('')
   const [result, setResult] = useState<string[]>()
+  const [loading, setLoading] = useState(false)
 
   const handleChangeEmail = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -19,12 +21,19 @@ const FindID = () => {
   const handleClickFind = useCallback(
     async (event: React.MouseEvent<HTMLButtonElement>) => {
       event.preventDefault()
+      if (!emailRegex.test(email)) {
+        return alert('Please check email address')
+      }
+
+      setLoading(true)
       try {
         const response = await findSigninInfo({ email })
         const usernames: null | string[] = response.data
         setResult(usernames || [])
       } catch (error) {
-        return
+        alert('Error to find username')
+      } finally {
+        setLoading(false)
       }
     },
     [email]
@@ -48,9 +57,13 @@ const FindID = () => {
           error={Boolean(email.length && !emailRegex.test(email))}
           errorText="Invalid email"
         />
-        <Button className="content-btn" onClick={handleClickFind}>
-          Find
-        </Button>
+        {!loading ? (
+          <Button className="content-btn" onClick={handleClickFind}>
+            Find
+          </Button>
+        ) : (
+          <Reload size={40} />
+        )}
         <S.ResultBox>
           <h2 className="result-title">
             {!result

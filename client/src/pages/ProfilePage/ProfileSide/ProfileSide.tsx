@@ -16,6 +16,7 @@ import { FaComment } from 'react-icons/fa'
 import { IComment } from '@appTypes/comment.type'
 import { getCommentsByUserId } from '@api/commentApi'
 import calculateDateAgo from '@api/functions/calculateDateAgo'
+import { useLoginOpen } from '@redux/context/loginProvider'
 
 interface ProfileSideProps {
   user: IUser
@@ -23,6 +24,7 @@ interface ProfileSideProps {
 
 const ProfileSide = ({ user }: ProfileSideProps) => {
   const dispatch = useAppDispatch()
+  const openLogin = useLoginOpen()
 
   const myId = useAppSelector((state) => state.user.userData?.id)
   const following = useAppSelector(
@@ -44,9 +46,13 @@ const ProfileSide = ({ user }: ProfileSideProps) => {
   const handleClickFollow = useCallback(
     (id: string) => (event: React.MouseEvent<HTMLElement>) => {
       event.preventDefault()
-      dispatch(userToggleFollow(id))
+      if (!myId) {
+        openLogin()
+      } else {
+        dispatch(userToggleFollow(id))
+      }
     },
-    [dispatch]
+    [dispatch, myId, openLogin]
   )
 
   useEffect(() => {

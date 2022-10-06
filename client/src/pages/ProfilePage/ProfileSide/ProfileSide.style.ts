@@ -42,11 +42,7 @@ export const NumBoxItem = styled.div`
 export const DescBox = styled.div`
   padding: 10px;
   color: ${({ theme }) => theme.colors.bgTextRGBA(0.95)};
-
-  &,
-  & pre {
-    white-space: normal;
-  }
+  white-space: normal;
 `
 
 export const BoxTitle = styled.h2`

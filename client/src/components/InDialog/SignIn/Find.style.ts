@@ -18,7 +18,8 @@ export const Content = styled(CommonStyle.DialogContent)`
   color: ${({ theme }) => theme.colors.bgTextRGBA(0.86)};
 
   & .content-btn {
-    padding: 10px 20px;
+    padding: 0 20px;
+    height: 40px;
     border-radius: 6px;
   }
 `
