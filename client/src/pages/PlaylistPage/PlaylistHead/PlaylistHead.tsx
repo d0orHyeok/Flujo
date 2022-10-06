@@ -2,6 +2,8 @@ import styled from 'styled-components'
 import React, { useState, useCallback, useLayoutEffect, useEffect } from 'react'
 import { IPlaylist } from '@appTypes/types.type.'
 import {
+  EmptyMusicCover,
+  EmptyMusicCoverBackgorund,
   EmptyPlaylistImage,
   EmptyPlaylistImageBackground,
 } from '@styles/EmptyImage'
@@ -20,9 +22,11 @@ import {
   clearMusics,
   togglePlay,
 } from '@redux/features/player/playerSlice'
+import Waveform from '@components/Waveform/Waveform'
 
 const Wrapper = styled(AnyHeadStyle.AnyHeadWrapper)`
   position: relative;
+  height: 260px;
 `
 
 const Container = styled.div`
@@ -95,6 +99,13 @@ const PlaylistMusicCounter = styled.div`
   }
 `
 
+const WaveFormBox = styled.div`
+  position: relative;
+  width: calc(100% - 200px);
+  padding-right: 30px;
+  top: -60px;
+`
+
 interface PlaylistHeadProps {
   playlist: IPlaylist
 }
@@ -103,10 +114,11 @@ const PlaylistHead = ({ playlist }: PlaylistHeadProps) => {
   const dispatch = useAppDispatch()
 
   const isPlay = useAppSelector((state) => state.player.controll.isPlay)
-  const nextups = useAppSelector((state) => state.player.musics)
+  const { currentMusic, musics: nextups } = useAppSelector(
+    (state) => state.player
+  )
 
   const [active, setActive] = useState(false)
-
   const [background, setBackground] = useState<string>(
     EmptyPlaylistImageBackground
   )
@@ -125,19 +137,7 @@ const PlaylistHead = ({ playlist }: PlaylistHeadProps) => {
     [active, dispatch, playlist.musics]
   )
 
-  const changeBackground = useCallback(async () => {
-    if (playlist.image) {
-      const newBackground = await getGradientFromImageUrl(
-        playlist.image,
-        EmptyPlaylistImageBackground
-      )
-      setBackground(newBackground)
-    } else {
-      setBackground(EmptyPlaylistImageBackground)
-    }
-  }, [playlist.image])
-
-  useEffect(() => {
+  const changeActive = useCallback(() => {
     if (nextups.length !== playlist.musics.length) {
       setActive(false)
     } else {
@@ -149,6 +149,46 @@ const PlaylistHead = ({ playlist }: PlaylistHeadProps) => {
       setActive(bol)
     }
   }, [nextups, playlist.musics])
+
+  const changeBackground = useCallback(async () => {
+    if (active) {
+      const newBackground = currentMusic?.cover
+        ? await getGradientFromImageUrl(
+            currentMusic.cover,
+            EmptyMusicCoverBackgorund
+          )
+        : EmptyMusicCoverBackgorund
+      setBackground(newBackground)
+    } else {
+      const newBackground = playlist.image
+        ? await getGradientFromImageUrl(
+            playlist.image,
+            EmptyPlaylistImageBackground
+          )
+        : EmptyPlaylistImageBackground
+      setBackground(newBackground)
+    }
+  }, [active, currentMusic?.cover, playlist.image])
+
+  const drawImage = useCallback(() => {
+    if (active) {
+      return currentMusic?.cover ? (
+        <img className="img" src={currentMusic.cover} alt="" />
+      ) : (
+        <EmptyMusicCover className="img" />
+      )
+    } else {
+      return playlist?.image ? (
+        <img className="img" src={playlist.image} alt="" />
+      ) : (
+        <EmptyPlaylistImage className="img" />
+      )
+    }
+  }, [active, currentMusic?.cover, playlist.image])
+
+  useEffect(() => {
+    changeActive()
+  }, [changeActive])
 
   useLayoutEffect(() => {
     changeBackground()
@@ -177,28 +217,28 @@ const PlaylistHead = ({ playlist }: PlaylistHeadProps) => {
           <div className="ago">{caculateDateAgo(playlist.createdAt)}</div>
         </SubInfo>
 
-        <PlaylistImage>
-          {playlist?.image ? (
-            <img className="img" src={playlist.image} alt="" />
-          ) : (
-            <EmptyPlaylistImage className="img" />
-          )}
-        </PlaylistImage>
+        <PlaylistImage>{drawImage()}</PlaylistImage>
       </Container>
-
-      <PlaylistMusicCounter>
-        <div className="musicCount">{playlist.musicsCount}</div>
-        <div>TRACKS</div>
-        {playlist.musics ? (
-          <div className="durationSum">
-            {convertTimeToString(
-              playlist.musics.reduce((prev, value) => prev + value.duration, 0)
-            )}
-          </div>
-        ) : (
-          <></>
-        )}
-      </PlaylistMusicCounter>
+      {currentMusic && active ? (
+        <WaveFormBox>
+          <Waveform music={currentMusic} active={active} />
+        </WaveFormBox>
+      ) : (
+        <PlaylistMusicCounter>
+          <div className="musicCount">{playlist.musicsCount}</div>
+          <div>TRACKS</div>
+          {playlist.musics ? (
+            <div className="durationSum">
+              {convertTimeToString(
+                playlist.musics.reduce(
+                  (prev, value) => prev + value.duration,
+                  0
+                )
+              )}
+            </div>
+          ) : null}
+        </PlaylistMusicCounter>
+      )}
     </Wrapper>
   )
 }

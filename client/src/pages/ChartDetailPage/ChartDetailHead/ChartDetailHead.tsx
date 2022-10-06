@@ -13,9 +13,11 @@ import {
   clearMusics,
   togglePlay,
 } from '@redux/features/player/playerSlice'
+import Waveform from '@components/Waveform/Waveform'
 
 const Wrapper = styled(AnyHeadStyle.AnyHeadWrapper)`
   position: relative;
+  height: 260px;
 `
 
 const Container = styled.div`
@@ -77,6 +79,13 @@ const ChartMusics = styled.div`
   }
 `
 
+const WaveFormBox = styled.div`
+  position: relative;
+  width: calc(100% - 200px);
+  padding-right: 30px;
+  top: -60px;
+`
+
 interface ChartDetailHeadProps {
   title: string
   musics: IMusic[]
@@ -86,11 +95,12 @@ const ChartDetailHead = ({ title, musics }: ChartDetailHeadProps) => {
   const dispatch = useAppDispatch()
 
   const isPlay = useAppSelector((state) => state.player.controll.isPlay)
-  const nextups = useAppSelector((state) => state.player.musics)
+  const { currentMusic, musics: nextups } = useAppSelector(
+    (state) => state.player
+  )
   const firstMusic = musics[0]
 
   const [active, setActive] = useState(false)
-
   const [background, setBackground] = useState<string>(
     EmptyMusicCoverBackgorund
   )
@@ -109,19 +119,7 @@ const ChartDetailHead = ({ title, musics }: ChartDetailHeadProps) => {
     [active, dispatch, musics]
   )
 
-  const changeBackground = useCallback(async () => {
-    if (firstMusic.cover) {
-      const newBackground = await getGradientFromImageUrl(
-        firstMusic.cover,
-        EmptyMusicCoverBackgorund
-      )
-      setBackground(newBackground)
-    } else {
-      setBackground(EmptyMusicCoverBackgorund)
-    }
-  }, [firstMusic?.cover])
-
-  useEffect(() => {
+  const changeActive = useCallback(() => {
     if (nextups.length !== musics.length) {
       setActive(false)
     } else {
@@ -132,6 +130,46 @@ const ChartDetailHead = ({ title, musics }: ChartDetailHeadProps) => {
       setActive(bol)
     }
   }, [nextups, musics])
+
+  const changeBackground = useCallback(async () => {
+    if (active) {
+      const newBackground = currentMusic?.cover
+        ? await getGradientFromImageUrl(
+            currentMusic.cover,
+            EmptyMusicCoverBackgorund
+          )
+        : EmptyMusicCoverBackgorund
+      setBackground(newBackground)
+    } else {
+      const newBackground = firstMusic.cover
+        ? await getGradientFromImageUrl(
+            firstMusic.cover,
+            EmptyMusicCoverBackgorund
+          )
+        : EmptyMusicCoverBackgorund
+      setBackground(newBackground)
+    }
+  }, [active, currentMusic?.cover, firstMusic?.cover])
+
+  const drawImage = useCallback(() => {
+    if (active) {
+      return currentMusic?.cover ? (
+        <img className="img" src={currentMusic.cover} alt="" />
+      ) : (
+        <EmptyMusicCover className="img" />
+      )
+    } else {
+      return firstMusic?.cover ? (
+        <img className="img" src={firstMusic.cover} alt="" />
+      ) : (
+        <EmptyMusicCover className="img" />
+      )
+    }
+  }, [active, currentMusic?.cover, firstMusic?.cover])
+
+  useEffect(() => {
+    changeActive()
+  }, [changeActive])
 
   useLayoutEffect(() => {
     changeBackground()
@@ -154,28 +192,26 @@ const ChartDetailHead = ({ title, musics }: ChartDetailHeadProps) => {
           </div>
         </ChartInfo>
 
-        <ChartImage>
-          {firstMusic?.cover ? (
-            <img className="img" src={firstMusic.cover} alt="" />
-          ) : (
-            <EmptyMusicCover className="img" />
-          )}
-        </ChartImage>
+        <ChartImage>{drawImage()}</ChartImage>
       </Container>
 
-      <ChartMusics>
-        <div className="musicCount">{musics.length}</div>
-        <div>TRACKS</div>
-        {musics ? (
-          <div className="durationSum">
-            {convertTimeToString(
-              musics.reduce((prev, value) => prev + value.duration, 0)
-            )}
-          </div>
-        ) : (
-          <></>
-        )}
-      </ChartMusics>
+      {currentMusic && active ? (
+        <WaveFormBox>
+          <Waveform music={currentMusic} active={active} />
+        </WaveFormBox>
+      ) : (
+        <ChartMusics>
+          <div className="musicCount">{musics.length}</div>
+          <div>TRACKS</div>
+          {musics ? (
+            <div className="durationSum">
+              {convertTimeToString(
+                musics.reduce((prev, value) => prev + value.duration, 0)
+              )}
+            </div>
+          ) : null}
+        </ChartMusics>
+      )}
     </Wrapper>
   )
 }
