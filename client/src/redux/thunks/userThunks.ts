@@ -1,5 +1,7 @@
+import { AxiosConfig } from './../../api/Axios'
 import Axios from '@api/Axios'
-
+import { delelteMusic } from '@api/musicApi'
+import { deletePlaylist } from '@api/playlistApi'
 import { createAsyncThunk } from '@reduxjs/toolkit'
 
 interface IUserLoginBody {
@@ -21,28 +23,28 @@ export const userLogin = createAsyncThunk(
 
 export const userAuth = createAsyncThunk(
   'AUTH',
-  async () => {
-    const response = await Axios.get('/api/auth/info')
+  async (config: AxiosConfig | undefined, { getState }) => {
+    const state: any = getState()
+    const updatedat = state.user.userData?.updatedAt
+    const response = await Axios.get('/api/auth/info', {
+      ...config,
+      params: { updatedat },
+    })
     return response.data
-  },
-  {
-    // 정보를 가져오고 30초 이내에 재요청 할경우 취소
-    condition: (userId, { getState }: { getState: any }) => {
-      const { user } = getState()
-      const { update, userData } = user
-      if (Boolean(userData)) {
-        const time_ms = Date.now() - update
-        if (Math.floor(time_ms / 1000) < 30) {
-          return false
-        }
-      }
-    },
   }
 )
 
 export const userLogout = createAsyncThunk('LOGOUT', async () => {
   await Axios.post('/api/auth/signout')
 })
+
+export const userChangeEmail = createAsyncThunk(
+  'CHANGE_EMAIL',
+  async (email: string) => {
+    const response = await Axios.patch(`/api/auth/email`, { email })
+    return response.data
+  }
+)
 
 export const userToggleFollow = createAsyncThunk(
   'TOGGLE_FOLLOW',
@@ -58,14 +60,6 @@ export const userUpdateImage = createAsyncThunk(
     const response = await Axios.patch(`/api/auth/image/update`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
-    return response.data
-  }
-)
-
-export const userDeleteImage = createAsyncThunk(
-  'USER_DELETE_IMAGE',
-  async () => {
-    const response = await Axios.patch(`/api/auth/image/delete`)
     return response.data
   }
 )
@@ -107,5 +101,28 @@ export const userToggleRepost = createAsyncThunk(
       `/api/auth/repost/${targetType}/${targetId}`
     )
     return { targetType, data: response.data }
+  }
+)
+
+export interface IUserDeleteItemReturnValue {
+  targetType: 'music' | 'playlist'
+  deleteId: number
+}
+
+export const userDeleteItem = createAsyncThunk(
+  'DELETE_ITEM',
+  async (param: UserToggleTargetParam) => {
+    const { targetId, targetType } = param
+    const func = targetType === 'music' ? delelteMusic : deletePlaylist
+    await func(targetId)
+    return { targetType, deleteId: targetId }
+  }
+)
+
+export const userDeleteAccount = createAsyncThunk(
+  'DELETE_ACCOUNT',
+  async () => {
+    const response = await Axios.delete('/api/auth')
+    return response.data
   }
 )

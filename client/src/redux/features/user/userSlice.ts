@@ -19,12 +19,9 @@ export const userSlice = createSlice({
     // 로그인
     [userThunks.userLogin.fulfilled.type]: (state, action) => {
       const { accessToken, userData } = action.payload
-
       interceptWithAccessToken(accessToken)
-
       state.isLogin = true
       state.userData = userData
-      state.update = Date.now()
     },
     [userThunks.userLogin.rejected.type]: (state) => {
       state.isLogin = false
@@ -32,8 +29,12 @@ export const userSlice = createSlice({
     },
     [userThunks.userAuth.fulfilled.type]: (state, action) => {
       state.isLogin = true
-      state.userData = action.payload
-      state.update = Date.now()
+
+      // 재요청이 방지되거나 기존데이터와 변화가 없다면 null 값을 받는다
+      const newData = action.payload
+      if (Boolean(newData)) {
+        state.userData = newData
+      }
     },
     [userThunks.userAuth.rejected.type]: (state) => {
       state.isLogin = false
@@ -52,6 +53,11 @@ export const userSlice = createSlice({
       state.isLogin = false
       state.userData = undefined
     },
+    [userThunks.userChangeEmail.fulfilled.type]: (state, action) => {
+      if (state.userData) {
+        state.userData.email = action.payload
+      }
+    },
 
     [userThunks.userToggleFollow.fulfilled.type]: (state, action) => {
       if (state.userData) {
@@ -62,12 +68,10 @@ export const userSlice = createSlice({
     },
     [userThunks.userUpdateImage.fulfilled.type]: (state, action) => {
       if (state.userData) {
-        state.userData.profileImage = action.payload
-      }
-    },
-    [userThunks.userDeleteImage.fulfilled.type]: (state) => {
-      if (state.userData) {
-        state.userData.profileImage = undefined
+        const { profileImage, nickname, description } = action.payload
+        state.userData.profileImage = profileImage
+        state.userData.nickname = nickname
+        state.userData.description = description
       }
     },
     [userThunks.userUpdateProfile.fulfilled.type]: (state, action) => {
@@ -100,7 +104,13 @@ export const userSlice = createSlice({
       if (state.userData) {
         const updatePlaylist: IPlaylist = action.payload
         state.userData.playlists = state.userData.playlists.map((playlist) =>
-          playlist.id === updatePlaylist.id ? updatePlaylist : playlist
+          playlist.id === updatePlaylist.id
+            ? {
+                ...playlist,
+                musics: updatePlaylist.musics,
+                updatedAt: updatePlaylist.updatedAt,
+              }
+            : playlist
         )
       }
     },
@@ -111,7 +121,13 @@ export const userSlice = createSlice({
       if (state.userData) {
         const updatePlaylist: IPlaylist = action.payload
         state.userData.playlists = state.userData.playlists.map((playlist) =>
-          playlist.id === updatePlaylist.id ? updatePlaylist : playlist
+          playlist.id === updatePlaylist.id
+            ? {
+                ...playlist,
+                musics: updatePlaylist.musics,
+                updatedAt: updatePlaylist.updatedAt,
+              }
+            : playlist
         )
       }
     },
@@ -121,6 +137,25 @@ export const userSlice = createSlice({
         const existPlaylists = state.userData.playlists || []
         state.userData.playlists = [...existPlaylists, createPlaylist]
       }
+    },
+    [userThunks.userDeleteItem.fulfilled.type]: (state, action) => {
+      const { targetType, deleteId }: userThunks.IUserDeleteItemReturnValue =
+        action.payload
+      if (state.userData) {
+        if (targetType === 'music') {
+          state.userData.musics = state.userData.musics.filter(
+            (m) => m.id !== deleteId
+          )
+        } else {
+          state.userData.playlists = state.userData.playlists.filter(
+            (m) => m.id !== deleteId
+          )
+        }
+      }
+    },
+    [userThunks.userDeleteAccount.fulfilled.type]: (state) => {
+      state.userData = undefined
+      state.isLogin = false
     },
   },
 })

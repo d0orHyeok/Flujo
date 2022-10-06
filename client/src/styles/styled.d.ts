@@ -6,6 +6,7 @@ declare module 'styled-components' {
   export interface DefaultTheme {
     colors: Colors
     device: Device
+    minWidth?: string | number
   }
 }
 

@@ -11,6 +11,9 @@ interface AppThemeProviderProps {
 interface IAppThemeContext {
   ThemeMode: string
   setThemeMode?: React.Dispatch<React.SetStateAction<string>>
+  setMinWidth?: React.Dispatch<
+    React.SetStateAction<string | number | undefined>
+  >
 }
 
 const AppThemeContext = createContext<IAppThemeContext>({ ThemeMode: 'dark' })
@@ -18,11 +21,14 @@ const AppThemeContext = createContext<IAppThemeContext>({ ThemeMode: 'dark' })
 export const AppThemeProvider = ({ children }: AppThemeProviderProps) => {
   const localSettingTheme = window.localStorage.getItem('theme') || 'dark'
   const [ThemeMode, setThemeMode] = useState(localSettingTheme)
+  const [minWidth, setMinWidth] = useState<number | string | undefined>()
   const themeObject = ThemeMode === 'dark' ? darkTheme : lightTheme
 
   return (
-    <AppThemeContext.Provider value={{ ThemeMode, setThemeMode }}>
-      <ThemeProvider theme={themeObject}>{children}</ThemeProvider>
+    <AppThemeContext.Provider value={{ ThemeMode, setThemeMode, setMinWidth }}>
+      <ThemeProvider theme={{ ...themeObject, minWidth }}>
+        {children}
+      </ThemeProvider>
     </AppThemeContext.Provider>
   )
 }
@@ -43,4 +49,13 @@ export const useAppTheme = (): UseThemeReturnTypes => {
   }, [ThemeMode, setThemeMode])
 
   return [ThemeMode, toggleTheme]
+}
+
+export const useSetMinWidth = () => {
+  const context = useContext(AppThemeContext)
+  const { setMinWidth } = context
+
+  return (minWidth?: string | number) => {
+    setMinWidth && setMinWidth(minWidth)
+  }
 }
