@@ -37,9 +37,7 @@ const TrackDetailPlaylists = ({
       const skip = page * 15
       const take = skip + 15
       const response = await findPlaylistsContainsMusic(musicId, {
-        skip,
-        take,
-        uid,
+        params: { skip, take, uid },
       })
       const getItems: IPlaylist[] = response.data
       if (!getItems || getItems.length < 15) {
@@ -70,7 +68,7 @@ const TrackDetailPlaylists = ({
   return (
     <>
       <div {...props}>
-        {playlists.length ? (
+        {loading || playlists.length ? (
           <>
             {playlists.map((playlist, index) => (
               <StyledPlaylistCard key={index} playlist={playlist} />

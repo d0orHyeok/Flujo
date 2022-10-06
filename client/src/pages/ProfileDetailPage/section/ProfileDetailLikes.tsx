@@ -1,4 +1,4 @@
-import { getUserMusics } from '@api/musicApi'
+import { getMusicsByIds } from '@api/musicApi'
 import { IMusic } from '@appTypes/music.type'
 import { IUser } from '@appTypes/user.type'
 import LoadingArea from '@components/Loading/LoadingArea'
@@ -26,6 +26,8 @@ interface IProfileDetailLikesProps
 }
 
 const ProfileDetailLikes = ({ user, ...props }: IProfileDetailLikesProps) => {
+  const { likeMusics } = user
+
   const [musics, setMusics] = useState<IMusic[]>([])
   const [page, setPage] = useState(0)
   const [done, setDone] = useState(false)
@@ -40,7 +42,10 @@ const ProfileDetailLikes = ({ user, ...props }: IProfileDetailLikesProps) => {
     try {
       const skip = page * 15
       const take = skip + 15
-      const response = await getUserMusics(user.id, { skip, take })
+      const musicIds = likeMusics.slice(skip, take).map((m) => m.id)
+      const response = await getMusicsByIds(musicIds, {
+        params: { uid: user.id },
+      })
       const getItems: IMusic[] = response.data
       if (!getItems || getItems.length < 15) {
         setDone(true)
@@ -52,7 +57,8 @@ const ProfileDetailLikes = ({ user, ...props }: IProfileDetailLikesProps) => {
     } finally {
       setLoading(false)
     }
-  }, [done, user.id, page])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [done, page, user.id])
 
   const handleOnView = useCallback(
     (inView: boolean) => {
@@ -67,15 +73,13 @@ const ProfileDetailLikes = ({ user, ...props }: IProfileDetailLikesProps) => {
     getMusics()
   }, [getMusics])
 
-  return musics.length ? (
-    <>
-      <div {...props}>
-        {musics.map((music, index) => (
-          <StyledMusicCard key={index} music={music} />
-        ))}
-        <LoadingArea loading={loading} hide={done} onInView={handleOnView} />
-      </div>
-    </>
+  return likeMusics.length ? (
+    <div {...props}>
+      {musics.map((music, index) => (
+        <StyledMusicCard key={index} music={music} />
+      ))}
+      <LoadingArea loading={loading} hide={done} onInView={handleOnView} />
+    </div>
   ) : (
     <NoItem>
       <Heart />

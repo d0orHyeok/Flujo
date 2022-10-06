@@ -33,7 +33,9 @@ const TrackDetailRelatedTracks = ({
     try {
       const skip = page * 15
       const take = skip + 15
-      const response = await findRelatedMusics(musicId, { skip, take })
+      const response = await findRelatedMusics(musicId, {
+        params: { skip, take },
+      })
       const getItems: IMusic[] = response.data
       if (!getItems || getItems.length < 15) {
         setDone(true)
@@ -60,15 +62,13 @@ const TrackDetailRelatedTracks = ({
     getRelatedMusics()
   }, [getRelatedMusics])
 
-  return musics.length ? (
-    <>
-      <div {...props}>
-        {musics.map((music, index) => (
-          <StyledMusicCard key={index} music={music} />
-        ))}
-        <LoadingArea loading={loading} hide={done} onInView={handleOnView} />
-      </div>
-    </>
+  return loading || musics.length ? (
+    <div {...props}>
+      {musics.map((music, index) => (
+        <StyledMusicCard key={index} music={music} />
+      ))}
+      <LoadingArea loading={loading} hide={done} onInView={handleOnView} />
+    </div>
   ) : (
     <NoItem>
       Sorry...

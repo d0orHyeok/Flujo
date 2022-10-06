@@ -37,7 +37,9 @@ const SearchPlaylist = ({ keyward }: ISearchPlaylistsProps) => {
       const getNum = 15
       const skip = page * getNum
       const take = skip + getNum
-      const response = await searchPlaylist(keyward, { skip, take, uid })
+      const response = await searchPlaylist(keyward, {
+        params: { skip, take, uid },
+      })
       const getItems = response.data
       if (!getItems || getItems.length < getNum) {
         setDone(true)

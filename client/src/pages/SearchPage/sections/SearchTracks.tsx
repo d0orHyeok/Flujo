@@ -37,7 +37,9 @@ const SearchTracks = ({ keyward }: ISearchTracksProps) => {
       const getNum = 15
       const skip = page * getNum
       const take = skip + getNum
-      const response = await searchMusic(keyward, { skip, take, uid })
+      const response = await searchMusic(keyward, {
+        params: { skip, take, uid },
+      })
       const getItems = response.data
       if (!getItems || getItems.length < getNum) {
         setDone(true)

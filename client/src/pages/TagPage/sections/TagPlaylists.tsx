@@ -32,7 +32,9 @@ const TagPlaylists = ({ tag }: ITagPlaylistsProps) => {
       const getNum = 15
       const skip = page * getNum
       const take = skip + getNum
-      const response = await getPlaylistsByTag(tag, { skip, take, uid })
+      const response = await getPlaylistsByTag(tag, {
+        params: { skip, take, uid },
+      })
       const getItems = response.data
       console.log(getItems)
       if (!getItems || getItems.length < getNum) {

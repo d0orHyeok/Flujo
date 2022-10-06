@@ -18,12 +18,14 @@ import RelatedTarget, {
 } from '../../components/RelatedTarget/RelatedTarget'
 import UserContentCard from '@components/UserCard/UserContentCard'
 import TrackComments from './TrackComments/TrackComments'
-import useInterval from '@api/Hooks/userInterval'
+import { useInterval } from '@api/Hooks'
 import { Helmet } from 'react-helmet-async'
+import { useSetMinWidth } from '@redux/context/appThemeProvider'
 
 const TrackPage = () => {
   const { userId, permalink } = useParams()
   const navigate = useNavigate()
+  const setMinWidth = useSetMinWidth()
 
   const [music, setMusic] = useState<IMusic>()
   const [relatedMusics, setRelatedMusics] = useState<IMusic[]>([])
@@ -90,12 +92,11 @@ const TrackPage = () => {
   }, [music, relatedMusics])
 
   const resizeSideContent = useCallback(() => {
-    if (sideRef.current) {
-      const docH = document.body.offsetHeight
-      const sideH = sideRef.current.getBoundingClientRect().height
-      const calcH = Math.floor(docH - sideH - 101)
-      sideRef.current.style.top = `${calcH < 81 ? calcH : 75}px`
-    }
+    if (!sideRef.current) return
+    const docH = document.body.offsetHeight
+    const sideH = sideRef.current.getBoundingClientRect().height
+    const calcH = Math.floor(docH - sideH - 101)
+    sideRef.current.style.top = `${calcH < 81 ? calcH : 75}px`
   }, [])
 
   useEffect(() => {
@@ -105,6 +106,13 @@ const TrackPage = () => {
       window.removeEventListener('resize', resizeSideContent)
     }
   }, [resizeSideContent])
+
+  useEffect(() => {
+    setMinWidth('725px')
+    return () => {
+      setMinWidth()
+    }
+  }, [setMinWidth])
 
   return !music ? (
     <Loading />

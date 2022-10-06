@@ -18,8 +18,10 @@ import PlaylistHead from './PlaylistHead/PlaylistHead'
 import * as PageStyle from '@styles/TargetPageStyle/TargetPage.style'
 import PlaylistMusics from './PlaylistMusics/PlaylistMusics'
 import { Helmet } from 'react-helmet-async'
+import { useSetMinWidth } from '@redux/context/appThemeProvider'
 
 const PlaylistPage = () => {
+  const setMinWidth = useSetMinWidth()
   const { userId, permalink } = useParams()
   const navigate = useNavigate()
 
@@ -77,6 +79,13 @@ const PlaylistPage = () => {
     }
   }, [resizeSideContent])
 
+  useEffect(() => {
+    setMinWidth('725px')
+    return () => {
+      setMinWidth()
+    }
+  }, [setMinWidth])
+
   return !playlist ? (
     <Loading />
   ) : (
@@ -128,7 +137,11 @@ const PlaylistPage = () => {
               ) : (
                 <></>
               )}
-              <PlaylistMusics musics={playlist.musics} />
+              {playlist.musics?.length ? (
+                <PlaylistMusics musics={playlist.musics} />
+              ) : (
+                <></>
+              )}
             </PageStyle.MainContent>
           </PageStyle.Content>
           {existRelated ? (

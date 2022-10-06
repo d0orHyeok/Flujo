@@ -4,12 +4,15 @@ import { Button } from '@components/Common'
 import LoadingArea from '@components/Loading/LoadingArea'
 import MusicCard from '@components/MusicCard/MusicCard'
 import { Portal } from '@mui/material'
+import { useSetMinWidth } from '@redux/context/appThemeProvider'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { BsClockHistory } from 'react-icons/bs'
 import * as S from './HistoryPage.style'
 
 const HistoryPage = () => {
+  const setMinWidth = useSetMinWidth()
+
   const [historys, setHistorys] = useState<IHistory[]>([])
   const [page, setPage] = useState(0)
   const [loading, setLoading] = useState(false)
@@ -72,7 +75,7 @@ const HistoryPage = () => {
       const getNum = 15
       const skip = page * getNum
       const take = skip + getNum
-      const response = await getUsersHistorys({ skip, take })
+      const response = await getUsersHistorys({ params: { skip, take } })
       const getItems = response.data
       if (!getItems || getItems.length < getNum) {
         setDone(true)
@@ -85,6 +88,13 @@ const HistoryPage = () => {
       setLoading(false)
     }
   }, [page])
+
+  useEffect(() => {
+    setMinWidth('650px')
+    return () => {
+      setMinWidth()
+    }
+  }, [setMinWidth])
 
   useEffect(() => {
     getHistorys()

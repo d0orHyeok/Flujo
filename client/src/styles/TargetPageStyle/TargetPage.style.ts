@@ -8,7 +8,6 @@ export const Wrapper = styled.div`
   margin: 0 auto;
   font-size: 14px;
   line-height: 14px;
-  min-width: 725px;
 `
 
 export const Toolbox = styled.div`

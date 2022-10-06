@@ -138,7 +138,7 @@ const TrackDetailUsers = ({
     getUserItems()
   }, [getUserItems])
 
-  return users?.length ? (
+  return loading || users?.length ? (
     <StyledUl {...props}>
       {displayUsers.map((user, index) => (
         <StyledLi key={index}>

@@ -1,10 +1,12 @@
-import React, { useCallback, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import * as S from './UploadPage.style'
 import { Helmet } from 'react-helmet-async'
 import UploadMusic from './UploadMusic'
+import { useSetMinWidth } from '@redux/context/appThemeProvider'
 
 const UploadPage = () => {
   const [musicFiles, setMusicFiles] = useState<FileList>()
+  const setMinWidth = useSetMinWidth()
 
   const handleChangeFiles = useCallback((files: FileList) => {
     if (files.length) {
@@ -22,6 +24,13 @@ const UploadPage = () => {
       inputEl.files = dataTranster.files
     }
   }, [])
+
+  useEffect(() => {
+    setMinWidth('480px')
+    return () => {
+      setMinWidth()
+    }
+  }, [setMinWidth])
 
   return (
     <>

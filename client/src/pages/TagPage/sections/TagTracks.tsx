@@ -32,7 +32,9 @@ const TagTracks = ({ tag }: ITagTracksProps) => {
       const getNum = 15
       const skip = page * getNum
       const take = skip + getNum
-      const response = await getMusicsByTag(tag, { skip, take, uid })
+      const response = await getMusicsByTag(tag, {
+        params: { skip, take, uid },
+      })
       const getItems = response.data
       if (!getItems || getItems.length < getNum) {
         setDone(true)
