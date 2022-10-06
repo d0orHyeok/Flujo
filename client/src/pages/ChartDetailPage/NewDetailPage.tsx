@@ -1,4 +1,3 @@
-import { getNewReleaseMusics } from '@api/musicApi'
 import { genreList } from '@assets/data/genre'
 import React, { useLayoutEffect, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
@@ -39,8 +38,8 @@ const NewDetailPage = () => {
       <ChartDetailPage
         title={title}
         description={`New release ${title.toLowerCase()} tracks on Wave`}
-        getMusics={getNewReleaseMusics}
-        genre={!genre ? undefined : title}
+        genre={genre === 'all' ? undefined : title}
+        chart="newrelease"
       />
     </>
   )

@@ -1,4 +1,3 @@
-import { getNewReleaseMusics } from '@api/musicApi'
 import { Helmet } from 'react-helmet-async'
 import BaseChartPage from './BaseChartPage'
 
@@ -9,9 +8,9 @@ const NewPage = () => {
         <title>New Release tracks | Wave</title>
       </Helmet>
       <BaseChartPage
+        chart="newrelease"
         title="New Release tracks"
         description="Up-and-coming tracks"
-        getMusics={getNewReleaseMusics}
       />
     </>
   )

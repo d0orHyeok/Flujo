@@ -20,20 +20,23 @@ import { FollowTextButton } from '@components/Common/Button'
 import { useAppDispatch, useAppSelector } from '@redux/hook'
 import { userToggleFollow } from '@redux/thunks/userThunks'
 import { useLoginOpen } from '@redux/context/loginProvider'
+import { getChartedMusics } from '@api/musicApi'
+import { useSetMinWidth } from '@redux/context/appThemeProvider'
 
 interface IChartDetailPagePrpps {
-  getMusics: (...args: any[]) => any
   title: string
   description: string
   genre?: string
+  chart: 'newrelease' | 'trend'
 }
 
 const ChartDetailPage = ({
   title,
   description,
   genre,
-  getMusics,
+  chart,
 }: IChartDetailPagePrpps) => {
+  const setMinWidth = useSetMinWidth()
   const { search } = useLocation()
   const dispatch = useAppDispatch()
   const openLogin = useLoginOpen()
@@ -48,39 +51,43 @@ const ChartDetailPage = ({
   const [loading, setLoading] = useState(true)
   const [musics, setMusics] = useState<IMusic[]>([])
   const [users, setUsers] = useState<IUser[]>([])
-  const [date, setDate] = useState('week')
+  const [date, setDate] = useState<number | string>()
 
   const handleClickFollow = useCallback(
-    (userId: string) => (event: React.MouseEvent<HTMLButtonElement>) => {
+    (userId: string) => async (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault()
       if (!myId) {
         openLogin()
         return
       }
 
-      event.preventDefault()
-      dispatch(userToggleFollow(userId)).then((value) => {
-        if (value.type.indexOf('fulfilled') !== -1) {
-          const { type } = value.payload
-          setUsers((state) =>
-            state.map((user) => {
-              if (user.id === userId) {
-                const add = type === 'follow' ? 1 : -1
-                return { ...user, followersCount: user.followersCount + add }
-              } else {
-                return user
-              }
-            })
-          )
-        }
-      })
+      const value = await dispatch(userToggleFollow(userId))
+      if (value.type.indexOf('fulfilled') !== -1) {
+        const { type } = value.payload
+        setUsers((state) =>
+          state.map((user) => {
+            if (user.id === userId) {
+              const add = type === 'follow' ? 1 : -1
+              return { ...user, followersCount: user.followersCount + add }
+            } else {
+              return user
+            }
+          })
+        )
+      }
     },
     [dispatch, myId, openLogin]
   )
 
   const getChartMusics = useCallback(async () => {
+    if (!date) {
+      return
+    }
     setLoading(true)
     try {
-      const response = await getMusics({ genre, date })
+      const response = await getChartedMusics({
+        params: { chart, genre, date },
+      })
       const getItems = response?.data || []
       setMusics(getItems)
     } catch (error) {
@@ -89,7 +96,7 @@ const ChartDetailPage = ({
     } finally {
       setLoading(false)
     }
-  }, [getMusics, genre, date])
+  }, [chart, genre, date])
 
   const resizeSideContent = useCallback(() => {
     if (sideRef.current) {
@@ -97,24 +104,11 @@ const ChartDetailPage = ({
       const sideH = sideRef.current.getBoundingClientRect().height
       const calcH = Math.floor(docH - sideH - 101)
 
-      console.log(docH, sideH)
       sideRef.current.style.top = `${calcH < 81 ? calcH : 80}px`
     }
   }, [])
 
-  useEffect(() => {
-    resizeSideContent()
-    window.addEventListener('resize', resizeSideContent)
-    return () => {
-      window.removeEventListener('resize', resizeSideContent)
-    }
-  }, [resizeSideContent])
-
-  useLayoutEffect(() => {
-    getChartMusics()
-  }, [getChartMusics])
-
-  useLayoutEffect(() => {
+  const changeDate = useCallback(() => {
     if (!search) {
       setDate('week')
     } else {
@@ -132,22 +126,51 @@ const ChartDetailPage = ({
     }
   }, [search])
 
-  useLayoutEffect(() => {
+  const changeUsers = useCallback(() => {
     if (musics.length) {
       const arr: IUser[] = []
       musics.forEach((music) => {
         const { user } = music
-        if (arr.findIndex((u) => u.id === user.id) === -1) {
+        if (user && arr.findIndex((u) => u.id === user?.id) === -1) {
           arr.push(user)
         }
       })
       setUsers(arr)
+    } else {
+      setUsers([])
     }
   }, [musics])
 
+  useEffect(() => {
+    setMinWidth('725px')
+    return () => {
+      setMinWidth()
+    }
+  }, [setMinWidth])
+
+  useEffect(() => {
+    resizeSideContent()
+    window.addEventListener('resize', resizeSideContent)
+    return () => {
+      window.removeEventListener('resize', resizeSideContent)
+    }
+  }, [resizeSideContent])
+
+  useLayoutEffect(() => {
+    getChartMusics()
+  }, [getChartMusics])
+
+  useLayoutEffect(() => {
+    changeDate()
+  }, [changeDate])
+
+  useLayoutEffect(() => {
+    changeUsers()
+  }, [changeUsers])
+
   return loading ? (
     <Loading />
-  ) : !loading && musics.length ? (
+  ) : musics.length ? (
     <>
       <S.Wrapper>
         <ChartDetailHead {...{ musics, title }} />
@@ -166,8 +189,8 @@ const ChartDetailPage = ({
               {users.map((user, index) => (
                 <S.UserItem key={index}>
                   <div className="userItem-profileImage">
-                    <Link className="link" to={`/profile/${user.id}`}>
-                      {user.profileImage ? (
+                    <Link className="link" to={`/profile/${user?.id}`}>
+                      {user?.profileImage ? (
                         <img className="img" src={user.profileImage} alt="" />
                       ) : (
                         <EmptyProfileImage className="img" />

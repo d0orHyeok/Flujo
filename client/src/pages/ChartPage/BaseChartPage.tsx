@@ -8,6 +8,8 @@ import { genreChart, genreList } from '@assets/data/genre'
 import CheckBox from '@components/Common/Checkbox'
 import { Collapse } from '@mui/material'
 import Select, { Option } from '@components/Common/Select/Select'
+import { getChartedMusics } from '@api/musicApi'
+import axios, { Canceler } from 'axios'
 
 interface IChart {
   title: string
@@ -19,27 +21,41 @@ interface IChart {
 interface BaseChartPageProps {
   title: string
   description: string
-  getMusics: (...args: any[]) => any
+  chart: 'trend' | 'newrelease'
 }
 
-const BaseChartPage = ({
-  title,
-  description,
-  getMusics,
-}: BaseChartPageProps) => {
+const BaseChartPage = ({ title, description, chart }: BaseChartPageProps) => {
   const [period, setPeriod] = useState<string | number | undefined>('Weekly')
   const [expanded, setExpanded] = useState(false)
   const [genreCheck, setGenreCheck] = useState(
     Array.from({ length: genreList.length }, () => true)
   )
-  const [page, setPage] = useState(0)
+  const [page, setPage] = useState(-1)
   const [done, setDone] = useState(false)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [charts, setCharts] = useState<IChart[]>([])
+  const [cancelers, setCancelers] = useState<Canceler[]>([])
 
   const toggleExpanded = useCallback(() => {
     setExpanded((state) => !state)
   }, [])
+
+  const handleChagnePeriod = useCallback(
+    (period?: string | number) => {
+      setPeriod((prev) => {
+        if (prev !== period) {
+          cancelers.forEach((c) => c())
+          setCancelers([])
+          setCharts([])
+          setPage(-1)
+          return period
+        } else {
+          return prev
+        }
+      })
+    },
+    [cancelers]
+  )
 
   const handleClickCheckbox = useCallback(
     (index: number) => (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -52,29 +68,42 @@ const BaseChartPage = ({
   )
 
   const handleGetChartedTracks = useCallback(
-    async (genre?: string, period?: string | number) => {
+    async (genre?: string | string[]) => {
+      setLoading(true)
       const date =
         period === 'Weekly' ? 'week' : period === 'Monthly' ? 'month' : period
       try {
-        const response = await getMusics({ genre, date })
-        const getItems: IMusic[] = response.data
-        return getItems
+        const cancelToken = new axios.CancelToken((c) =>
+          setCancelers((prev) => [...prev, c])
+        )
+        const response = await getChartedMusics({
+          cancelToken,
+          params: {
+            chart,
+            genre,
+            date,
+          },
+        })
+        return response.data
       } catch (error) {
+        if (!axios.isCancel(error)) {
+          setDone(true)
+        }
         console.error(error)
         return []
       }
     },
-    [getMusics]
+    [chart, period]
   )
 
   const getGenreChartedMusics = useCallback(async () => {
     // 페이지 하단에 도달했을 때 장르별 차트목록을 불러온다
-    if (done || charts.length === 0) {
+    if (done || page < 0) {
       return
     }
 
     const getNum = 4
-    const baseIndex = charts.length - 1
+    const baseIndex = page * getNum
 
     // 장르종류를 가져온다
     const genres = genreChart.filter(
@@ -85,53 +114,62 @@ const BaseChartPage = ({
       return
     }
 
-    setLoading(true)
     try {
       // 서버로 부터 장르들을 가져온다.
-      const newCharts = await Promise.all(
-        genres.map(async (genre) => {
+      const genreMusics = await handleGetChartedTracks(genres)
+      const newCharts = genreMusics?.map(
+        (item: { genre: string; musics: IMusic[] }) => {
+          const { genre, musics } = item
           const link = genre.toLowerCase().replace(/[^a-z]/g, '')
-          const musics: IMusic[] = await handleGetChartedTracks(genre, period)
-          return { title: genre, link, genre, musics }
-        })
+          return { title: genre, link: link, genre: genre, musics }
+        }
       )
       setCharts((prevState) => [...prevState, ...newCharts])
-    } catch (error: any) {
-      setDone(true)
-      console.error(error.response || error)
-    } finally {
       setLoading(false)
+    } catch (error: any) {
+      console.error(error.response || error)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [charts.length, done, page, period])
+  }, [done, page, handleGetChartedTracks])
 
   const handleOnView = useCallback(
     (inView: boolean) => {
       if (inView && !loading && !done) {
-        setPage((prevState) => prevState + 1)
+        setPage((prevState) => {
+          if (prevState < 0) {
+            return prevState
+          }
+          const num = 4
+          const itemNum = num * prevState + 1
+          if (charts.length < itemNum) {
+            return prevState
+          }
+          return prevState + 1
+        })
       }
     },
-    [loading, done]
+    [charts.length, done, loading]
   )
+
+  const getAllChart = useCallback(async () => {
+    if (page === -1 && charts.length === 0) {
+      setDone(false)
+      const musics = await handleGetChartedTracks(undefined)
+      if (musics.length === 0) {
+        setDone(true)
+      } else {
+        setPage(0)
+      }
+      setCharts([{ title: 'All music genres', link: 'all', musics }])
+    }
+  }, [charts.length, handleGetChartedTracks, page])
 
   useEffect(() => {
     getGenreChartedMusics()
   }, [getGenreChartedMusics])
 
   useEffect(() => {
-    setLoading(true)
-    handleGetChartedTracks(undefined, period).then((musics) => {
-      setCharts([{ title: 'All music genres', link: 'all', musics }])
-      setLoading(false)
-    })
-  }, [handleGetChartedTracks, period])
-
-  useEffect(() => {
-    if (charts.length === 1) {
-      setPage(0)
-      setDone(false)
-    }
-  }, [charts.length])
+    getAllChart()
+  }, [getAllChart])
 
   return (
     <>
@@ -151,7 +189,7 @@ const BaseChartPage = ({
           <Select
             className="filterBox-select"
             value={period}
-            onChangeValue={setPeriod}
+            onChangeValue={handleChagnePeriod}
           >
             <div className="inner-select">
               <Option value="Daily">{'Daily'}</Option>
@@ -240,11 +278,7 @@ const BaseChartPage = ({
             </Link>
           </S.NoChart>
         )}
-        {done ? (
-          <></>
-        ) : (
-          <LoadingArea loading={loading} onInView={handleOnView} />
-        )}
+        <LoadingArea loading={loading} hide={done} onInView={handleOnView} />
       </S.Container>
     </>
   )

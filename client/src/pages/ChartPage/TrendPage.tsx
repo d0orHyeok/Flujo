@@ -1,4 +1,3 @@
-import { getTrendingMusics } from '@api/musicApi'
 import { Helmet } from 'react-helmet-async'
 
 import BaseChartPage from './BaseChartPage'
@@ -12,7 +11,7 @@ const TrendPage = () => {
       <BaseChartPage
         title="Trending tracks"
         description="The most played tracks"
-        getMusics={getTrendingMusics}
+        chart="trend"
       />
     </>
   )

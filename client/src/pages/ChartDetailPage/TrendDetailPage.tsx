@@ -1,4 +1,3 @@
-import { getTrendingMusics } from '@api/musicApi'
 import { genreList } from '@assets/data/genre'
 import React, { useLayoutEffect, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
@@ -39,8 +38,8 @@ const TrendDetailPage = () => {
       <ChartDetailPage
         title={title}
         description={`Trending ${title.toLowerCase()} tracks on Wave`}
-        getMusics={getTrendingMusics}
-        genre={!genre ? undefined : title}
+        genre={genre === 'all' ? undefined : title}
+        chart="trend"
       />
     </>
   )
