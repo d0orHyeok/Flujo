@@ -64,6 +64,7 @@ const PopoverUser = ({ user, ...props }: PopoverUserProps) => {
   const [anchorTop, setAnchorTop] = useState(false)
   const [open, setOpen] = useState(false)
   const [parentWidth, setParentWidth] = useState<number>()
+  const [parentHeight, setParentHeight] = useState<number>()
 
   const handleOpen = useCallback((event: MouseEvent) => {
     event.preventDefault()
@@ -75,6 +76,32 @@ const PopoverUser = ({ user, ...props }: PopoverUserProps) => {
     setOpen(false)
   }, [])
 
+  const setAnchorPosition = useCallback(() => {
+    const popoverEl = popoverRef.current?.children.item(0)
+    if (open && popoverEl) {
+      const popoverRect = popoverEl.getBoundingClientRect()
+
+      const pageHeight = window.innerHeight - 81
+
+      setAnchorTop((state) => {
+        if (!state) {
+          return pageHeight < popoverRect.bottom ? true : false
+        } else {
+          if (!parentHeight) {
+            return state
+          }
+          const ifBottomHeight =
+            parentHeight + 14 + popoverRect.height + popoverRect.bottom
+          return ifBottomHeight < pageHeight ? false : true
+        }
+      })
+    }
+  }, [open, parentHeight])
+
+  useEffect(() => {
+    setAnchorPosition()
+  }, [setAnchorPosition])
+
   useEffect(() => {
     const parentEl = popoverRef.current?.parentElement
     if (!parentEl) {
@@ -84,6 +111,7 @@ const PopoverUser = ({ user, ...props }: PopoverUserProps) => {
     parentEl.style.position = 'relative'
     const parentData = parentEl.getBoundingClientRect()
     setParentWidth(parentData.width)
+    setParentHeight(parentData.height)
 
     parentEl.addEventListener('mouseenter', handleOpen)
     parentEl.addEventListener('mouseleave', handleClose)
@@ -92,21 +120,6 @@ const PopoverUser = ({ user, ...props }: PopoverUserProps) => {
       parentEl.removeEventListener('mouseleave', handleClose)
     }
   }, [handleClose, handleOpen])
-
-  useEffect(() => {
-    const popoverEl = popoverRef.current?.children.item(0)
-    if (open && popoverEl) {
-      const popoverRect = popoverEl.getBoundingClientRect()
-
-      const pageHeight = window.innerHeight - 81
-
-      if (pageHeight < popoverRect.bottom) {
-        setAnchorTop(true)
-      } else {
-        setAnchorTop(false)
-      }
-    }
-  }, [open])
 
   return (
     <PopoverDiv

@@ -3,8 +3,8 @@ import styled from 'styled-components'
 import LoadingBar from './LoadingBar'
 import { InView } from 'react-intersection-observer'
 
-const StyledDiv = styled.div<{ hide?: boolean }>`
-  display: ${({ hide }) => (hide ? 'none' : 'flex')};
+const StyledDiv = styled.div`
+  display: flex;
   align-items: center;
   justify-content: center;
   height: 200px;
@@ -16,11 +16,20 @@ interface LodaingAreaProps extends React.HTMLAttributes<HTMLDivElement> {
   onInView?: (inView: boolean) => void
 }
 
-const LoadingArea = ({ loading, onInView, ...props }: LodaingAreaProps) => {
-  return (
+const LoadingArea = ({
+  loading,
+  onInView,
+  hide,
+  ...props
+}: LodaingAreaProps) => {
+  return hide ? null : !loading ? (
     <InView as="div" onChange={onInView}>
-      <StyledDiv {...props}>{loading ? <LoadingBar /> : <></>}</StyledDiv>
+      <StyledDiv {...props}></StyledDiv>
     </InView>
+  ) : (
+    <StyledDiv {...props}>
+      <LoadingBar />
+    </StyledDiv>
   )
 }
 

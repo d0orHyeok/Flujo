@@ -47,8 +47,8 @@ const ProfileArea = ({ className, fold }: ProfileAreaProps) => {
     localStorage.setItem('wave_login', 'false')
     dispatch(userLogout())
     handleClose()
-    location.replace('/')
-  }, [dispatch, handleClose])
+    navigate(location.pathname)
+  }, [dispatch, handleClose, navigate])
 
   return (
     <>
@@ -92,8 +92,12 @@ const ProfileArea = ({ className, fold }: ProfileAreaProps) => {
           horizontal: fold ? 'left' : 'right',
         }}
       >
-        <MenuItem onClick={handleClickAndNavigate(`/profile/you`)}>
-          <Link to="/profile/you">Profile</Link>
+        <MenuItem
+          onClick={handleClickAndNavigate(
+            `/profile/${user.userData?.id || 'you'}`
+          )}
+        >
+          <Link to={`/profile/${user.userData?.id || 'you'}`}>Profile</Link>
         </MenuItem>
         <MenuItem onClick={handleClickAndNavigate(`/history`)}>
           <Link to="/history">History</Link>

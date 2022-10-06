@@ -14,25 +14,27 @@ const withUser = <P extends object>(
     const [loading, setLoading] = useState(true)
     const isLogin = useAppSelector((state) => Boolean(state.user.userData))
 
-    const authCheck = useCallback(async () => {
+    const authCheck = useCallback(() => {
       if (!dispatch || !navigate) {
         return
       }
-      const { type } = await dispatch(userAuth())
-      const success = type.indexOf('fulfilled') !== -1
-      const isAuth = success ? success : isLogin
+      dispatch(userAuth()).then((value) => {
+        const { type } = value
+        const success = type.indexOf('fulfilled') !== -1
+        const isAuth = success ? success : isLogin
 
-      if (isAuth) {
-        if (option === false) {
-          navigate('/')
+        if (isAuth) {
+          if (option === false) {
+            navigate('/')
+          }
+        } else {
+          if (option) {
+            navigate('/')
+          }
         }
-      } else {
-        if (option) {
-          navigate('/')
-        }
-      }
 
-      setLoading(false)
+        setLoading(false)
+      })
     }, [dispatch, isLogin, navigate])
 
     useLayoutEffect(() => {

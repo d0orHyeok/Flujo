@@ -12,8 +12,8 @@ export const Backdrop = styled.div<{ fold: string }>`
   display: none;
 
   ${({ theme }) => theme.device.desktop} {
-    & .app-backdrop {
-      display: ${({ fold }) => !fold && 'block'};
+    & {
+      display: ${({ fold }) => (fold === 'false' ? 'block' : 'none')};
     }
   }
 `
@@ -127,13 +127,24 @@ export const AppContainer = styled.div<{ fold: string }>`
   min-height: 100%;
   height: 100%;
   transition: padding-left 0.3s ease;
-  padding-left: ${({ fold }) => getHeaderWidth(fold === 'true')};
-  background-color: ${({ theme }) => theme.colors.bgColor};
   padding-top: ${floatBoxHeight};
+  padding-left: ${({ fold }) => getHeaderWidth(fold === 'true')};
+  padding-bottom: 81px;
+  min-width: ${({ theme }) => theme.minWidth || 'auto'};
 
-  &,
   & .app-footer {
-    padding-bottom: 81px;
+    position: relative;
+    z-index: -1;
+  }
+
+  & .app-main {
+    background-color: ${({ theme }) => theme.colors.bgColor};
+    height: 100%;
+    position: relative;
+  }
+
+  & .empty-space {
+    height: 81px;
   }
 
   /* media 1200px */
@@ -160,7 +171,7 @@ export const FloatBox = styled.div<{ fold: string }>`
     position: absolute;
     left: ${({ fold }) => getHeaderWidth(fold === 'true')};
     transform: scale(75%);
-    display: ${({ fold }) => (!fold ? 'none' : 'bloack')};
+    display: ${({ fold }) => (fold === 'false' ? 'none' : 'bloack')};
   }
 
   & .float-search {

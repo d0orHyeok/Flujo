@@ -21,14 +21,12 @@ interface IButtonProps {
 
 interface PlaylistCardProps extends React.HTMLAttributes<HTMLDivElement> {
   playlist: IPlaylist
-  setPlaylist?: any
   repostUser?: IUser
   buttonProps?: IButtonProps
 }
 
 const PlaylistCard = ({
-  playlist,
-  setPlaylist,
+  playlist: originData,
   repostUser,
   buttonProps,
   ...props
@@ -37,10 +35,8 @@ const PlaylistCard = ({
 
   const isPlay = useAppSelector((state) => state.player.controll.isPlay)
   const playerMusics = useAppSelector((state) => state.player.musics)
-
-  const [playlistMusics, setPlaylistMusics] = useState(
-    playlist.musics?.slice(0, 5) || []
-  )
+  const [playlist, setPlaylist] = useState(originData)
+  const [viewMore, setViewMore] = useState(false)
   const [playlistPlay, setPlaylistPlay] = useState(false)
 
   const handleClickPlay = () => {
@@ -63,13 +59,10 @@ const PlaylistCard = ({
     if (!playlist.musics || !playlist.musics.length) {
       return
     }
+    setViewMore((state) => !state)
+  }, [playlist.musics])
 
-    playlistMusics.length > 5
-      ? setPlaylistMusics(playlist.musics.slice(0, 5))
-      : setPlaylistMusics(playlist.musics)
-  }, [playlist.musics, playlistMusics.length])
-
-  useEffect(() => {
+  const checkPlaying = useCallback(() => {
     if (playlist.musics?.length === playerMusics.length) {
       let bol = true
       for (let i = 0; i < playlist.musics.length; i++) {
@@ -85,6 +78,10 @@ const PlaylistCard = ({
       setPlaylistPlay(false)
     }
   }, [playerMusics, playlist.musics])
+
+  useEffect(() => {
+    checkPlaying()
+  }, [checkPlaying])
 
   return (
     <S.Container {...props}>
@@ -138,54 +135,56 @@ const PlaylistCard = ({
             </div>
           </div>
         </div>
-        {!playlistMusics || playlistMusics.length === 0 ? (
+        {!playlist.musics || playlist.musics?.length === 0 ? (
           <></>
         ) : (
           <S.PlaylistMusicUl className="playlist-musics">
-            {playlistMusics.map((music, index) => (
-              <li key={index} className="playlist-musicItem">
-                <S.MusicImageBox>
+            {(viewMore ? playlist.musics : playlist.musics.slice(0, 5)).map(
+              (music, index) => (
+                <li key={index} className="playlist-musicItem">
+                  <S.MusicImageBox>
+                    <Link
+                      className="link"
+                      to={`/track/${music.userId}/${music.permalink}`}
+                    >
+                      {music.cover ? (
+                        <img className="img" src={music.cover} alt="" />
+                      ) : (
+                        <EmptyMusicCover className="img" />
+                      )}
+                    </Link>
+                  </S.MusicImageBox>
+                  <div className="musicItem-info musicItem-index">
+                    {index + 1}
+                  </div>
+                  <div className="musicItem-info musicItem-uploader">
+                    <Link to={`/profile/${music.userId}`}>
+                      {music.user.nickname || music.user.username}
+                    </Link>
+                  </div>
                   <Link
-                    className="link"
+                    className="musicItem-info musicItem-title"
                     to={`/track/${music.userId}/${music.permalink}`}
                   >
-                    {music.cover ? (
-                      <img className="img" src={music.cover} alt="" />
-                    ) : (
-                      <EmptyMusicCover className="img" />
-                    )}
+                    {music.title}
                   </Link>
-                </S.MusicImageBox>
-                <div className="musicItem-info musicItem-index">
-                  {index + 1}
-                </div>
-                <div className="musicItem-info musicItem-uploader">
-                  <Link to={`/profile/${music.userId}`}>
-                    {music.user.nickname || music.user.username}
-                  </Link>
-                </div>
-                <Link
-                  className="musicItem-info musicItem-title"
-                  to={`/track/${music.userId}/${music.permalink}`}
-                >
-                  {music.title}
-                </Link>
-                {music.count ? (
-                  <div className="musicItem-info musicItem-play">
-                    <FaPlay className="icon play" />
-                    {numberFormat(music.count)}
-                  </div>
-                ) : (
-                  <></>
-                )}
-              </li>
-            ))}
+                  {music.count ? (
+                    <div className="musicItem-info musicItem-play">
+                      <FaPlay className="icon play" />
+                      {numberFormat(music.count)}
+                    </div>
+                  ) : (
+                    <></>
+                  )}
+                </li>
+              )
+            )}
             {playlist.musics.length > 5 ? (
               <button
                 className="viewMore"
                 onClick={handleClickViewMore}
               >{`View ${
-                playlistMusics.length > 5 ? 'fewer' : playlist.musics.length - 5
+                viewMore ? 'fewer' : playlist.musics.length - 5
               } tracks`}</button>
             ) : (
               <></>

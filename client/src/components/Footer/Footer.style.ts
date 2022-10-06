@@ -3,8 +3,6 @@ import { Link } from 'react-router-dom'
 import { Divider as MuiDivider } from '@mui/material'
 
 export const Wrapper = styled.footer`
-  position: 'relative';
-  z-index: -1;
   font-size: 12px;
   line-height: 12px;
   background-color: ${({ theme }) => theme.colors.bgColor};

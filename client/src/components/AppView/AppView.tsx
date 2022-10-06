@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from 'react'
+import React, { useCallback, useLayoutEffect, useState } from 'react'
 import * as S from './AppView.style'
 import { BiAlbum } from 'react-icons/bi'
 import { MdOutlineAddchart } from 'react-icons/md'
@@ -35,14 +35,20 @@ const AppView = ({ children }: AppViewProps) => {
     window.localStorage.getItem('fold') || 'false'
   )
 
-  const toggleFold = () => {
-    const changeFold = fold === 'false' ? 'true' : 'false'
-    window.localStorage.setItem('fold', changeFold)
-    setFold(changeFold)
-  }
+  const toggleFold = useCallback(() => {
+    setFold((prev) => {
+      const changeFold = prev === 'false' ? 'true' : 'false'
+      window.localStorage.setItem('fold', changeFold)
+      return changeFold
+    })
+  }, [])
+
+  const setWidth = useCallback(() => {
+    setWindowWidth(window.innerWidth)
+  }, [])
 
   const handleResize = debounce(() => {
-    setWindowWidth(window.innerWidth)
+    setWidth()
   }, 100)
 
   useLayoutEffect(() => {
@@ -93,8 +99,12 @@ const AppView = ({ children }: AppViewProps) => {
         <SearchBox className="float-search" windowWidth={windowWidth} />
       </S.FloatBox>
       <S.AppContainer id="container" fold={fold}>
-        {children}
-        <Footer id="app-footer" className="app-footer" />
+        <div className="app-main">
+          {children}
+
+          <Footer id="app-footer" className="app-footer" />
+          <div className="empty-space"></div>
+        </div>
       </S.AppContainer>
       <Musicbar />
       <S.Backdrop

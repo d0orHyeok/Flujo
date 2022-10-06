@@ -44,10 +44,6 @@ export const Container = styled.div`
       width: 120px;
       height: 120px;
     }
-
-    & .musicCard-infoBox {
-      height: 120px;
-    }
   }
 `
 

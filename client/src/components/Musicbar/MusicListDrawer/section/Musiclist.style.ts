@@ -9,15 +9,15 @@ export const AreaImage = styled.div`
 `
 
 export const MusicImage = styled.div`
-  width: 480px;
-  height: 480px;
+  width: 360px;
+  height: 360px;
 
   @media screen and (max-width: 1000px) {
     width: 240px;
     height: 240px;
   }
 
-  & img {
+  & .img {
     width: 100%;
     height: 100%;
     overflow: cover;

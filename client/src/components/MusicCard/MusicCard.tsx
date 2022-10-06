@@ -80,7 +80,7 @@ const MusicCard = ({
             <div className="musicCard-infoBox-info">
               <div className="musicCard-uploader">
                 <Link to={`/profile/${music.userId}`}>
-                  {music.user.nickname || music.user.username || music.userId}
+                  {music.user?.nickname || music.user?.username || music.userId}
                 </Link>
                 {repostUser ? (
                   <>
