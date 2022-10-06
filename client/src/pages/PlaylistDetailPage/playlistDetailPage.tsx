@@ -99,6 +99,17 @@ const PlaylistDetailPage = () => {
     }
   }, [permalink, title, userId])
 
+  const handleClickNavItem = useCallback(
+    (index: number, link: string) => (event: React.MouseEvent<HTMLElement>) => {
+      event.preventDefault()
+      event.stopPropagation()
+
+      setNavIndex(index)
+      window.history.pushState('', '', link)
+    },
+    []
+  )
+
   useLayoutEffect(() => {
     if (detail === 'likes' || detail === 'reposts') {
       setTitle(`See all ${detail} of `)
@@ -155,22 +166,25 @@ const PlaylistDetailPage = () => {
 
         {/* Navigation */}
         <NavUl>
-          {detailItems.map((item, index) => (
-            <li
-              key={index}
-              className={`playlistDetail-navItem${
-                navIndex === index ? ' select' : ''
-              }`}
-            >
-              <Link
-                className="playlistDetail-navItem-link"
-                to={`/playlist/${playlist.userId}/${playlist.permalink}/${item.pathName}`}
-                onClick={() => setNavIndex(index)}
+          {detailItems.map((item, index) => {
+            const link = `/playlist/${playlist.userId}/${playlist.permalink}/${item.pathName}`
+            return (
+              <li
+                key={index}
+                className={`playlistDetail-navItem${
+                  navIndex === index ? ' select' : ''
+                }`}
               >
-                {item.displayName}
-              </Link>
-            </li>
-          ))}
+                <Link
+                  className="playlistDetail-navItem-link"
+                  to={link}
+                  onClick={handleClickNavItem(index, link)}
+                >
+                  {item.displayName}
+                </Link>
+              </li>
+            )
+          })}
         </NavUl>
 
         {/* Content */}

@@ -14,7 +14,6 @@ export const Container = styled.div`
   position: relative;
   padding: 10px 30px;
   display: flex;
-  min-width: 900px;
   box-sizing: border-box;
 
   & > * {

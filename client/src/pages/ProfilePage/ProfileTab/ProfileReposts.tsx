@@ -32,10 +32,9 @@ interface ProfileRepostsProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const ProfileReposts = ({ user, ...props }: ProfileRepostsProps) => {
-  const [items, setItems] = useState([
-    ...user.repostMusics,
-    ...user.repostPlaylists,
-  ])
+  const [items, setItems] = useState(
+    sortByCreatedAt([...user.repostMusics, ...user.repostPlaylists])
+  )
   const [displayItems, setDisplayItems] = useState<(IMusic | IPlaylist)[]>([])
   const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(0)
@@ -45,6 +44,8 @@ const ProfileReposts = ({ user, ...props }: ProfileRepostsProps) => {
     if (done) {
       return
     }
+
+    setLoading(true)
 
     const getNum = 15
     const skip = page * getNum
@@ -82,13 +83,42 @@ const ProfileReposts = ({ user, ...props }: ProfileRepostsProps) => {
     [loading, done]
   )
 
+  const resetItem = useCallback(() => {
+    let changed = false
+    setItems((items) => {
+      const newItems = sortByCreatedAt([
+        ...user.repostMusics,
+        ...user.repostPlaylists,
+      ])
+
+      if (
+        items.length !== newItems.length ||
+        items.findIndex((i, index) => i.id !== newItems[index].id) !== -1
+      ) {
+        changed = true
+        return newItems
+      }
+      return items
+    })
+
+    if (changed) {
+      setDisplayItems([])
+      setPage(0)
+      setDone(false)
+    }
+  }, [user])
+
+  useEffect(() => {
+    resetItem()
+  }, [resetItem])
+
   useEffect(() => {
     getItems()
   }, [getItems])
 
   return (
     <>
-      {displayItems.length ? (
+      {items.length ? (
         <StyledDiv {...props}>
           {displayItems.map((item, index) =>
             'title' in item ? (
@@ -109,7 +139,11 @@ const ProfileReposts = ({ user, ...props }: ProfileRepostsProps) => {
               />
             )
           )}
-          <LoadingArea loading={loading} onInView={handleOnView} />
+          <LoadingArea
+            loading={loading}
+            onInView={handleOnView}
+            hide={done && !loading}
+          />
         </StyledDiv>
       ) : (
         <CommonStyle.Empty>

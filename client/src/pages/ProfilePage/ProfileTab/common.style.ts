@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import { GoSettings } from 'react-icons/go'
 
 export const Empty = styled.div`
-  padding: 10vh 0;
+  padding: 50px 0;
   display: flex;
   flex-direction: column;
   align-items: center;

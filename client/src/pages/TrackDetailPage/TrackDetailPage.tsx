@@ -10,6 +10,7 @@ import TrackDetailPlaylists from './DetailTab/TrackDetailPlaylists'
 import Loading from '@components/Loading/Loading'
 import { getMusicByPermalink } from '@api/musicApi'
 import TrackDetailRelatedTracks from './DetailTab/TrackDetailRelatedTracks'
+import { useInterval } from '@api/Hooks'
 
 const Wrapper = styled.div`
   min-height: 100%;
@@ -103,6 +104,17 @@ const TrackDetailPage = () => {
     }
   }, [permalink, title, userId])
 
+  const handleClickNavItem = useCallback(
+    (index: number, link: string) => (event: React.MouseEvent<HTMLElement>) => {
+      event.preventDefault()
+      event.stopPropagation()
+
+      setNavIndex(index)
+      window.history.pushState('', '', link)
+    },
+    []
+  )
+
   useLayoutEffect(() => {
     if (detail === 'likes' || detail === 'reposts') {
       setTitle(`See all ${detail} of `)
@@ -121,6 +133,8 @@ const TrackDetailPage = () => {
   useLayoutEffect(() => {
     getMusicData()
   }, [getMusicData])
+
+  useInterval(getMusicData, 600000)
 
   return isNotfound ? (
     <NotFoundPage />
@@ -165,22 +179,25 @@ const TrackDetailPage = () => {
 
         {/* Navigation */}
         <NavUl>
-          {detailItems.map((item, index) => (
-            <li
-              key={index}
-              className={`trackDetail-navItem${
-                navIndex === index ? ' select' : ''
-              }`}
-            >
-              <Link
-                className="trackDetail-navItem-link"
-                to={`/track/${music.userId}/${music.permalink}/${item.pathName}`}
-                onClick={() => setNavIndex(index)}
+          {detailItems.map((item, index) => {
+            const link = `/track/${music.userId}/${music.permalink}/${item.pathName}`
+            return (
+              <li
+                key={index}
+                className={`trackDetail-navItem${
+                  navIndex === index ? ' select' : ''
+                }`}
               >
-                {item.displayName}
-              </Link>
-            </li>
-          ))}
+                <Link
+                  className="trackDetail-navItem-link"
+                  to={link}
+                  onClick={handleClickNavItem(index, link)}
+                >
+                  {item.displayName}
+                </Link>
+              </li>
+            )
+          })}
         </NavUl>
 
         {/* Content */}

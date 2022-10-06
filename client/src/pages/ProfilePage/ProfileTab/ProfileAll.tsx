@@ -45,6 +45,7 @@ const ProfileAll = ({ user, editable, ...props }: ProfileAllProps) => {
     if (done) {
       return
     }
+    setLoading(true)
 
     const getNum = 15
     const skip = page * getNum
@@ -61,8 +62,8 @@ const ProfileAll = ({ user, editable, ...props }: ProfileAllProps) => {
     )
 
     try {
-      const res1 = await getMusicsByIds(musicIds, { uid })
-      const res2 = await getPlaylistsByIds(playlistIds, { uid })
+      const res1 = await getMusicsByIds(musicIds, { params: { uid } })
+      const res2 = await getPlaylistsByIds(playlistIds, { params: { uid } })
       const array = sortByCreatedAt([...res1.data, ...res2.data])
       setDisplayItems((prevState) => [...prevState, ...array])
     } catch (error: any) {
@@ -83,13 +84,60 @@ const ProfileAll = ({ user, editable, ...props }: ProfileAllProps) => {
     [loading, done]
   )
 
+  const resetItem = useCallback(() => {
+    let isChange = false
+    setItems((items) => {
+      const changed = user.playlists.filter((playlist) => {
+        const findItem: IPlaylist | undefined = items.find(
+          (item) => 'name' in item && item.id === playlist.id
+        )
+        if (!findItem) {
+          return true
+        }
+        if (playlist.musics?.length !== findItem?.musics.length) {
+          return true
+        }
+        return false
+      })
+
+      const newItems = sortByCreatedAt([
+        ...user.musics,
+        ...user.playlists,
+        ...user.repostMusics,
+        ...user.repostPlaylists,
+      ])
+
+      if (
+        changed.length ||
+        items.length !== newItems.length ||
+        items.findIndex((i, index) => i.id !== newItems[index].id) !== -1
+      ) {
+        isChange = true
+        return newItems
+      }
+
+      return items
+    })
+
+    if (isChange) {
+      setDisplayItems([])
+      setPage(0)
+      setDone(false)
+      window.scrollTo(0, 0)
+    }
+  }, [user])
+
   useEffect(() => {
     getItems()
   }, [getItems])
 
+  useEffect(() => {
+    resetItem()
+  }, [resetItem])
+
   return (
     <>
-      {displayItems.length ? (
+      {items.length ? (
         <StyledDiv {...props}>
           {displayItems.map((item, index) => {
             if ('title' in item) {
@@ -124,7 +172,11 @@ const ProfileAll = ({ user, editable, ...props }: ProfileAllProps) => {
               )
             }
           })}
-          <LoadingArea loading={loading} onInView={handleOnView} />
+          <LoadingArea
+            loading={loading}
+            onInView={handleOnView}
+            hide={!loading && done}
+          />
         </StyledDiv>
       ) : (
         <CommonStyle.Empty>

@@ -1,18 +1,21 @@
-import { IMusic } from '@appTypes/types.type.'
-import React, { useCallback, useLayoutEffect, useState } from 'react'
+import { IMusic, IUser } from '@appTypes/types.type.'
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import { getUserMusics } from '@api/musicApi'
 import * as CommonStyle from './common.style'
 import { Link } from 'react-router-dom'
 import { PrimaryButton } from '@components/Common/Button'
 import MusicCard from '@components/MusicCard/MusicCard'
 import LoadingArea from '@components/Loading/LoadingArea'
+import { useAppSelector } from '@redux/hook'
 
 interface ProfileTracksProps extends React.HTMLAttributes<HTMLDivElement> {
-  userId: string
+  user: IUser
   editable?: boolean
 }
 
-const ProfileTracks = ({ userId, editable, ...props }: ProfileTracksProps) => {
+const ProfileTracks = ({ user, editable, ...props }: ProfileTracksProps) => {
+  const uid = useAppSelector((state) => state.user.userData?.id)
+
   const [musics, setMusics] = useState<IMusic[]>([])
   const [page, setPage] = useState(0)
   const [done, setDone] = useState(false)
@@ -29,7 +32,9 @@ const ProfileTracks = ({ userId, editable, ...props }: ProfileTracksProps) => {
     try {
       const skip = page * getNum
       const take = skip + getNum
-      const response = await getUserMusics(userId, { skip, take })
+      const response = await getUserMusics(user.id, {
+        params: { skip, take, uid },
+      })
       const getItems: IMusic[] = response.data
       if (!getItems || getItems.length < getNum) {
         setDone(true)
@@ -41,7 +46,7 @@ const ProfileTracks = ({ userId, editable, ...props }: ProfileTracksProps) => {
     } finally {
       setLoading(false)
     }
-  }, [userId, done, page])
+  }, [done, page, user.id, uid])
 
   const handleOnView = useCallback(
     (inView: boolean) => {
@@ -52,13 +57,28 @@ const ProfileTracks = ({ userId, editable, ...props }: ProfileTracksProps) => {
     [loading, done]
   )
 
+  const checkDeleted = useCallback(() => {
+    if (user.id !== uid) {
+      return
+    }
+    setMusics((prevState) =>
+      prevState.filter(
+        (m1) => user.musics.findIndex((m2) => m2.id === m1.id) !== -1
+      )
+    )
+  }, [uid, user.id, user.musics])
+
+  useEffect(() => {
+    checkDeleted()
+  }, [checkDeleted])
+
   useLayoutEffect(() => {
     getRelatedMusics()
   }, [getRelatedMusics])
 
   return (
     <>
-      {musics.length ? (
+      {!done || musics.length ? (
         <div {...props}>
           {musics.map((music, index) => (
             <MusicCard
@@ -67,7 +87,11 @@ const ProfileTracks = ({ userId, editable, ...props }: ProfileTracksProps) => {
               buttonProps={{ mediaSize: 1200 }}
             />
           ))}
-          <LoadingArea loading={loading} onInView={handleOnView} />
+          <LoadingArea
+            loading={loading}
+            onInView={handleOnView}
+            hide={done && !loading}
+          />
         </div>
       ) : (
         <CommonStyle.Empty>

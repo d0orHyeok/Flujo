@@ -5,11 +5,12 @@ import { Link, useParams } from 'react-router-dom'
 import styled from 'styled-components'
 import { navItems } from '../assets/profileNavItem'
 import { BsFillCaretLeftFill, BsFillCaretRightFill } from 'react-icons/bs'
-import { Modal } from '@components/Common'
-import EditProfile from '@components/InnerModal/EditProfile'
+import EditProfile from '@components/InDialog/EditProfile/EditProfile'
 import { useCopyLink } from '@api/Hooks'
 import { useLoginOpen } from '@redux/context/loginProvider'
 import { userToggleFollow } from '@redux/thunks/userThunks'
+import { IUser } from '@appTypes/user.type'
+import Dialog, { getTransitionSlide } from '@components/Common/Dialog'
 
 const Nav = styled.div`
   font-size: 16px;
@@ -103,15 +104,21 @@ const ButtonContainer = styled.div`
 
 interface ProfileNavProps extends React.HTMLAttributes<HTMLDivElement> {
   editable?: boolean
-  editModalProps?: { onClose?: () => any }
+  profileData?: IUser
+  nav?: string
+  onNavChange?: (nav?: string) => void
 }
+
+const Transition = getTransitionSlide('down')
 
 const ProfileNav = ({
   editable,
-  editModalProps,
+  profileData,
+  nav,
+  onNavChange,
   ...props
 }: ProfileNavProps) => {
-  const { userId, nav } = useParams()
+  const { userId } = useParams()
 
   const dispatch = useAppDispatch()
   const copyLink = useCopyLink()
@@ -139,17 +146,13 @@ const ProfileNav = ({
     [isLogin, openLogin, dispatch, userId]
   )
 
-  const handleCloseModal = useCallback(() => {
-    setOpen(false)
-    editModalProps?.onClose && editModalProps.onClose()
-  }, [editModalProps])
-
   const handleClickArrowButton =
     (move: -1 | 1) => (event: React.MouseEvent<HTMLButtonElement>) => {
-      event.preventDefault()
       event.stopPropagation()
+
       const target = ulRef.current
       if (target) {
+        // 메뉴에 스크롤이 있을경우 클릭한 위치가 앞으로 오도록 이동시킨다
         const scrollLeft = target.scrollLeft
         const length = target.children.length
         const widths = Array.from(target.children).map((c, index) =>
@@ -176,8 +179,15 @@ const ProfileNav = ({
     }
 
   const handleClickNavItem =
-    (index: number) => (event: React.MouseEvent<HTMLElement>) => {
+    (index: number, link: string) => (event: React.MouseEvent<HTMLElement>) => {
+      event.preventDefault()
       event.stopPropagation()
+
+      window.history.pushState('', '', link)
+      const linkArr = link.split('/')
+      const newNav = linkArr.length < 4 ? undefined : linkArr[3]
+      onNavChange && onNavChange(newNav)
+
       const target = ulRef.current
       if (!target) {
         return
@@ -212,24 +222,27 @@ const ProfileNav = ({
           <BsFillCaretLeftFill />
         </ScrollButton>
         <ul ref={ulRef}>
-          {navItems.map((item, index) => (
-            <li
-              id={`profile-nav-${index}`}
-              key={item.name}
-              className={(nav || '') === item.path ? 'selected' : undefined}
-            >
-              <Link
-                to={
-                  index === 0
-                    ? `/profile/${userId}`
-                    : `/profile/${userId}/${item.path}`
-                }
-                onClick={handleClickNavItem(index)}
+          {navItems.map((item, index) => {
+            const link =
+              index === 0
+                ? `/profile/${userId}`
+                : `/profile/${userId}/${item.path}`
+            return (
+              <li
+                id={`profile-nav-${index}`}
+                key={item.name}
+                className={(nav || '') === item.path ? 'selected' : undefined}
               >
-                {item.name}
-              </Link>
-            </li>
-          ))}
+                <Link
+                  to={link}
+                  state={profileData}
+                  onClick={handleClickNavItem(index, link)}
+                >
+                  {item.name}
+                </Link>
+              </li>
+            )
+          })}
         </ul>
         <ScrollButton onClick={handleClickArrowButton(1)}>
           <BsFillCaretRightFill />
@@ -240,9 +253,13 @@ const ProfileNav = ({
               <button className="profileBtn" onClick={handleClickEdit}>
                 edit
               </button>
-              <Modal open={open} onClose={handleCloseModal}>
-                <EditProfile onClose={handleCloseModal} />
-              </Modal>
+              <Dialog
+                open={open}
+                onClose={() => setOpen(false)}
+                TransitionComponent={Transition}
+              >
+                <EditProfile onClose={() => setOpen(false)} />
+              </Dialog>
             </>
           ) : (
             <FollowTextButton

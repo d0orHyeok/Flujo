@@ -21,14 +21,19 @@ import ProfileTracks from './ProfileTab/ProfileTracks'
 import ProfilePlaylists from './ProfileTab/ProfilePlaylists'
 import ProfileReposts from './ProfileTab/ProfileReposts'
 import ProfileSide from './ProfileSide/ProfileSide'
+import { useInterval } from '@api/Hooks'
+import { useSetMinWidth } from '@redux/context/appThemeProvider'
 
 const ProfilePage = () => {
-  const { userId, nav } = useParams()
+  const setMinWidth = useSetMinWidth()
+  const { userId, nav: paramNav } = useParams()
 
   const userData = useAppSelector((state) => state.user.userData)
+
   const [isLoading, setIsLoading] = useState(false)
   const [editable, setEditable] = useState(false)
   const [profileData, setProfileData] = useState<IUser>()
+  const [nav, setNav] = useState(paramNav)
 
   const sideRef = useRef<HTMLDivElement>(null)
 
@@ -45,6 +50,12 @@ const ProfilePage = () => {
     }
   }, [userData, userId])
 
+  const applyDataChanged = useCallback(() => {
+    if (userId === 'you' || userData?.id === userId) {
+      setProfileData(userData)
+    }
+  }, [userData, userId])
+
   const onLoad = useCallback(async () => {
     if (!profileData) {
       setIsLoading(true)
@@ -55,7 +66,12 @@ const ProfilePage = () => {
 
   useLayoutEffect(() => {
     onLoad()
-  }, [onLoad])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    applyDataChanged()
+  }, [applyDataChanged])
 
   useEffect(() => {
     setEditable(userId === 'you' || userData?.id === userId)
@@ -72,21 +88,43 @@ const ProfilePage = () => {
   }, [nav])
 
   const resizeSideContent = useCallback(() => {
-    if (sideRef.current) {
-      const docH = document.body.offsetHeight
-      const sideH = sideRef.current.getBoundingClientRect().height
-      const calcH = Math.floor(docH - sideH - 91)
-      sideRef.current.style.top = `${calcH < 81 ? calcH : 65}px`
+    if (!sideRef.current) return
+    const docH = document.body.offsetHeight
+    const sideH = sideRef.current.getBoundingClientRect().height
+    const calcH = Math.floor(docH - sideH - 91)
+    sideRef.current.style.top = `${calcH < 81 ? calcH : 65}px`
+
+    const parent = sideRef.current.parentElement
+    if (!parent) return
+    const parentRect = parent.getBoundingClientRect()
+    const minHeight = Math.floor(docH - parentRect.top - 81)
+    if (minHeight > 0) {
+      parent.style.minHeight = `${minHeight}px`
     }
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nav])
 
   useEffect(() => {
-    resizeSideContent()
     window.addEventListener('resize', resizeSideContent)
     return () => {
       window.removeEventListener('resize', resizeSideContent)
     }
   }, [resizeSideContent])
+
+  useEffect(() => {
+    if (!isLoading) {
+      resizeSideContent()
+    }
+  }, [isLoading, resizeSideContent])
+
+  useInterval(getProfileData, 600000)
+
+  useEffect(() => {
+    setMinWidth('900px')
+    return () => {
+      setMinWidth()
+    }
+  }, [setMinWidth])
 
   return (
     <>
@@ -106,7 +144,9 @@ const ProfilePage = () => {
             <ProfileNav
               className="profileNav"
               editable={editable}
-              editModalProps={{ onClose: getProfileData }}
+              profileData={profileData}
+              nav={nav}
+              onNavChange={setNav}
             />
             <S.Container>
               <div className="profile-main">
@@ -118,9 +158,9 @@ const ProfilePage = () => {
                     editable={editable}
                   />
                 ) : nav === 'tracks' ? (
-                  <ProfileTracks userId={profileData.id} editable={editable} />
+                  <ProfileTracks user={profileData} editable={editable} />
                 ) : nav === 'playlists' ? (
-                  <ProfilePlaylists userId={profileData.id} />
+                  <ProfilePlaylists user={profileData} />
                 ) : nav === 'reposts' ? (
                   <ProfileReposts user={profileData} />
                 ) : (

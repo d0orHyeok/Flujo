@@ -44,6 +44,7 @@ const Item = styled.li`
 interface SearchSideProps extends React.HTMLAttributes<HTMLUListElement> {
   keyward?: string
   query?: string
+  onQueryChange: (...args: any[]) => any
 }
 
 const items = [
@@ -57,7 +58,19 @@ const items = [
   { query: 'people', name: 'People', icon: <IoMdPeople className="icon" /> },
 ]
 
-const SearchSide = ({ keyward, query, ...props }: SearchSideProps) => {
+const SearchSide = ({
+  keyward,
+  query,
+  onQueryChange,
+  ...props
+}: SearchSideProps) => {
+  const handleClickLink =
+    (query: string) => (event: React.MouseEvent<HTMLElement>) => {
+      event.preventDefault()
+      window.history.pushState('', '', `/search?${query}=${keyward}`)
+      onQueryChange && onQueryChange(query)
+    }
+
   return (
     <ul {...props}>
       {items.map((item, index) => (
@@ -65,7 +78,10 @@ const SearchSide = ({ keyward, query, ...props }: SearchSideProps) => {
           key={index}
           className={query === item.query ? 'select' : undefined}
         >
-          <Link to={`/search?${item.query}=${keyward}`}>
+          <Link
+            to={`/search?${item.query}=${keyward}`}
+            onClick={handleClickLink(item.query)}
+          >
             {item.icon}
             <span className="name">{item.name}</span>
           </Link>

@@ -19,6 +19,7 @@ import { IComment } from '@appTypes/comment.type'
 import ProfileDetailLikes from './section/ProfileDetailLikes'
 import ProfileDetailFollow from './section/ProfileDetailFollow'
 import ProfileDetailComments from './section/ProfileDetailComments'
+import { useInterval } from '@api/Hooks'
 
 const ProfileDetailPage = () => {
   const { userId } = useParams()
@@ -28,7 +29,7 @@ const ProfileDetailPage = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [profileData, setProfileData] = useState<IUser>()
   const [comments, setComments] = useState<IComment[]>([])
-  const [nav, setNav] = useState('')
+  const [nav, setNav] = useState(location.pathname.split('/').at(-1) || 'likes')
   const [displayText, setDisplayText] = useState<{
     title?: string
     head?: string
@@ -80,6 +81,17 @@ const ProfileDetailPage = () => {
     setIsLoading(false)
   }, [getProfileData, profileData])
 
+  const handleClickNavItem = useCallback(
+    (link: string) => (event: React.MouseEvent<HTMLElement>) => {
+      event.preventDefault()
+      event.stopPropagation()
+      window.history.pushState('', '', link)
+      const newNav = link.split('/').at(-1)
+      setNav(newNav || '')
+    },
+    []
+  )
+
   const setTexts = useCallback(() => {
     if (!profileData) {
       return
@@ -130,14 +142,14 @@ const ProfileDetailPage = () => {
   }, [profileData])
 
   useEffect(() => {
-    const newNav = location.pathname.split('/').at(-1) || 'likes'
-    setNav(newNav)
     window.scrollTo(0, 0)
-  }, [location.pathname])
+  }, [nav])
 
   useEffect(() => {
     setTexts()
   }, [setTexts])
+
+  useInterval(getProfileData, 600000)
 
   return isLoading ? (
     <Loading />
@@ -186,21 +198,25 @@ const ProfileDetailPage = () => {
 
         {/* Navigation */}
         <S.NavUl>
-          {detailItems.map((item, index) => (
-            <li
-              key={index}
-              className={`detail-navItem${
-                nav === item.pathName ? ' select' : ''
-              }`}
-            >
-              <Link
-                className="detail-navItem-link"
-                to={`/profile/${profileData.id}/${item.pathName}`}
+          {detailItems.map((item, index) => {
+            const link = `/profile/${profileData.id}/${item.pathName}`
+            return (
+              <li
+                key={index}
+                className={`detail-navItem${
+                  nav === item.pathName ? ' select' : ''
+                }`}
               >
-                {item.displayName}
-              </Link>
-            </li>
-          ))}
+                <Link
+                  className="detail-navItem-link"
+                  to={link}
+                  onClick={handleClickNavItem(link)}
+                >
+                  {item.displayName}
+                </Link>
+              </li>
+            )
+          })}
         </S.NavUl>
 
         {/* Content */}

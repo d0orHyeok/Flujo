@@ -1,5 +1,5 @@
-import { IPlaylist } from '@appTypes/types.type.'
-import React, { useCallback, useLayoutEffect, useState } from 'react'
+import { IPlaylist, IUser } from '@appTypes/types.type.'
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 import styled from 'styled-components'
 import * as CommonStyle from './common.style'
 import PlaylistCard from '@components/PlaylistCard/PlaylistCard'
@@ -23,10 +23,10 @@ const StyledDivIcon = styled.div`
 `
 
 interface ProfilePlaylistsProps extends React.HTMLAttributes<HTMLDivElement> {
-  userId: string
+  user: IUser
 }
 
-const ProfilePlaylists = ({ userId, ...props }: ProfilePlaylistsProps) => {
+const ProfilePlaylists = ({ user, ...props }: ProfilePlaylistsProps) => {
   const uid = useAppSelector((state) => state.user.userData?.id)
 
   const [playlists, setPlaylists] = useState<IPlaylist[]>([])
@@ -45,7 +45,9 @@ const ProfilePlaylists = ({ userId, ...props }: ProfilePlaylistsProps) => {
     try {
       const skip = page * getNum
       const take = skip + getNum
-      const response = await getUserPlaylists(userId, { skip, take, uid })
+      const response = await getUserPlaylists(user.id, {
+        params: { skip, take, uid },
+      })
       const getItems: IPlaylist[] = response.data
       if (!getItems || getItems.length < getNum) {
         setDone(true)
@@ -57,7 +59,7 @@ const ProfilePlaylists = ({ userId, ...props }: ProfilePlaylistsProps) => {
     } finally {
       setLoading(false)
     }
-  }, [userId, done, page, uid])
+  }, [user.id, done, page, uid])
 
   const handleOnView = useCallback(
     (inView: boolean) => {
@@ -68,13 +70,28 @@ const ProfilePlaylists = ({ userId, ...props }: ProfilePlaylistsProps) => {
     [loading, done]
   )
 
+  const checkDeleted = useCallback(() => {
+    if (user.id !== uid) {
+      return
+    }
+    setPlaylists((prevState) =>
+      prevState.filter(
+        (p1) => user.playlists.findIndex((p2) => p2.id === p1.id) !== -1
+      )
+    )
+  }, [uid, user.id, user.playlists])
+
+  useEffect(() => {
+    checkDeleted()
+  }, [checkDeleted])
+
   useLayoutEffect(() => {
     getRelatedMusics()
   }, [getRelatedMusics])
 
   return (
     <>
-      {playlists.length ? (
+      {!done || playlists.length ? (
         <div {...props}>
           {playlists.map((playlist, index) => (
             <StyledPlaylistCard
@@ -83,7 +100,11 @@ const ProfilePlaylists = ({ userId, ...props }: ProfilePlaylistsProps) => {
               buttonProps={{ mediaSize: 1200 }}
             />
           ))}
-          <LoadingArea loading={loading} onInView={handleOnView} />
+          <LoadingArea
+            loading={loading}
+            onInView={handleOnView}
+            hide={done && !loading}
+          />
         </div>
       ) : (
         <CommonStyle.Empty>
