@@ -11,7 +11,7 @@ import { useAppSelector } from '@redux/hook'
 import { Link } from 'react-router-dom'
 import { IoRefreshOutline } from 'react-icons/io5'
 import { IconButton } from '@mui/material'
-import Reload from './sections/Reload'
+import Reload from '@components/Loading/Reload'
 
 interface ChartItem {
   genre: string
@@ -34,7 +34,7 @@ const HomePage = () => {
 
   const getChartItems = useCallback(async (option: 'trend' | 'newrelease') => {
     try {
-      const response = await getAllMusic({ option })
+      const response = await getAllMusic({ params: { option } })
       const items: ChartItem[] = response.data
       return items.map((item) => {
         const path =
@@ -106,12 +106,11 @@ const HomePage = () => {
       Boolean(newReleaseItems) &&
       Boolean(trendItems) &&
       Boolean(randomMusics) &&
-      Boolean(randomUsers) &&
-      Boolean(relatedMusics)
+      Boolean(randomUsers)
     ) {
       setLoading(false)
     }
-  }, [newReleaseItems, randomMusics, randomUsers, relatedMusics, trendItems])
+  }, [newReleaseItems, randomMusics, randomUsers, trendItems])
 
   useEffect(() => {
     getAllItems()
@@ -133,117 +132,126 @@ const HomePage = () => {
     checkLoading()
   }, [checkLoading])
 
-  return loading ? (
-    <Loading />
-  ) : (
+  return (
     <>
       <Helmet>
         <title>Wave | Stream and share to music online</title>
       </Helmet>
-      <S.Wrapper>
-        {/* 인기 차트 */}
-        {trendItems?.length ? (
-          <S.Container>
-            <h2 className="section-title">
-              <Link to="/trend">Charts: Top 100</Link>
-            </h2>
-            <div className="section-description">
-              The most played tracks on Wave this week
-            </div>
-            <SmallCardSlider cardsProps={trendItems} />
-          </S.Container>
-        ) : (
-          <></>
-        )}
-        {/* 최신 차트 */}
-        {newReleaseItems?.length ? (
-          <S.Container>
-            <h2 className="section-title">
-              <Link to="/newrelease">Charts: New Release</Link>
-            </h2>
-            <div className="section-description">
-              Up-and-coming tracks on Wave this week
-            </div>
-            <SmallCardSlider cardsProps={newReleaseItems} />
-          </S.Container>
-        ) : (
-          <></>
-        )}
-        {/* 랜덤 추천 */}
-        {randomUsers?.length ? (
-          <S.Container>
-            <h2 className="section-title section-title-flex">
-              <span className="title">Artists You Should Know</span>
-              <IconButton className="refreshBtn" onClick={reloadRandomUsers}>
-                <IoRefreshOutline />
-                Refresh List
-              </IconButton>
-            </h2>
-
-            <div className="section-description">
-              Top tracks from random artist
-            </div>
-            {!reload ? (
-              <SmallCardSlider
-                cardsProps={randomUsers.map((user) => {
-                  return { user, subText: 'Artist tracks' }
-                })}
-              />
+      {loading ? (
+        <Loading />
+      ) : (
+        <>
+          <S.Wrapper>
+            {/* 인기 차트 */}
+            {trendItems?.length ? (
+              <S.Container>
+                <h2 className="section-title">
+                  <Link to="/trend">Charts: Top 50</Link>
+                </h2>
+                <div className="section-description">
+                  The most played tracks on Wave this week
+                </div>
+                <SmallCardSlider cardsProps={trendItems} />
+              </S.Container>
             ) : (
-              <Reload />
+              <></>
             )}
-          </S.Container>
-        ) : (
-          <></>
-        )}
-        {randomMusics?.length ? (
-          <S.Container>
-            <h2 className="section-title">Recommended tracks for you</h2>
-            <div className="section-description">
-              {`These are tracks that we recommend randomly`}
-            </div>
-            <SmallCardSlider
-              cardsProps={randomMusics.map((music) => {
-                return { music }
-              })}
-            />
-          </S.Container>
-        ) : (
-          <></>
-        )}
-        {/* 재생기록 */}
-        {historys && historys?.length ? (
-          <S.Container>
-            <h2 className="section-title">Listening history</h2>
-            <div className="section-description">
-              {`Recent played tracks you've been listen`}
-            </div>
-            <SmallCardSlider
-              cardsProps={historys.map((history) => {
-                return { music: history.music }
-              })}
-            />
-          </S.Container>
-        ) : (
-          <></>
-        )}
-        {/* 연관 음악 */}
-        {relatedMusics?.length ? (
-          <S.Container>
-            <h2 className="section-title">More of what you like</h2>
-            <div className="section-description">
-              {`Suggestions based on what you've recently liked or played`}
-            </div>
-            <SmallCardSlider
-              cardsProps={relatedMusics.map((music) => {
-                return { music }
-              })}
-            />
-          </S.Container>
-        ) : (
-          <></>
-        )}
-      </S.Wrapper>
+            {/* 최신 차트 */}
+            {newReleaseItems?.length ? (
+              <S.Container>
+                <h2 className="section-title">
+                  <Link to="/newrelease">Charts: New Release</Link>
+                </h2>
+                <div className="section-description">
+                  Up-and-coming tracks on Wave this week
+                </div>
+                <SmallCardSlider cardsProps={newReleaseItems} />
+              </S.Container>
+            ) : (
+              <></>
+            )}
+            {/* 랜덤 추천 */}
+            {randomUsers?.length ? (
+              <S.Container>
+                <h2 className="section-title section-title-flex">
+                  <span className="title">Artists You Should Know</span>
+                  <IconButton
+                    className="refreshBtn"
+                    onClick={reloadRandomUsers}
+                  >
+                    <IoRefreshOutline />
+                    Refresh List
+                  </IconButton>
+                </h2>
+
+                <div className="section-description">
+                  Top tracks from random artist
+                </div>
+                {!reload ? (
+                  <SmallCardSlider
+                    cardsProps={randomUsers.map((user) => {
+                      return { user, subText: 'Artist tracks' }
+                    })}
+                  />
+                ) : (
+                  <S.ReloadBox>
+                    <Reload size={100} />
+                  </S.ReloadBox>
+                )}
+              </S.Container>
+            ) : (
+              <></>
+            )}
+            {randomMusics?.length ? (
+              <S.Container>
+                <h2 className="section-title">Recommended tracks for you</h2>
+                <div className="section-description">
+                  {`These are tracks that we recommend randomly`}
+                </div>
+                <SmallCardSlider
+                  cardsProps={randomMusics.map((music) => {
+                    return { music }
+                  })}
+                />
+              </S.Container>
+            ) : (
+              <></>
+            )}
+            {/* 재생기록 */}
+            {historys && historys?.length ? (
+              <S.Container>
+                <h2 className="section-title">Listening history</h2>
+                <div className="section-description">
+                  {`Recent played tracks you've been listen`}
+                </div>
+                <SmallCardSlider
+                  cardsProps={historys.map((history) => {
+                    return { music: history.music }
+                  })}
+                />
+              </S.Container>
+            ) : (
+              <></>
+            )}
+            {/* 연관 음악 */}
+            {relatedMusics?.length ? (
+              <S.Container>
+                <h2 className="section-title">More of what you like</h2>
+                <div className="section-description">
+                  {`Suggestions based on what you've recently liked or played`}
+                </div>
+                <SmallCardSlider
+                  cardsProps={relatedMusics.map((music) => {
+                    return { music }
+                  })}
+                />
+              </S.Container>
+            ) : (
+              <></>
+            )}
+          </S.Wrapper>
+        </>
+      )}
     </>
   )
 }

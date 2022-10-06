@@ -48,3 +48,9 @@ export const Container = styled.div`
     color: ${({ theme }) => theme.colors.bgTextRGBA(0.6)};
   }
 `
+export const ReloadBox = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 150px;
+`
