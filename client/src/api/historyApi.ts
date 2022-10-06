@@ -1,12 +1,11 @@
-import Axios from './Axios'
+import Axios, { AxiosConfig } from './Axios'
 
-interface PagingParms {
-  skip: number
-  take: number
+interface PagingParmsConfig extends AxiosConfig {
+  params?: { skip: number; take: number }
 }
 
-export const getUsersHistorys = (params?: PagingParms) => {
-  return Axios.get(`/api/history/user`, { params })
+export const getUsersHistorys = (config?: PagingParmsConfig) => {
+  return Axios.get(`/api/history/user`, config)
 }
 
 export const clearHistory = () => {

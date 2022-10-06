@@ -1,4 +1,4 @@
-import Axios from '@api/Axios'
+import Axios, { AxiosConfig } from '@api/Axios'
 
 interface CreateCommentBody {
   text: string
@@ -6,16 +6,20 @@ interface CreateCommentBody {
   commentedAt?: number
 }
 
-export const getCommentsByUserId = (userId: string) => {
-  return Axios.get(`/api/comment/user/${userId}`)
+export const getCommentsByUserId = (userId: string, config?: AxiosConfig) => {
+  return Axios.get(`/api/comment/user/${userId}`, config)
 }
 
-export const createComment = (createCommentBody: CreateCommentBody) => {
+export const createComment = (
+  createCommentBody: CreateCommentBody,
+  config?: AxiosConfig
+) => {
   const parseIntValue = Math.floor(createCommentBody.commentedAt || 0)
-  return Axios.post('/api/comment/create', {
-    ...createCommentBody,
-    commentedAt: parseIntValue,
-  })
+  return Axios.post(
+    '/api/comment/create',
+    { ...createCommentBody, commentedAt: parseIntValue },
+    config
+  )
 }
 
 export const deleteComment = (commentId: number) => {

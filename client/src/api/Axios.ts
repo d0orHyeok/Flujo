@@ -1,5 +1,7 @@
-import axios, { AxiosInstance } from 'axios'
+import axios, { AxiosInstance, AxiosRequestConfig } from 'axios'
 import qs from 'qs'
+
+export type AxiosConfig = AxiosRequestConfig<any | undefined>
 
 const Axios: AxiosInstance = axios.create({
   baseURL:
@@ -9,15 +11,15 @@ const Axios: AxiosInstance = axios.create({
   withCredentials: true,
 })
 
-Axios.interceptors.request.use((request) => {
+Axios.interceptors.request.use((config) => {
   if (process.env.NODE_ENV !== 'development') {
-    request.url = request.url?.replace('/api/', '/')
+    config.url = config.url?.replace('/api/', '/')
     const reqAuth = localStorage.getItem('wave_login') !== 'false'
-    if (!reqAuth && request.url?.indexOf('/auth/info') !== -1) {
+    if (!reqAuth && config.url?.indexOf('/auth/info') !== -1) {
       return
     }
   }
-  return request
+  return config
 })
 
 Axios.defaults.paramsSerializer = (params) => {
@@ -60,11 +62,13 @@ export const interceptWithAccessToken = (accessToken: string) => {
   // 요청전에 accessToken을 헤더에 담아준다.
   return Axios.interceptors.request.use(
     (config) => {
-      config.headers = {
-        ...config.headers,
-        Authorization: `Bearer ${accessToken}`,
+      return {
+        ...config,
+        headers: {
+          ...config.headers,
+          Authorization: `Bearer ${accessToken}`,
+        },
       }
-      return config
     },
     (error) => {
       Promise.reject(error)

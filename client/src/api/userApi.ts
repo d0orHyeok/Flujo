@@ -1,4 +1,4 @@
-import Axios from './Axios'
+import Axios, { AxiosConfig } from './Axios'
 
 interface IUserRegisterBody {
   username: string
@@ -7,19 +7,39 @@ interface IUserRegisterBody {
   nickanem?: string
 }
 
-export const userSignUp = (registerInfo: IUserRegisterBody) => {
-  return Axios.post('/api/auth/signup', registerInfo)
+export const userSignUp = (
+  registerInfo: IUserRegisterBody,
+  config?: AxiosConfig
+) => {
+  return Axios.post('/api/auth/signup', registerInfo, config)
 }
 
-export const getUserById = (userId: string) => {
-  return Axios.get(`/api/auth/${userId}`)
+export const getUserById = (userId: string, config?: AxiosConfig) => {
+  return Axios.get(`/api/auth/${userId}`, config)
 }
 
-interface PagingParams {
-  skip: number
-  take: number
+interface PagingParamsConfig extends AxiosConfig {
+  params?: { skip: number; take: number }
 }
 
-export const searchUser = (keyward: string, params?: PagingParams) => {
-  return Axios.get(`/api/auth/search/${keyward}`, { params })
+export const searchUser = (keyward: string, config?: PagingParamsConfig) => {
+  return Axios.get(`/api/auth/search/${keyward}`, config)
+}
+
+interface ChnagePasswordBody {
+  password: string
+  newPassword: string
+}
+
+export const changePassword = (
+  body: ChnagePasswordBody,
+  config?: AxiosConfig
+) => {
+  return Axios.patch('/api/auth/password', body, config)
+}
+
+export const findSigninInfo = (
+  body: { email: string } | { username: string }
+) => {
+  return Axios.post('/api/auth/find', body)
 }
