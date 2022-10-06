@@ -19,6 +19,31 @@ import TrendPage from '@pages/ChartPage/TrendPage'
 import NewPage from '@pages/ChartPage/NewPage'
 import TrendDetailPage from '@pages/ChartDetailPage/TrendDetailPage'
 import NewDetailPage from '@pages/ChartDetailPage/NewDetailPage'
+import Axios from '@api/Axios'
+import axios, { Canceler } from 'axios'
+import ChangePassword from '@pages/ChangePassword/ChangePassword'
+
+let cancelers: (Canceler | AbortController)[] = []
+const cancelAllRequests = () => {
+  cancelers.forEach((c) => ('abort' in c ? c.abort() : c()))
+  cancelers = []
+}
+const addCancelers = () => {
+  return Axios.interceptors.request.use((config) => {
+    if (config.url?.indexOf('/auth/info') !== -1) {
+      return config
+    }
+    if (!Boolean(config?.cancelToken)) {
+      const cancelToken = new axios.CancelToken((c) => cancelers.push(c))
+      return { ...config, cancelToken }
+    } else if (!Boolean(config?.signal)) {
+      const controller = new AbortController()
+      cancelers.push(controller)
+      return { ...config, signal: controller.signal }
+    }
+    return config
+  })
+}
 
 const userDetailPage = ['likes', 'following', 'followers', 'comments']
 
@@ -26,7 +51,14 @@ const Router = () => {
   const loacation = useLocation()
 
   useEffect(() => {
+    addCancelers()
+  }, [])
+
+  useEffect(() => {
     window.scrollTo(0, 0)
+    return () => {
+      cancelAllRequests()
+    }
   }, [loacation.pathname])
 
   return (
@@ -35,6 +67,7 @@ const Router = () => {
       <Route path="/" element={withUser(HomePage, null)} />
       <Route path="/home" element={withUser(HomePage, null)} />
       <Route path="/register" element={withUser(RegisterPage, false)} />
+      <Route path="/password" element={withUser(ChangePassword, false)} />
       <Route path="/upload" element={withUser(UploadPage, true)} />
       <Route path="/settings" element={withUser(SettingsPage, true)}></Route>
       {/* Track Page */}
