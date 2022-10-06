@@ -3,7 +3,7 @@ import { useEffect, useLayoutEffect, useRef } from 'react'
 const useIsomorphicLayoutEffect =
   typeof window !== 'undefined' ? useLayoutEffect : useEffect
 
-function useInterval(callback: () => void, delay: number | null) {
+export function useInterval(callback: () => void, delay: number | null) {
   const savedCallback = useRef(callback)
 
   // Remember the latest callback if it changes.
@@ -24,5 +24,3 @@ function useInterval(callback: () => void, delay: number | null) {
     return () => clearInterval(id)
   }, [delay])
 }
-
-export default useInterval

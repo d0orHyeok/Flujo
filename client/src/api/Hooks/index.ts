@@ -1,3 +1,4 @@
 import useCopyLink from './useCopyLink'
+import { useInterval } from './userInterval'
 
-export { useCopyLink }
+export { useCopyLink, useInterval }
