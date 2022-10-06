@@ -1,13 +1,10 @@
 import { IMusic } from '@appTypes/types.type.'
-import styled from 'styled-components'
-import React, { useCallback } from 'react'
-import { Divider } from '@mui/material'
+import React, { useCallback, useState } from 'react'
 import { FaComment } from 'react-icons/fa'
 import { Link } from 'react-router-dom'
 import { EmptyProfileImage } from '@styles/EmptyImage'
 import calculateDateAgo from '@api/functions/calculateDateAgo'
 import { useAppDispatch, useAppSelector } from '@redux/hook'
-import { Button } from '@components/Common'
 import { RiDeleteBin5Fill } from 'react-icons/ri'
 import { deleteComment } from '@api/commentApi'
 import { convertTimeToString } from '@api/functions'
@@ -17,136 +14,8 @@ import {
   togglePlay,
 } from '@redux/features/player/playerSlice'
 import PopoverUser from '@components/PopoverUser/PopoverUser'
-
-const StyledDivider = styled(Divider)`
-  background-color: ${({ theme }) => theme.colors.border1};
-`
-
-const CommentHead = styled.div`
-  margin-bottom: 10px;
-  & .icon.comment {
-    margin-right: 5px;
-  }
-`
-
-const MusicComments = styled.div`
-  padding: 10px 0;
-
-  & .comment-item {
-    display: flex;
-
-    &:not(:last-child) {
-      margin-bottom: 15px;
-    }
-
-    & .comment-imageBox {
-      flex-shrink: 0;
-      width: 40px;
-      height: 40px;
-      margin-right: 10px;
-      & .comment-imageBox-image,
-      & .comment-imageBox-link {
-        width: 100%;
-        height: 100%;
-        border-radius: 20px;
-        object-fit: cover;
-      }
-    }
-
-    & .comment-content {
-      min-width: 0;
-      & .comment-content-username {
-        margin-bottom: 3px;
-        min-width: 0;
-        width: 100%;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-
-        & .commentedAt {
-          border: none;
-
-          &:hover {
-            color: ${({ theme }) => theme.colors.bgTextRGBA(0.86)};
-          }
-
-          &::before {
-            cursor: default;
-            color: ${({ theme }) => theme.colors.bgTextRGBA(0.5)};
-            font-size: 0.8em;
-            content: 'at';
-            margin-right: 5px;
-          }
-        }
-      }
-
-      & .comment-content-text {
-        overflow-wrap: break-word;
-      }
-
-      & .comment-content-username .comment-link:hover,
-      & .comment-content-text {
-        color: ${({ theme }) => theme.colors.bgTextRGBA(0.86)};
-      }
-    }
-
-    & .comment-createdAt {
-      margin-left: auto;
-      font-size: 12px;
-      text-align: right;
-    }
-
-    & .deleteBtn {
-      display: none;
-    }
-
-    &:hover {
-      & .deleteBtn {
-        display: inline-block;
-      }
-    }
-  }
-`
-
-const DeleteButton = styled(Button)`
-  margin: 0 5px;
-  margin-top: 2px;
-  font-size: 14px;
-  color: ${({ theme }) => theme.colors.bgText};
-  padding: 0 5px;
-  border: 1px solid ${({ theme }) => theme.colors.border2};
-  border-radius: 3px;
-
-  &:hover {
-    border-color: ${({ theme }) => theme.colors.bgText};
-  }
-`
-
-const EmptyComment = styled.div`
-  padding: 10px 0;
-  text-align: center;
-  font-size: 10px;
-
-  & .icon.comment {
-    font-size: 15em;
-    color: ${({ theme }) => theme.colors.bgTextRGBA(0.15)};
-  }
-
-  & .text-main {
-    font-size: 2em;
-    color: ${({ theme }) => theme.colors.bgText};
-    margin: 1em 0;
-  }
-
-  & .text-light {
-    font-size: 1.6em;
-    color: ${({ theme }) => theme.colors.bgTextRGBA(0.6)};
-  }
-
-  ${({ theme }) => theme.device.tablet} {
-    font-size: 8px;
-  }
-`
+import * as S from './TrackComments.style'
+import { Button } from '@components/Common'
 
 interface TrackCommentsProps {
   music: IMusic
@@ -159,6 +28,9 @@ const TrackComments = ({ music, setMusic }: TrackCommentsProps) => {
   const userId = useAppSelector((state) => state.user.userData?.id)
   const duration = useAppSelector((state) => state.player.progress.duration)
   const currentMusic = useAppSelector((state) => state.player.currentMusic)
+
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const [anchorIndex, setAnchorIndex] = useState(-1)
 
   const handleClickCommentedAt = useCallback(
     (commentedAt: number) => async (event: React.MouseEvent<HTMLElement>) => {
@@ -190,38 +62,53 @@ const TrackComments = ({ music, setMusic }: TrackCommentsProps) => {
     [currentMusic?.id, dispatch, duration, music]
   )
 
-  const handleClickDeleteButton = useCallback(
-    (commentId: number) => (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClickDeleteBtn = useCallback(
+    (index: number) => (event: React.MouseEvent<HTMLButtonElement>) => {
       event.preventDefault()
       event.stopPropagation()
-      deleteComment(commentId)
-        .then(() => {
-          const existComments = music.comments || []
-          const newComments = existComments.filter(
-            (comment) => comment.id !== commentId
-          )
-          setMusic({
-            ...music,
-            comments: newComments,
-            commentsCount: newComments.length,
-          })
-        })
-        .catch((error) => {
-          console.error(error.response || error)
-          return alert('Failed to delete comment')
-        })
+      setAnchorEl(event.currentTarget)
+      setAnchorIndex(index)
     },
-    [music, setMusic]
+    []
   )
+
+  const handleCloseDelete = useCallback(() => {
+    setAnchorEl(null)
+    setAnchorIndex(-1)
+  }, [])
+
+  const handleDeleteComment = useCallback(async () => {
+    if (!anchorEl) return
+    const dataId = anchorEl.getAttribute('data-id')
+    if (!dataId) return
+
+    const commentId = Number(dataId)
+
+    try {
+      await deleteComment(commentId)
+
+      const existComments = music.comments || []
+      const newComments = existComments.filter(
+        (comment) => comment.id !== commentId
+      )
+      setMusic({
+        ...music,
+        comments: newComments,
+        commentsCount: newComments.length,
+      })
+    } catch (error) {
+      return alert('Failed to delete comment')
+    }
+  }, [anchorEl, music, setMusic])
 
   return music.commentsCount > 0 ? (
     <>
-      <CommentHead>
+      <S.CommentHead>
         <FaComment className="icon comment" />
         {`${music.commentsCount} comments`}
-      </CommentHead>
-      <StyledDivider />
-      <MusicComments>
+      </S.CommentHead>
+      <S.StyledDivider />
+      <S.MusicComments>
         {music.comments.map((comment, index) => (
           <div key={index} className="comment-item">
             <div className="comment-imageBox">
@@ -242,7 +129,7 @@ const TrackComments = ({ music, setMusic }: TrackCommentsProps) => {
               <PopoverUser user={comment.user} />
             </div>
             <div className="comment-content">
-              <div className="comment-content-username">
+              <div className="comment-content-top">
                 <Link
                   className="comment-link"
                   to={`/profile/${comment.userId}`}
@@ -255,37 +142,65 @@ const TrackComments = ({ music, setMusic }: TrackCommentsProps) => {
                 >
                   {convertTimeToString(comment.commentedAt)}
                 </button>
-              </div>
-              <div className="comment-content-text">{comment.text}</div>
-            </div>
-            {comment.userId !== userId ? (
-              <div className="comment-createdAt">
-                {calculateDateAgo(comment.updatedAt || comment.createdAt)}
-              </div>
-            ) : (
-              <div className="comment-createdAt">
-                <div>
+                <span className="createdAt">
                   {calculateDateAgo(comment.updatedAt || comment.createdAt)}
-                </div>
-                <DeleteButton
-                  title="delete"
-                  className="deleteBtn"
-                  onClick={handleClickDeleteButton(comment.id)}
-                >
-                  <RiDeleteBin5Fill />
-                </DeleteButton>
+                </span>
               </div>
-            )}
+              <div className="comment-content-bottom">
+                <pre className="text">{comment.text}</pre>
+
+                {userId === comment.userId ? (
+                  <S.DeleteButton
+                    title="delete"
+                    className={`deleteBtn ${
+                      anchorIndex === index ? 'active' : ''
+                    }`}
+                    data-id={comment.id}
+                    onClick={handleClickDeleteBtn(index)}
+                  >
+                    <RiDeleteBin5Fill />
+                  </S.DeleteButton>
+                ) : null}
+              </div>
+            </div>
           </div>
         ))}
-      </MusicComments>
+      </S.MusicComments>
+
+      <S.StyledPopover
+        open={Boolean(anchorEl)}
+        anchorEl={anchorEl}
+        onClose={handleCloseDelete}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right',
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+      >
+        <S.Dialog>
+          <div className="dialog-content">
+            Do you really want to remove this comment?
+            <div className="buttons">
+              <Button className="delete-cancelBtn" onClick={handleCloseDelete}>
+                Cancel
+              </Button>
+              <Button className="delete-yesBtn" onClick={handleDeleteComment}>
+                Yes
+              </Button>
+            </div>
+          </div>
+        </S.Dialog>
+      </S.StyledPopover>
     </>
   ) : (
-    <EmptyComment>
+    <S.EmptyComment>
       <FaComment className="icon comment" />
       <div className="text-main">Seems a little quiet over here</div>
       <div className="text-light">Be the first to comment on this track</div>
-    </EmptyComment>
+    </S.EmptyComment>
   )
 }
 
