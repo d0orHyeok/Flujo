@@ -15,40 +15,37 @@ export const EditBasicInfo = styled.div`
     height: 256px;
     margin-right: 1rem;
 
-    ${({ theme }) => theme.device.mobile} {
-      width: 200px;
-      height: 200px;
-    }
-
-    & label,
-    & .btn.resetBtn {
-      display: inline-flex;
-      align-items: center;
+    & .imageBox-control {
       position: absolute;
+      top: 186px;
       left: 50%;
       transform: translateX(-50%);
-      cursor: pointer;
-      background-color: rgba(255, 255, 255, 0.66);
-      color: black;
-      padding: 0 6px;
-      height: 28px;
-      font-size: 12px;
-      border-radius: 4px;
-      border: 1px solid lightgray;
+      text-align: center;
 
-      & svg {
-        width: 16px;
-        height: 16px;
-        margin-right: 4px;
+      & .btn {
+        cursor: pointer;
+        background-color: rgba(255, 255, 255, 0.66);
+        color: black;
+        padding: 0 6px;
+        height: 28px;
+        font-size: 12px;
+        border-radius: 4px;
+        border: 1px solid lightgray;
+
+        & .icon {
+          margin-right: 4px;
+          font-size: 16px;
+        }
+
+        &.imageBtn {
+          display: inline-flex;
+          align-items: center;
+        }
+
+        &.resetBtn {
+          margin-top: 4px;
+        }
       }
-    }
-
-    & label {
-      bottom: 40px;
-    }
-
-    & .btn.resetBtn.resetBtn {
-      bottom: 5px;
     }
 
     & .img {

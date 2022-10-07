@@ -127,7 +127,8 @@ const MusicBasicInfo = forwardRef<IMusicBasicInfoHandler, Props>(
     const handleResetCover = useCallback(() => {
       setCover(originalCover.url)
       if (coverInputRef.current) {
-        coverInputRef.current.files = null
+        const datatransfer = new DataTransfer()
+        coverInputRef.current.files = datatransfer.files
       }
       onChangeData && onChangeData('cover', null)
     }, [onChangeData, originalCover.url])
@@ -260,6 +261,7 @@ const MusicBasicInfo = forwardRef<IMusicBasicInfoHandler, Props>(
         )
         setOriginalCover({ file: origin, url })
       } else {
+        setCover(null)
         setOriginalCover({})
       }
 
@@ -311,6 +313,10 @@ const MusicBasicInfo = forwardRef<IMusicBasicInfoHandler, Props>(
       })
     }, [metadata])
 
+    const handleUploadImage = useCallback(() => {
+      coverInputRef.current?.click()
+    }, [])
+
     useLayoutEffect(() => {
       setValue()
     }, [setValue])
@@ -319,15 +325,17 @@ const MusicBasicInfo = forwardRef<IMusicBasicInfoHandler, Props>(
       <div {...props}>
         <S.EditBasicInfo>
           <div className="imageBox">
-            <label htmlFor="coverInput">
-              <AiFillCamera />
-              {'Upload Image'}
-            </label>
-            {cover !== originalCover.url && (
-              <button className="btn resetBtn" onClick={handleResetCover}>
-                Reset Cover
+            <div className="imageBox-control">
+              <button className="btn imageBtn" onClick={handleUploadImage}>
+                <AiFillCamera className="icon" />
+                {'Upload Image'}
               </button>
-            )}
+              {Boolean(cover) !== Boolean(originalCover.url) ? (
+                <button className="btn resetBtn" onClick={handleResetCover}>
+                  Reset Cover
+                </button>
+              ) : null}
+            </div>
             <input
               id="coverInput"
               type="file"
