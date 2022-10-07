@@ -10,21 +10,19 @@ import { numberFormat, sortByCreatedAt } from '@api/functions'
 import { BsFillPeopleFill, BsPersonFill, BsSoundwave } from 'react-icons/bs'
 import PopoverUser from '@components/PopoverUser/PopoverUser'
 import { FollowTextButton } from '@components/Common/Button'
-import { useAppDispatch, useAppSelector } from '@redux/hook'
+import { useAuthDispatch, useAppSelector } from '@redux/hook'
 import { userToggleFollow } from '@redux/thunks/userThunks'
 import { FaComment } from 'react-icons/fa'
 import { IComment } from '@appTypes/comment.type'
 import { getCommentsByUserId } from '@api/commentApi'
 import calculateDateAgo from '@api/functions/calculateDateAgo'
-import { useLoginOpen } from '@redux/context/loginProvider'
 
 interface ProfileSideProps {
   user: IUser
 }
 
 const ProfileSide = ({ user }: ProfileSideProps) => {
-  const dispatch = useAppDispatch()
-  const openLogin = useLoginOpen()
+  const authDispatch = useAuthDispatch()
 
   const myId = useAppSelector((state) => state.user.userData?.id)
   const following = useAppSelector(
@@ -46,13 +44,9 @@ const ProfileSide = ({ user }: ProfileSideProps) => {
   const handleClickFollow = useCallback(
     (id: string) => (event: React.MouseEvent<HTMLElement>) => {
       event.preventDefault()
-      if (!myId) {
-        openLogin()
-      } else {
-        dispatch(userToggleFollow(id))
-      }
+      authDispatch(userToggleFollow(id))
     },
-    [dispatch, myId, openLogin]
+    [authDispatch]
   )
 
   useEffect(() => {

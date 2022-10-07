@@ -7,9 +7,8 @@ import styled from 'styled-components'
 import { BsSoundwave } from 'react-icons/bs'
 import { IoMdPeople } from 'react-icons/io'
 import { FollowTextButton } from '@components/Common/Button'
-import { useAppDispatch, useAppSelector } from '@redux/hook'
+import { useAppSelector, useAuthDispatch } from '@redux/hook'
 import { userToggleFollow } from '@redux/thunks/userThunks'
-import { useLoginOpen } from '@redux/context/loginProvider'
 
 const Wrapper = styled.div`
   font-size: 16px;
@@ -74,17 +73,13 @@ interface UserContentCardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const UserContentCard = ({ user, ...props }: UserContentCardProps) => {
-  const dispatch = useAppDispatch()
-  const openLogin = useLoginOpen()
+  const authDispatch = useAuthDispatch()
 
   const userData = useAppSelector((state) => state.user.userData)
 
   const handleClickFollow = useCallback(() => {
-    if (!userData) {
-      return openLogin()
-    }
-    dispatch(userToggleFollow(user.id))
-  }, [userData, dispatch, user.id, openLogin])
+    authDispatch(userToggleFollow(user.id))
+  }, [user.id, authDispatch])
 
   return (
     <Wrapper {...props}>

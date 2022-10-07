@@ -5,8 +5,7 @@ import { EmptyProfileImage } from '@styles/EmptyImage'
 import { IoMdPeople } from 'react-icons/io'
 import { FollowTextButton } from '@components/Common/Button'
 import { numberFormat } from '@api/functions'
-import { useAppDispatch, useAppSelector } from '@redux/hook'
-import { useLoginOpen } from '@redux/context/loginProvider'
+import { useAppSelector, useAuthDispatch } from '@redux/hook'
 import { userToggleFollow } from '@redux/thunks/userThunks'
 import { IUser } from '@appTypes/types.type.'
 
@@ -63,8 +62,7 @@ interface PopoverContentProps {
 }
 
 const PopoverContent = ({ user }: PopoverContentProps) => {
-  const dispatch = useAppDispatch()
-  const openLogin = useLoginOpen()
+  const authDispatch = useAuthDispatch()
 
   const userId = useAppSelector((state) => state.user.userData?.id)
   const following =
@@ -74,13 +72,9 @@ const PopoverContent = ({ user }: PopoverContentProps) => {
     (targetId: string) => (event: React.MouseEvent<HTMLElement>) => {
       event.preventDefault()
       event.stopPropagation()
-      if (!userId) {
-        return openLogin()
-      }
-
-      dispatch(userToggleFollow(targetId))
+      authDispatch(userToggleFollow(targetId))
     },
-    [dispatch, openLogin, userId]
+    [authDispatch]
   )
 
   return (

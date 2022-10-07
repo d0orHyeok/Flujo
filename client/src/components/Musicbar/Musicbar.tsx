@@ -17,7 +17,7 @@ import {
 } from '@components/Common/Button'
 import convertTimeToString from '@api/functions/convertTimeToString'
 import Progressbar, { DurationArea } from './section/Progressbar'
-import { useAppDispatch, useAppSelector } from '@redux/hook'
+import { useAppDispatch, useAppSelector, useAuthDispatch } from '@redux/hook'
 import {
   nextMusic,
   prevMusic,
@@ -38,6 +38,7 @@ const getLocalVolume = () => {
 
 const Musicbar = () => {
   const dispatch = useAppDispatch()
+  const authDispatch = useAuthDispatch()
 
   const user = useAppSelector(selectUser)
   const { isPlay, isShuffle, repeat } = useAppSelector(
@@ -132,7 +133,7 @@ const Musicbar = () => {
 
   const handleClickLike = () => {
     if (currentMusic) {
-      dispatch(
+      authDispatch(
         userToggleLike({ targetId: currentMusic.id, targetType: 'music' })
       )
     }
@@ -140,7 +141,7 @@ const Musicbar = () => {
 
   const handleClickFollow = () => {
     if (currentMusic) {
-      dispatch(userToggleFollow(currentMusic.userId))
+      authDispatch(userToggleFollow(currentMusic.userId))
     }
   }
 

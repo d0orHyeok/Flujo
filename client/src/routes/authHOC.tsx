@@ -20,7 +20,7 @@ const withUser = <P extends object>(
       }
       dispatch(userAuth()).then((value) => {
         const { type } = value
-        const success = type.indexOf('fulfilled') !== -1
+        const success = type.includes('fulfilled')
         const isAuth = success ? success : isLogin
 
         if (isAuth) {

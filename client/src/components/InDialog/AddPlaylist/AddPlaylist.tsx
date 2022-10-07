@@ -94,7 +94,7 @@ const AddPlaylist = ({
 
     const value = await dispatch(userCreatePlaylist(body))
 
-    if (value.type.indexOf('fulfilled') !== -1) {
+    if (value.type.includes('fulfilled')) {
       const createPlaylist: IPlaylist = value.payload
       openAlert(`Create playlist: ${createPlaylist.name}`, {
         severity: 'success',
@@ -156,7 +156,7 @@ const AddPlaylist = ({
           state.filter((id) => id !== Number(playlistId))
         )
 
-        if (value.type.indexOf('fulfilled') !== -1) {
+        if (value.type.includes('fulfilled')) {
           const updatedPlaylist: IPlaylist = value.payload
           openAlert(
             `'${updatedPlaylist.name}' ${
@@ -240,7 +240,7 @@ const AddPlaylist = ({
             />
             <ul className="ul-playlists">
               {playlists.map((playlist, index) => {
-                if (playlist.name.indexOf(filter) === -1) {
+                if (!playlist.name.includes(filter)) {
                   return
                 }
 

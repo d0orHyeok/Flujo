@@ -32,7 +32,7 @@ const ChangePassword = () => {
     const query_token = search
       ?.replace('?', '')
       .split('&')
-      .find((query) => query.indexOf('token=') !== -1)
+      .find((query) => query.includes('token='))
     if (!query_token) {
       return navigate('/notfound')
     }

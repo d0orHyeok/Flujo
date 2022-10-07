@@ -18,7 +18,7 @@ import {
   removeMusic,
   clearMusics,
 } from '@redux/features/player/playerSlice'
-import { useAppDispatch, useAppSelector } from '@redux/hook'
+import { useAppDispatch, useAppSelector, useAuthDispatch } from '@redux/hook'
 import { AddPlaylistMenuItem, MusicMenuItem } from '@components/Common/MenuItem'
 import { MusicMenu } from '@components/Common/Menu'
 import { useCopyLink } from '@api/Hooks'
@@ -29,6 +29,7 @@ import { userToggleLike, userToggleRepost } from '@redux/thunks/userThunks'
 const Musiclist = () => {
   const copyLink = useCopyLink()
   const dispatch = useAppDispatch()
+  const authDispatch = useAuthDispatch()
 
   const likeMusics =
     useAppSelector((state) => state.user.userData?.likeMusics) || []
@@ -113,10 +114,10 @@ const Musiclist = () => {
     event.stopPropagation()
     if (anchorEl) {
       const musicId = musics[Number(anchorEl.value)].id
-      dispatch(userToggleLike({ targetId: musicId, targetType: 'music' }))
+      authDispatch(userToggleLike({ targetId: musicId, targetType: 'music' }))
       setAnchorEl(null)
     } else {
-      dispatch(
+      authDispatch(
         userToggleLike({
           targetId: Number(event.currentTarget.ariaValueText),
           targetType: 'music',
@@ -130,7 +131,7 @@ const Musiclist = () => {
     event.stopPropagation()
     if (anchorEl) {
       const musicId = musics[Number(anchorEl.value)].id
-      dispatch(userToggleRepost({ targetId: musicId, targetType: 'music' }))
+      authDispatch(userToggleRepost({ targetId: musicId, targetType: 'music' }))
       setAnchorEl(null)
     }
   }

@@ -1,7 +1,7 @@
 import { numberFormat } from '@api/functions'
 import { FollowTextButton } from '@components/Common/Button'
 import { IUser } from '@appTypes/types.type.'
-import { useAppDispatch, useAppSelector } from '@redux/hook'
+import { useAppSelector, useAuthDispatch } from '@redux/hook'
 import { EmptyProfileImage } from '@styles/EmptyImage'
 import React, { useCallback, useLayoutEffect, useState } from 'react'
 import { IoMdPeople } from 'react-icons/io'
@@ -76,7 +76,7 @@ const TrackDetailUsers = ({
   isReposts,
   ...props
 }: TrackDetailUsersPorps) => {
-  const dispatch = useAppDispatch()
+  const authDispatch = useAuthDispatch()
 
   const userId = useAppSelector((state) => state.user.userData?.id)
   const following =
@@ -90,20 +90,21 @@ const TrackDetailUsers = ({
   const handleClickFollow = useCallback(
     (id: string) => (event: React.MouseEvent<HTMLButtonElement>) => {
       event.preventDefault()
-      dispatch(userToggleFollow(id)).then((res: any) => {
-        const { type } = res.payload
-        const addCount = type === 'unfollow' ? -1 : 1
-
-        setDisplayUsers((state) => {
-          return state.map((f) =>
-            f.id === id
-              ? { ...f, followersCount: f.followersCount + addCount }
-              : f
-          )
-        })
+      authDispatch(userToggleFollow(id)).then((res) => {
+        const type = res.payload?.type
+        if (Boolean(type)) {
+          const addCount = type === 'unfollow' ? -1 : 1
+          setDisplayUsers((state) => {
+            return state.map((f) =>
+              f.id === id
+                ? { ...f, followersCount: f.followersCount + addCount }
+                : f
+            )
+          })
+        }
       })
     },
-    [dispatch]
+    [authDispatch]
   )
 
   const getUserItems = useCallback(() => {

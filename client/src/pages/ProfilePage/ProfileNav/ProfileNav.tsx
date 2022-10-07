@@ -1,5 +1,5 @@
 import { FollowTextButton } from '@components/Common/Button'
-import { useAppDispatch, useAppSelector } from '@redux/hook'
+import { useAuthDispatch, useAppSelector } from '@redux/hook'
 import React, { useCallback, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import styled from 'styled-components'
@@ -7,7 +7,6 @@ import { navItems } from '../assets/profileNavItem'
 import { BsFillCaretLeftFill, BsFillCaretRightFill } from 'react-icons/bs'
 import EditProfile from '@components/InDialog/EditProfile/EditProfile'
 import { useCopyLink } from '@api/Hooks'
-import { useLoginOpen } from '@redux/context/loginProvider'
 import { userToggleFollow } from '@redux/thunks/userThunks'
 import { IUser } from '@appTypes/user.type'
 import Dialog, { getTransitionSlide } from '@components/Common/Dialog'
@@ -119,31 +118,22 @@ const ProfileNav = ({
   ...props
 }: ProfileNavProps) => {
   const { userId } = useParams()
-
-  const dispatch = useAppDispatch()
+  const authDispatch = useAuthDispatch()
   const copyLink = useCopyLink()
-  const openLogin = useLoginOpen()
 
   const following = useAppSelector(
     (state) => state.user.userData?.following || []
   )
-  const isLogin = useAppSelector((state) => state.user.isLogin)
-
-  const ulRef = useRef<HTMLUListElement>(null)
-
   const [open, setOpen] = useState(false)
+  const ulRef = useRef<HTMLUListElement>(null)
 
   const handleClickFollow = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       event.preventDefault()
       event.stopPropagation()
-      if (isLogin) {
-        if (userId) dispatch(userToggleFollow(userId))
-      } else {
-        openLogin()
-      }
+      if (userId) authDispatch(userToggleFollow(userId))
     },
-    [isLogin, openLogin, dispatch, userId]
+    [authDispatch, userId]
   )
 
   const handleClickArrowButton =

@@ -15,7 +15,7 @@ Axios.interceptors.request.use((config) => {
   if (process.env.NODE_ENV !== 'development') {
     config.url = config.url?.replace('/api/', '/')
     const reqAuth = localStorage.getItem('wave_login') !== 'false'
-    if (!reqAuth && config.url?.indexOf('/auth/info') !== -1) {
+    if (!reqAuth && Boolean(config.url?.includes('/auth/info'))) {
       return
     }
   }
@@ -36,7 +36,7 @@ Axios.interceptors.response.use(
       // 유저인증실패로 요청에 실패한경우
       const reqAuth = localStorage.getItem('wave_login') !== 'false'
 
-      if (originalRequest.url.indexOf('/auth/refresh') !== -1 || !reqAuth) {
+      if (originalRequest.url.includes('/auth/refresh') !== -1 || !reqAuth) {
         return Promise.reject(error)
       } else {
         // refreshToken을 통해 accessToken 요청

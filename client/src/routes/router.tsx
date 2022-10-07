@@ -30,7 +30,7 @@ const cancelAllRequests = () => {
 }
 const addCancelers = () => {
   return Axios.interceptors.request.use((config) => {
-    if (config.url?.indexOf('/auth/info') !== -1) {
+    if (Boolean(config.url?.includes('/auth/info'))) {
       return config
     }
     if (!Boolean(config?.cancelToken)) {

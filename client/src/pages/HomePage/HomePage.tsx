@@ -37,9 +37,10 @@ const HomePage = () => {
       const response = await getAllMusic({ params: { option } })
       const items: ChartItem[] = response.data
       return items.map((item) => {
-        const path =
-          item.genre.indexOf('All music genres') !== -1 ? 'all' : item.genre
-        const subText = option === 'trend' ? 'Top 100' : 'New Release'
+        const path = item.genre.includes('All music genres')
+          ? 'all'
+          : item.genre
+        const subText = option === 'trend' ? 'Top 50' : 'New Release'
         return {
           mainText: {
             name: item.genre,

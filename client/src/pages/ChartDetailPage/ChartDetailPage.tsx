@@ -17,9 +17,8 @@ import { EmptyProfileImage } from '@styles/EmptyImage'
 import { IoMdPeople } from 'react-icons/io'
 import { BsSoundwave } from 'react-icons/bs'
 import { FollowTextButton } from '@components/Common/Button'
-import { useAppDispatch, useAppSelector } from '@redux/hook'
+import { useAuthDispatch, useAppSelector } from '@redux/hook'
 import { userToggleFollow } from '@redux/thunks/userThunks'
-import { useLoginOpen } from '@redux/context/loginProvider'
 import { getChartedMusics } from '@api/musicApi'
 import { useSetMinWidth } from '@redux/context/appThemeProvider'
 
@@ -36,15 +35,13 @@ const ChartDetailPage = ({
   genre,
   chart,
 }: IChartDetailPagePrpps) => {
+  const authDispatch = useAuthDispatch()
   const setMinWidth = useSetMinWidth()
   const { search } = useLocation()
-  const dispatch = useAppDispatch()
-  const openLogin = useLoginOpen()
 
   const following = useAppSelector(
     (state) => state.user.userData?.following || []
   )
-  const myId = useAppSelector((state) => state.user.userData?.id)
 
   const sideRef = useRef<HTMLDivElement>(null)
 
@@ -56,13 +53,8 @@ const ChartDetailPage = ({
   const handleClickFollow = useCallback(
     (userId: string) => async (event: React.MouseEvent<HTMLButtonElement>) => {
       event.preventDefault()
-      if (!myId) {
-        openLogin()
-        return
-      }
-
-      const value = await dispatch(userToggleFollow(userId))
-      if (value.type.indexOf('fulfilled') !== -1) {
+      const value = await authDispatch(userToggleFollow(userId))
+      if (value.type.includes('fulfilled')) {
         const { type } = value.payload
         setUsers((state) =>
           state.map((user) => {
@@ -76,7 +68,7 @@ const ChartDetailPage = ({
         )
       }
     },
-    [dispatch, myId, openLogin]
+    [authDispatch]
   )
 
   const getChartMusics = useCallback(async () => {

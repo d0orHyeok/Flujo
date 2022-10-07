@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import * as S from './MusicSmallCard.style'
 import { FaPlay, FaPause } from 'react-icons/fa'
-import { useAppDispatch, useAppSelector } from '@redux/hook'
+import { useAppDispatch, useAppSelector, useAuthDispatch } from '@redux/hook'
 import { setCurrentMusic, togglePlay } from '@redux/features/player/playerSlice'
 import {
   AddMusicMenuItem,
@@ -20,6 +20,7 @@ export interface IMusicSmallCardProps
 }
 
 const MusicSmallCard = ({ music, ...props }: IMusicSmallCardProps) => {
+  const authDispath = useAuthDispatch()
   const dispatch = useAppDispatch()
 
   const currentMusic = useAppSelector((state) => state.player.currentMusic)
@@ -56,7 +57,7 @@ const MusicSmallCard = ({ music, ...props }: IMusicSmallCardProps) => {
   const handleClickLike = (event: React.MouseEvent<HTMLElement>) => {
     event.stopPropagation()
     event.preventDefault()
-    dispatch(userToggleLike({ targetId: music.id, targetType: 'music' }))
+    authDispath(userToggleLike({ targetId: music.id, targetType: 'music' }))
   }
 
   useEffect(() => {

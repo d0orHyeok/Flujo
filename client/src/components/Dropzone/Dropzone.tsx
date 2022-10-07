@@ -48,13 +48,13 @@ const Dropzone = ({
       const fileArray = Array.from(files)
       if (multiple) {
         fileArray.forEach((file) => {
-          if (file.type.indexOf('audio') === -1) {
+          if (file.type.includes('audio')) {
             return
           }
           dataTransfer.items.add(file)
         })
       } else {
-        const audioFile = fileArray.find((f) => f.type.indexOf('audio') !== -1)
+        const audioFile = fileArray.find((f) => f.type.includes('audio'))
         audioFile && dataTransfer.items.add(audioFile)
       }
 

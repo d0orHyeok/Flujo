@@ -6,7 +6,7 @@ import { MdPlaylistPlay, MdPlaylistAdd, MdOutlineEdit } from 'react-icons/md'
 import { BiRepost } from 'react-icons/bi'
 import { Button } from '@components/Common'
 import { IMusic, IPlaylist } from '@appTypes/types.type.'
-import { useAppDispatch, useAppSelector } from '@redux/hook'
+import { useAppDispatch, useAppSelector, useAuthDispatch } from '@redux/hook'
 import { useLoginOpen } from '@redux/context/loginProvider'
 import { useCopyLink } from '@api/Hooks'
 import { addMusic } from '@redux/features/player/playerSlice'
@@ -99,6 +99,7 @@ const InteractionButtons = ({
   ...props
 }: Props) => {
   const dispatch = useAppDispatch()
+  const authDispath = useAuthDispatch()
   const openLogin = useLoginOpen()
   const copyLink = useCopyLink()
   const openAlert = useAlert()
@@ -122,22 +123,17 @@ const InteractionButtons = ({
     (event: React.MouseEvent<HTMLButtonElement>) => {
       event.preventDefault()
       event.stopPropagation()
-      if (!userData) {
-        openLogin()
-        return
-      }
-
       const targetType = 'title' in target ? 'music' : 'playlist'
-      dispatch(userToggleRepost({ targetId: target.id, targetType })).then(
+      authDispath(userToggleRepost({ targetId: target.id, targetType })).then(
         (value: any) => {
-          if (value.type.indexOf('fulfilled') !== -1 && setTarget) {
+          if (value.type.includes('fulfilled') && setTarget) {
             const existReposts =
               target.reposts ||
               Array.from({ length: target.repostsCount || 0 }, (v, i) => i)
             const newReposts =
               value.payload.data.toggleType === 'repost'
                 ? [...existReposts, userData]
-                : existReposts.filter((ru) => ru.id !== userData.id)
+                : existReposts.filter((ru) => ru.id !== userData?.id)
             setTarget({
               ...target,
               reposts: newReposts,
@@ -147,22 +143,17 @@ const InteractionButtons = ({
         }
       )
     },
-    [dispatch, openLogin, setTarget, target, userData]
+    [authDispath, setTarget, target, userData]
   )
 
   const handleClickLike = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
       event.preventDefault()
       event.stopPropagation()
-      if (!userData) {
-        openLogin()
-        return
-      }
-
       const targetType = 'title' in target ? 'music' : 'playlist'
-      dispatch(userToggleLike({ targetId: target.id, targetType })).then(
+      authDispath(userToggleLike({ targetId: target.id, targetType })).then(
         (value: any) => {
-          if (value.type.indexOf('fulfilled') !== -1) {
+          if (value.type.includes('fulfilled')) {
             if (setTarget) {
               const existLikes =
                 target.likes ||
@@ -170,7 +161,7 @@ const InteractionButtons = ({
               const newLikes =
                 value.payload.data.toggleType === 'like'
                   ? [...existLikes, userData]
-                  : existLikes.filter((l) => l.id !== userData.id)
+                  : existLikes.filter((l) => l.id !== userData?.id)
               setTarget({
                 ...target,
                 likes: newLikes,
@@ -181,7 +172,7 @@ const InteractionButtons = ({
         }
       )
     },
-    [userData, target, openLogin, dispatch, setTarget]
+    [target, authDispath, setTarget, userData]
   )
 
   const onSuccessCreatePlaylist = useCallback(

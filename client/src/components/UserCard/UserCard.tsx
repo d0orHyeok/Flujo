@@ -6,7 +6,7 @@ import styled from 'styled-components'
 import { IoMdPeople } from 'react-icons/io'
 import { FollowTextButton } from '@components/Common/Button'
 import { Link } from 'react-router-dom'
-import { useAppDispatch, useAppSelector } from '@redux/hook'
+import { useAppSelector, useAuthDispatch } from '@redux/hook'
 import { userToggleFollow } from '@redux/thunks/userThunks'
 
 const Card = styled.div`
@@ -85,7 +85,7 @@ interface UserCardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const UserCard = ({ user, ...props }: UserCardProps) => {
-  const dispatch = useAppDispatch()
+  const authDispatch = useAuthDispatch()
 
   const myId = useAppSelector((state) => state.user.userData?.id)
   const following = useAppSelector(
@@ -98,19 +98,16 @@ const UserCard = ({ user, ...props }: UserCardProps) => {
 
   const handleClickFollow = useCallback(
     (id: string) => (event: React.MouseEvent<HTMLButtonElement>) => {
-      if (!myId) {
-        return
-      }
       event.preventDefault()
-      dispatch(userToggleFollow(id)).then((res) => {
-        const success = res.type.indexOf('fulfilled') !== -1
-        if (success) {
-          const add = res.payload.type === 'unfollow' ? -1 : 1
+      authDispatch(userToggleFollow(id)).then((res) => {
+        const type = res.payload?.type
+        if (Boolean(type)) {
+          const add = type === 'unfollow' ? -1 : 1
           setFollowerCount((state) => state + add)
         }
       })
     },
-    [dispatch, myId]
+    [authDispatch]
   )
 
   useEffect(() => {

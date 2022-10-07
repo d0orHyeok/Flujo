@@ -3,7 +3,7 @@ import { IUser } from '@appTypes/user.type'
 import { FollowTextButton } from '@components/Common/Button'
 import LoadingArea from '@components/Loading/LoadingArea'
 import NoItem from '@pages/TrackDetailPage/DetailTab/NoItem.style'
-import { useAppDispatch, useAppSelector } from '@redux/hook'
+import { useAppSelector, useAuthDispatch } from '@redux/hook'
 import { userToggleFollow } from '@redux/thunks/userThunks'
 import { EmptyProfileImage } from '@styles/EmptyImage'
 import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
@@ -75,7 +75,7 @@ const ProfileDetailFollow = ({
   option,
   ...props
 }: IProfileDetailFollowProps) => {
-  const dispatch = useAppDispatch()
+  const authDispatch = useAuthDispatch()
 
   const userId = useAppSelector((state) => state.user.userData?.id)
   const following =
@@ -90,20 +90,21 @@ const ProfileDetailFollow = ({
   const handleClickFollow = useCallback(
     (id: string) => (event: React.MouseEvent<HTMLButtonElement>) => {
       event.preventDefault()
-      dispatch(userToggleFollow(id)).then((res: any) => {
-        const { type } = res.payload
-        const addCount = type === 'unfollow' ? -1 : 1
-
-        setDisplayUsers((state) => {
-          return state.map((f) =>
-            f.id === id
-              ? { ...f, followersCount: f.followersCount + addCount }
-              : f
-          )
-        })
+      authDispatch(userToggleFollow(id)).then((res) => {
+        const type = res.payload?.type
+        if (Boolean(type)) {
+          const addCount = type === 'unfollow' ? -1 : 1
+          setDisplayUsers((state) => {
+            return state.map((f) =>
+              f.id === id
+                ? { ...f, followersCount: f.followersCount + addCount }
+                : f
+            )
+          })
+        }
       })
     },
-    [dispatch]
+    [authDispatch]
   )
 
   const getRelatedMusics = useCallback(async () => {
