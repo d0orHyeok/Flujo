@@ -67,6 +67,7 @@ module.exports = {
       Buffer: ['buffer', 'Buffer'],
       process: 'process/browser',
     }),
+    new webpack.EnvironmentPlugin(),
 
     // new CopyPlugin({
     //   patterns: [{ from: 'source', to: 'dest' }],
