@@ -46,12 +46,47 @@ export const userChangeEmail = createAsyncThunk(
   }
 )
 
+const authCondition = (foo: any, { getState }: { getState: any }) => {
+  const { user } = getState()
+  if (!Boolean(user?.userData?.id)) return false
+}
+
 export const userToggleFollow = createAsyncThunk(
   'TOGGLE_FOLLOW',
   async (targetId: string) => {
     const response = await Axios.patch(`/api/auth/follow/${targetId}`)
     return response.data
-  }
+  },
+  { condition: authCondition }
+)
+
+interface UserToggleTargetParam {
+  targetType: 'music' | 'playlist'
+  targetId: number
+}
+
+export const userToggleLike = createAsyncThunk(
+  'TOGGLE_LIKES',
+  async (param: UserToggleTargetParam) => {
+    const { targetId, targetType } = param
+    const response = await Axios.patch(
+      `/api/auth/like/${targetType}/${targetId}`
+    )
+    return { targetType, data: response.data }
+  },
+  { condition: authCondition }
+)
+
+export const userToggleRepost = createAsyncThunk(
+  'USER_REPOST',
+  async (param: UserToggleTargetParam) => {
+    const { targetId, targetType } = param
+    const response = await Axios.patch(
+      `/api/auth/repost/${targetType}/${targetId}`
+    )
+    return { targetType, data: response.data }
+  },
+  { condition: authCondition }
 )
 
 export const userUpdateImage = createAsyncThunk(
@@ -74,33 +109,6 @@ export const userUpdateProfile = createAsyncThunk(
   async (body: IUpdateProfileBody) => {
     const response = await Axios.patch(`/api/auth/profile`, body)
     return response.data
-  }
-)
-
-interface UserToggleTargetParam {
-  targetType: 'music' | 'playlist'
-  targetId: number
-}
-
-export const userToggleLike = createAsyncThunk(
-  'TOGGLE_LIKES',
-  async (param: UserToggleTargetParam) => {
-    const { targetId, targetType } = param
-    const response = await Axios.patch(
-      `/api/auth/like/${targetType}/${targetId}`
-    )
-    return { targetType, data: response.data }
-  }
-)
-
-export const userToggleRepost = createAsyncThunk(
-  'USER_REPOST',
-  async (param: UserToggleTargetParam) => {
-    const { targetId, targetType } = param
-    const response = await Axios.patch(
-      `/api/auth/repost/${targetType}/${targetId}`
-    )
-    return { targetType, data: response.data }
   }
 )
 
