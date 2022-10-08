@@ -36,7 +36,7 @@ Axios.interceptors.response.use(
       // 유저인증실패로 요청에 실패한경우
       const reqAuth = localStorage.getItem('wave_login') !== 'false'
 
-      if (originalRequest.url.includes('/auth/refresh') !== -1 || !reqAuth) {
+      if (originalRequest.url.includes('/auth/refresh') || !reqAuth) {
         return Promise.reject(error)
       } else {
         // refreshToken을 통해 accessToken 요청

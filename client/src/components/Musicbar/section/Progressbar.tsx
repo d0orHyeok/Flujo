@@ -3,7 +3,7 @@ import { useAppDispatch, useAppSelector } from '@redux/hook'
 import React, { useCallback, useEffect, useState } from 'react'
 import convertTimeToString from '@api/functions/convertTimeToString'
 import * as S from './Progressbar.style'
-import { createHistory } from '@api/Hooks/historyApi'
+import { createHistory } from '@api/historyApi'
 
 export const DurationArea = () => {
   const progress = useAppSelector((state) => state.player.progress)
