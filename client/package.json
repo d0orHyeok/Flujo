@@ -10,6 +10,7 @@
     "react",
     "typescript"
   ],
+  "license": "MIT",
   "author": "d0orhyeok <d0oR.hyeok@gmail.com>",
   "bugs": {
     "url": "https://github.com/d0orHyeok/Wave/issues"

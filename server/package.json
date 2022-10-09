@@ -1,8 +1,8 @@
 {
   "name": "server",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "Wave API Server",
+  "author": "JangHyeok Kim",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
@@ -21,6 +21,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@nestjs/cli": "^8.0.0",
     "@nestjs/common": "^8.0.0",
     "@nestjs/config": "^1.2.0",
     "@nestjs/core": "^8.0.0",
@@ -28,8 +29,11 @@
     "@nestjs/passport": "^8.2.1",
     "@nestjs/platform-express": "^8.0.0",
     "@nestjs/serve-static": "^2.2.2",
+    "@nestjs/swagger": "^6.1.2",
     "@nestjs/typeorm": "^8.0.3",
     "@types/bcryptjs": "^2.4.2",
+    "@types/express": "^4.17.13",
+    "@types/multer": "^1.4.7",
     "@types/nodemailer": "^6.4.6",
     "@types/passport-jwt": "^3.0.6",
     "bcryptjs": "^2.4.3",
@@ -49,17 +53,15 @@
     "rxjs": "^7.2.0",
     "shelljs": "^0.8.5",
     "short-unique-id": "^4.4.4",
+    "swagger-ui-express": "^4.5.0",
     "typeorm": "^0.2.45",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
-    "@nestjs/cli": "^8.0.0",
     "@nestjs/schematics": "^8.0.0",
     "@nestjs/testing": "^8.0.0",
     "@types/cookie-parser": "^1.4.2",
-    "@types/express": "^4.17.13",
     "@types/jest": "27.4.1",
-    "@types/multer": "^1.4.7",
     "@types/node": "^16.0.0",
     "@types/shelljs": "^0.8.11",
     "@types/supertest": "^2.0.11",

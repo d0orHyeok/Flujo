@@ -1,46 +1,77 @@
-# Getting Started with Create React App
+# [**Wave**](https://wave-d0orhyeok.netlify.app/) · [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/d0orHyeok/wave-client-production/blob/master/LICENSE) <img src="https://img.shields.io/badge/TypeScript-3178C6?flat&logo=TypeScript&logoColor=white"> <img src="https://img.shields.io/badge/React-61DAFB?flat&logo=React&logoColor=black"> <img src="https://img.shields.io/badge/Redux-764ABC?flat&logo=Redux&logoColor=white"> <img src="https://img.shields.io/badge/styled-components-DB7093?flat&logo=styled-components&logoColor=white">
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Wave, 음악공유 스트리밍 사이트입니다.
 
-## Available Scripts
+- React, TypeScript사용한 프로젝트입니다.
+- SoundCloud를 참고하여 개발한 사이트입니다.
+- [**View website: Wave**](https://wave-d0orhyeok.netlify.app/)
+- **Server status**
+  | Client | API Server |
+  | --- | --- |
+  | ![Netlify Status](https://api.netlify.com/api/v1/badges/92c9ca1c-7424-450e-999b-9707876a5883/deploy-status) | ![Heroku](https://heroku-badge.herokuapp.com/?app=wave-nestjs) |
 
-In the project directory, you can run:
+## **Installation**
 
-### `npm start`
+프로젝트 클론 후 패키지 설치를 진행하고 환경변수를 등록하고 실행하세요.
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### Clone Project
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+```sh
+git clone [REPO_URL] [DIR]
+```
 
-### `npm test`
+### Install development dependencies:
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+```sh
+npm install
+# or
+yarn add
 
-### `npm run build`
+```
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Create .env
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```sh
+# .env
+REACT_APP_API_URL = [YOUR_BACKEND_URI]
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## **React App Structure**
 
-### `npm run eject`
+```bash
+├─api       # API 요청함수 파일
+│  ├─functions  # React가 아닌 ts, js 함수들
+│  └─Hooks      # Custom Hooks
+├─assets    # 폰트, 데이터 등
+├─components
+│  └─Common     # 의존성 없는 컴포넌트
+├─pages     # router에 들어갈 페이지 컴포넌트
+├─redux     # redux toolkit
+│  ├─context    # Providers
+│  ├─features   # Slices
+│  └─thunks     # Asyncthunks
+├─routes    # Router & HOC
+├─styles    # Styled components settings & css
+└─type      # Types & interfaces
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+## **Documentation**
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### [**Library**](https://github.com/d0orHyeok/wave-client-production/blob/master/docs/LIBRARY.md)
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+개발에 사용된 주요 라이브러리에 대한 설명
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### [**API Reference**](https://github.com/d0orHyeok/wave-nestjs-server)
 
-## Learn More
+Wave에서 사용된 API 코드와 설명을 위 링크의 레퍼지토리에서 확인할 수 있습니다.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## **Author**
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- [d0orHyeok](https://github.com/d0orHyeok) - JangHyeok Kim
+- Email
+  - d0oR.hyeok@gmail.com
+  - d0or_hyeok@naver.com
+
+## **License**
+
+Wave is [MIT licensed](https://github.com/d0orHyeok/wave-client-production/blob/master/LICENSE).
