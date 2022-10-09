@@ -12,13 +12,7 @@ Wave, 음악공유 스트리밍 사이트입니다.
 
 ## **Installation**
 
-프로젝트 클론 후 패키지 설치를 진행하고 환경변수를 등록하고 실행하세요.
-
-### Clone Project
-
-```sh
-git clone [REPO_URL] [DIR]
-```
+패키지 설치를 진행하고 환경변수를 등록하고 실행하세요.
 
 ### Install development dependencies:
 
